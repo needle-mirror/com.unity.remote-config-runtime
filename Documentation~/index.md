@@ -15,8 +15,5 @@ In the Web Dashboard, you can create and manage [environments](Environments.md) 
 
 Define rules that control which players receive what settings updates, and when. Unity manages the delivery and assignment of those settings with minimal impact to performance. No update to your application is necessary. When a player launches your game, Remote Config Runtime detects contextual attributes used as rule conditions, based on Unity, the application, the user, or custom criteria that you define. The service then returns customized settings for each player according to the rules that apply to them. This allows different players using the same version of your game to have slightly different experiences. It also allows you to understand the impact each experience has on your business.
 
-`Preview Package`
-**Note**: This is a preview version of the Remote Config Runtime package, and subject to changes that may impact the package's stability. The service is also under active development and subject to changes that may impact the service's stability. If you encounter any issues, or have any questions, please [contact us](mailto:remote-config@unity3d.com).
-
 `Verified Package`
 **Note**: This is a verified version of the Remote Config Runtime package, however the service is under active development and subject to changes that may impact the service's stability. If you encounter any issues, or have any questions, please [contact us](mailto:remote-config@unity3d.com).

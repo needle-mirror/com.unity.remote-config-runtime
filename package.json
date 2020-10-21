@@ -1,7 +1,7 @@
 {
   "name": "com.unity.remote-config-runtime",
   "displayName": "Remote Config Runtime",
-  "version": "1.0.0-exp.3",
+  "version": "1.0.0",
   "unity": "2018.4",
   "description": "Remote Config is a cloud service that lets you tune and customize your app over the air without requiring an update to your game.  You can use rules to enable or disable features, change the difficulty of your game or run special events to target specific audiences.  Rules control when updates are applied and to whom, while Unity manages delivery of your game content with minimal performance impact. \n\nRemote Config can be configured via the editor or through our public API’s.  Functionality includes: \n- Release new features without deploying code:\n   - Feature flagging\n   - Staged Rollouts\n   - Kill switch functionality\n   - Start & End Date\n   - Enable & disable rules\n- Personalized real-time segmentation with custom attributes\n   - Custom conditions for applying setting variants\n   - Device, user, game and other arbitrary attributes supporting\n- Reporting\n   - Tracing ID for decorating analytics events",
   "dependencies": {
@@ -41,12 +41,12 @@
     "deploy"
   ],
   "upmCi": {
-    "footprint": "e67b1501b781fcca1984daa38586db4b84873347"
+    "footprint": "26e8edd08d5fbc47c7e35c0c76fe1922080431c7"
   },
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.monetization.remote-config-runtime.git",
     "type": "git",
-    "revision": "601f614d75d4e4a84f572960a33c35cf67c7b9c4"
+    "revision": "9cea2e86d08ad5011e21abd84d3deefd489a9473"
   },
   "samples": [
     {
