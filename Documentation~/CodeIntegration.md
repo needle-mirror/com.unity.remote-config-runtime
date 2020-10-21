@@ -2,7 +2,7 @@
 The `RemoteConfig` API is included in the `Unity` namespace. You must include this in your game script. For more information on its classes and methods, see the [Scripting API](../api/index.html) documentation.
 
 ## Implementing custom attributes
-To provide custom attributes for [Rule conditions](RulesAndSettings.md#conditions), implement the following `struct` variables in your game script:
+To provide custom attributes for [Rule conditions](RulesAndSettings.md#condition), implement the following `struct` variables in your game script:
 
 * Use the `Delivery` structure to provide a custom player ID attribute by using the `SetCustomUserID` method if your application uses its own tracking method. Remote Config will auto-generate an ID if no developer-defined attribute is available.
 * Use the `userAttributes` structure to provide custom **user**-category attributes.

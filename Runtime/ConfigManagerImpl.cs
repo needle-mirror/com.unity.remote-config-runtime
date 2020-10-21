@@ -67,7 +67,7 @@ namespace Unity.RemoteConfig
         internal string cacheHeadersFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "1.0.0-exp.2";
+        internal const string pluginVersion = "1.0.0-exp.3";
 
         public ConfigManagerImpl(string originService, string attributionMetadataStr = "", string cacheFileRC = "RemoteConfig.json", string cacheHeadersFileRC = "RemoteConfigHeaders.json")
         {
@@ -333,7 +333,7 @@ namespace Unity.RemoteConfig
 
         internal void ToNewlineDelimitedJson<T>(Stream stream, IEnumerable<T> items)
         {
-            // Let caller dispose the underlying stream	
+            // Let caller dispose the underlying stream
             using (var textWriter = new StreamWriter(stream, new UTF8Encoding(false, true), 1024, true))
             {
                 ToNewlineDelimitedJson(textWriter, items);
@@ -352,7 +352,7 @@ namespace Unity.RemoteConfig
                     serializer.Serialize(writer, item);
                 }
                 // http://specs.okfnlabs.org/ndjson/
-                // Each JSON text MUST conform to the [RFC7159] standard and MUST be written to the stream followed by the newline character \n (0x0A). 
+                // Each JSON text MUST conform to the [RFC7159] standard and MUST be written to the stream followed by the newline character \n (0x0A).
                 // The newline charater MAY be preceeded by a carriage return \r (0x0D). The JSON texts MUST NOT contain newlines or carriage returns.
                 textWriter.Write("\n");
             }

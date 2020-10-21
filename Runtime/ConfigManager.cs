@@ -30,7 +30,7 @@ namespace Unity.RemoteConfig
             set { _configmanagerImpl.requestStatus = value; }
         }
 
-        // <summary>
+        /// <summary>
         /// This event fires when the configuration manager successfully fetches settings from the service.
         /// </summary>
         /// <returns>
