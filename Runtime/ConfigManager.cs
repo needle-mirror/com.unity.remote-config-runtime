@@ -16,7 +16,7 @@ namespace Unity.RemoteConfig
     /// </summary>
     public static class ConfigManager
     {
-        private static ConfigManagerImpl _configmanagerImpl = new ConfigManagerImpl("liveops");
+        private static ConfigManagerImpl _configmanagerImpl = new ConfigManagerImpl("remote-config");
 
         /// <summary>
         /// Returns the status of the current configuration request from the service.
