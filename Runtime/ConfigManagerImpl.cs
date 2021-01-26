@@ -67,8 +67,15 @@ namespace Unity.RemoteConfig
         internal string cacheHeadersFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "1.0.0";
+        internal const string pluginVersion = "1.0.1-exp.2";
 
+        /// <summary>
+        /// Constructor for the ConfigManagerImpl.
+        /// </summary>
+        /// <param name="originService">Represents the origin for request, e.g 'GameSim'</param>
+        /// <param name="attributionMetadataStr">An attributtion string to ascribe metadata </param>
+        /// <param name="cacheFileRC">remote config cache file</param>
+        /// <param name="cacheHeadersFileRC">remote config headers cache file</param>
         public ConfigManagerImpl(string originService, string attributionMetadataStr = "", string cacheFileRC = "RemoteConfig.json", string cacheHeadersFileRC = "RemoteConfigHeaders.json")
         {
             cacheFile = cacheFileRC;
@@ -275,6 +282,12 @@ namespace Unity.RemoteConfig
             };
         }
 
+        /// <summary>
+        /// Tries to create cache files (config and headers) and write into them if they are successfully fetched from remote location
+        /// </summary>
+        /// <param name="origin">represents config origin. If value is Remote, overwrite the file content </param>
+        /// <param name="headers">request headers as a key-value dictionary</param>
+        /// <param name="result">config value</param>
         public void SaveCache(ConfigOrigin origin, Dictionary<string, string> headers, string result)
         {
             if(origin == ConfigOrigin.Remote)
@@ -297,6 +310,9 @@ namespace Unity.RemoteConfig
             }
         }
 
+        /// <summary>
+        /// Tries to read from cache files (config and headers) and invokes RawResponseReturned action with cached parameters
+        /// </summary>
         public void LoadFromCache()
         {
             try

@@ -1,11 +1,13 @@
 {
   "name": "com.unity.remote-config-runtime",
   "displayName": "Remote Config Runtime",
-  "version": "1.0.0",
+  "version": "1.0.1-exp.2",
   "unity": "2018.4",
   "description": "Remote Config is a cloud service that lets you tune and customize your app over the air without requiring an update to your game.  You can use rules to enable or disable features, change the difficulty of your game or run special events to target specific audiences.  Rules control when updates are applied and to whom, while Unity manages delivery of your game content with minimal performance impact. \n\nRemote Config can be configured via the editor or through our public API’s.  Functionality includes: \n- Release new features without deploying code:\n   - Feature flagging\n   - Staged Rollouts\n   - Kill switch functionality\n   - Start & End Date\n   - Enable & disable rules\n- Personalized real-time segmentation with custom attributes\n   - Custom conditions for applying setting variants\n   - Device, user, game and other arbitrary attributes supporting\n- Reporting\n   - Tracing ID for decorating analytics events",
   "dependencies": {
-    "com.unity.nuget.newtonsoft-json": "2.0.0"
+    "com.unity.nuget.newtonsoft-json": "2.0.0",
+    "com.unity.modules.unitywebrequest": "1.0.0",
+    "com.unity.modules.unityanalytics": "1.0.0"
   },
   "keywords": [
     "remote",
@@ -41,17 +43,17 @@
     "deploy"
   ],
   "upmCi": {
-    "footprint": "26e8edd08d5fbc47c7e35c0c76fe1922080431c7"
+    "footprint": "36717341091b7c58d7f4c4bffef69a09aff4076f"
   },
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.monetization.remote-config-runtime.git",
     "type": "git",
-    "revision": "9cea2e86d08ad5011e21abd84d3deefd489a9473"
+    "revision": "04e6184a36410244ef4d05124fbb34c767df097c"
   },
   "samples": [
     {
       "displayName": "Example Sample",
-      "description": "Sample contains an empty scene from which the example code in the Documentation can be implemented with",
+      "description": "This sample example C# file can be used to quickly utilise usage of Remote Config APIs. For more comprehensive code integration, visit https://docs.unity3d.com/Packages/com.unity.remote-config@latest",
       "path": "Samples~/Example"
     }
   ]
