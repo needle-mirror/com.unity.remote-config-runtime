@@ -67,7 +67,7 @@ namespace Unity.RemoteConfig
         internal string cacheHeadersFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "1.0.1";
+        internal const string pluginVersion = "1.0.2-exp.1";
 
         /// <summary>
         /// Constructor for the ConfigManagerImpl.

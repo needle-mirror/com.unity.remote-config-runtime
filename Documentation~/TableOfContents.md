@@ -4,3 +4,4 @@
 * [Code integration](CodeIntegration)
 * [REST API](RESTAPI)
 * [Web Dashboard](WebDashboard)
+* [Apple privacy survey](apple-privacy-survey)
