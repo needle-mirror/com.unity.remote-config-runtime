@@ -3,10 +3,12 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Reflection;
 using System;
+using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using System.Linq;
 using System.IO;
+using System.Net.NetworkInformation;
 
 namespace Unity.RemoteConfig.Tests
 {
@@ -15,49 +17,42 @@ namespace Unity.RemoteConfig.Tests
         [UnityTest]
         public IEnumerator SetCustomUserID_SetsCustomUserID()
         {
-            ConfigManagerTestUtils.SetAppIdOnCommonPayload();
+            ConfigManagerTestUtils.SetProjectIdOnRequestPayload();
             var monoTest = new MonoBehaviourTest<SetCustomUserID_MonobehaviorTest>(false);
 
-            FieldInfo configmanagerImplInfo = typeof(ConfigManager).GetField("_configmanagerImpl", BindingFlags.Static | BindingFlags.NonPublic);
+            FieldInfo configmanagerImplInfo = typeof(ConfigManager).GetField("ConfigManagerImpl", BindingFlags.Static | BindingFlags.NonPublic);
             var configmanagerImpl = configmanagerImplInfo.GetValue(null);
 
             monoTest.component.StartTest();
             yield return monoTest;
 
-            FieldInfo deliveryFieldInfo = typeof(ConfigManagerImpl).GetField("deliveryPayload", BindingFlags.Instance | BindingFlags.NonPublic);
-            var deliveryPayload = deliveryFieldInfo.GetValue(configmanagerImpl);
+            FieldInfo rcRequestFieldInfo = typeof(ConfigManagerImpl).GetField("_remoteConfigRequest", BindingFlags.Instance | BindingFlags.NonPublic);
+            FieldInfo customUserIdFieldInfo = rcRequestFieldInfo.FieldType.GetField("customUserId");
+            var customUserId = customUserIdFieldInfo.GetValue(rcRequestFieldInfo.GetValue(configmanagerImpl));
 
-            FieldInfo customUserIdFieldInfo = deliveryFieldInfo.FieldType.GetField("customUserId");
-            var customUserId = customUserIdFieldInfo.GetValue(deliveryFieldInfo.GetValue(configmanagerImpl));
-
-            Assert.That(string.Equals(customUserId, ConfigManagerTestUtils.userId));
+            Assert.That(Equals(customUserId, ConfigManagerTestUtils.userId));
         }
 
         [UnityTest]
         public IEnumerator SetEnvironmentID_SetsEnvironmentID()
         {
-            ConfigManagerTestUtils.SetAppIdOnCommonPayload();
+            ConfigManagerTestUtils.SetProjectIdOnRequestPayload();
             var monoTest = new MonoBehaviourTest<SetEnvironmentID_MonobehaviorTest>(false);
-
-            FieldInfo configmanagerImplInfo = typeof(ConfigManager).GetField("_configmanagerImpl", BindingFlags.Static | BindingFlags.NonPublic);
-            var configmanagerImpl = configmanagerImplInfo.GetValue(null);
 
             monoTest.component.StartTest();
             yield return monoTest;
 
-            FieldInfo deliveryFieldInfo = typeof(ConfigManagerImpl).GetField("deliveryPayload", BindingFlags.Instance | BindingFlags.NonPublic);
-            var deliveryPayload = deliveryFieldInfo.GetValue(configmanagerImpl);
+            FieldInfo rcRequestFieldInfo = typeof(ConfigManagerImpl).GetField("_remoteConfigRequest", BindingFlags.Instance | BindingFlags.NonPublic);
+            FieldInfo environmentIdFieldInfo = rcRequestFieldInfo.FieldType.GetField("environmentId");
+            var environmentId = environmentIdFieldInfo.GetValue(rcRequestFieldInfo.GetValue(ConfigManager.ConfigManagerImpl));
 
-            FieldInfo environmentIdFieldInfo = deliveryFieldInfo.FieldType.GetField("environmentId");
-            var environmentId = environmentIdFieldInfo.GetValue(deliveryFieldInfo.GetValue(configmanagerImpl));
-
-            Assert.That(string.Equals(environmentId, ConfigManagerTestUtils.environmentId));
+            Assert.That(Equals(environmentId, ConfigManagerTestUtils.environmentId));
         }
 
         [UnityTest]
         public IEnumerator FetchConfigs_OnCompleteGetsFiredWithCorrectInfo()
         {
-            ConfigManagerTestUtils.SetAppIdOnCommonPayload();
+            ConfigManagerTestUtils.SetProjectIdOnRequestPayload();
             var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
             yield return monoTest;
@@ -68,7 +63,7 @@ namespace Unity.RemoteConfig.Tests
         [UnityTest]
         public IEnumerator FetchConfigs_NullWorks()
         {
-            ConfigManagerTestUtils.SetAppIdOnCommonPayload();
+            ConfigManagerTestUtils.SetProjectIdOnRequestPayload();
             var monoTest = new MonoBehaviourTest<FetchConfigs_MonobehaviorTest>(false);
             monoTest.component.StartTest();
             yield return monoTest;
@@ -88,21 +83,57 @@ namespace Unity.RemoteConfig.Tests
         [UnityTest]
         public IEnumerator SaveCache_CreatesFileIfNotThereAndCachesRightContent()
         {
-            if (File.Exists(Path.Combine(Application.persistentDataPath, "RemoteConfig.json")))
+            if (File.Exists(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile)))
             {
-                File.Delete(Path.Combine(Application.persistentDataPath, "RemoteConfig.json"));
+                File.Delete(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile));
             }
 
-            ConfigManagerTestUtils.SetAppIdOnCommonPayload();
+            ConfigManagerTestUtils.SetProjectIdOnRequestPayload();
             var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
             yield return monoTest;
 
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
             yield return new WaitForSeconds(2f);
-            Assert.That(File.Exists(Path.Combine(Application.persistentDataPath, "RemoteConfig.json")));
-            string text = File.ReadAllText(Path.Combine(Application.persistentDataPath, "RemoteConfig.json"));
+            Assert.That(File.Exists(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile)));
+            string text = File.ReadAllText(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile));
             Assert.That(text.Contains("testInt"));
+            ConfigManager.ConfigManagerImpl.configs.Remove(ConfigManagerImpl.DefaultConfigKey);
+            ConfigManager.ConfigManagerImpl.LoadFromCache();
+            Assert.That(ConfigManager.appConfig.GetInt("testInt") == 232);
+        }
+
+        [UnityTest]
+        public IEnumerator SaveCache_CachesMultipleRuntimeConfigs()
+        {
+            if (File.Exists(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile)))
+            {
+                File.Delete(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile));
+            }
+
+            ConfigManagerTestUtils.SetProjectIdOnRequestPayload();
+            var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+            var managerImpl = ConfigManager.ConfigManagerImpl;
+            var configResponse = managerImpl.ParseResponse(
+                ConfigOrigin.Remote,
+                new Dictionary<string, string>(),
+                ConfigManagerTestUtils.jsonPayloadEconomyConfig);
+            managerImpl.HandleConfigResponse("economy", configResponse);
+            yield return new WaitForSeconds(2f);
+            Assert.That(File.Exists(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile)));
+            string text = File.ReadAllText(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile));
+            Assert.That(text.Contains("testInt"));
+            Assert.That(text.Contains("economy"));
+            Assert.That(managerImpl.configs.Count == 2);
+            Assert.That(ConfigManager.GetConfig("economy").GetString("item") == "sword");
+            managerImpl.configs.Remove(ConfigManagerImpl.DefaultConfigKey);
+            managerImpl.configs.Remove("economy");
+            managerImpl.LoadFromCache();
+            Assert.That(ConfigManager.appConfig.GetInt("testInt") == 232);
+            Assert.That(ConfigManager.GetConfig("economy").GetString("item") == "sword");
+            Assert.That(ConfigManager.GetConfig("economy").assignmentId ==
+                        JObject.Parse(ConfigManagerTestUtils.jsonPayloadEconomyConfig)["metadata"]["assignmentId"].ToString());
         }
     }
 
@@ -114,16 +145,16 @@ namespace Unity.RemoteConfig.Tests
             ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
 
             yield return null;
-            Assert.That(ConfigManager.appConfig.assignmentID == "a04fb7ec-26e4-4247-b8b4-70dd6967a858");
+            Assert.That(ConfigManager.appConfig.assignmentId == "a04fb7ec-26e4-4247-b8b4-70dd6967a858");
         }
         [UnityTest]
         public IEnumerator ResponseParsedEventHanlder_ReturnsNullAssignmentIdWhenBadResponse()
         {
-            var assignmentIdBeforeRequest = ConfigManager.appConfig.assignmentID;
+            var assignmentIdBeforeRequest = ConfigManager.appConfig.assignmentId;
             ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadStringNoRCSection);
 
             yield return null;
-            Assert.That(ConfigManager.appConfig.assignmentID == assignmentIdBeforeRequest);
+            Assert.That(ConfigManager.appConfig.assignmentId == assignmentIdBeforeRequest);
         }
 
         [UnityTest]
@@ -132,17 +163,17 @@ namespace Unity.RemoteConfig.Tests
             ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
 
             yield return null;
-            Assert.That(ConfigManager.appConfig.environmentID == "7d2e0e2d-4bcd-4b6e-8d5d-65d17a708db2");
+            Assert.That(ConfigManager.appConfig.environmentId == "7d2e0e2d-4bcd-4b6e-8d5d-65d17a708db2");
         }
 
         [UnityTest]
         public IEnumerator ResponseParsedEventHandler_ReturnsNullEnvironmentIdWhenBadResponse()
         {
-            var environmentIdBeforeRequest = ConfigManager.appConfig.environmentID;
+            var environmentIdBeforeRequest = ConfigManager.appConfig.environmentId;
             ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadStringNoRCSection);
 
             yield return null;
-            Assert.That(ConfigManager.appConfig.environmentID == environmentIdBeforeRequest);
+            Assert.That(ConfigManager.appConfig.environmentId == environmentIdBeforeRequest);
         }
 
         [UnityTest]
@@ -151,7 +182,7 @@ namespace Unity.RemoteConfig.Tests
             ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
 
             yield return null;
-            Assert.That(ConfigManager.appConfig.config.ToString() == ((JObject)JObject.Parse(ConfigManagerTestUtils.jsonPayloadString)["settings"]).ToString());
+            Assert.That(ConfigManager.appConfig.config.ToString() == ((JObject)JObject.Parse(ConfigManagerTestUtils.jsonPayloadString)["configs"]?["settings"])?.ToString());
         }
 
         [UnityTest]
@@ -303,7 +334,7 @@ namespace Unity.RemoteConfig.Tests
         {
             ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
             yield return null;
-            Assert.That(ConfigManager.appConfig.GetKeys().Length == ((JObject)JObject.Parse(ConfigManagerTestUtils.jsonPayloadString)["settings"]).Properties().Select(prop => prop.Name).ToArray<string>().Length);
+            Assert.That(ConfigManager.appConfig.GetKeys().Length == ((JObject)JObject.Parse(ConfigManagerTestUtils.jsonPayloadString)["configs"]["settings"]).Properties().Select(prop => prop.Name).ToArray<string>().Length);
         }
 
         [UnityTest]
@@ -333,39 +364,25 @@ namespace Unity.RemoteConfig.Tests
 
         public static string jsonPayloadString =
             @"{
-                ""prefs"": {
-                    ""testInt"": 1,
-                    ""boolField"": ""false"",
-                    ""dwadwd"": ""test""
+                ""configs"": {
+                    ""settings"": {
+                        ""raywagagwawd"": """",
+                        ""settingsConfig"": ""{\""hello\"":2.0,\""someInt\"":32,\""madBro\"":\""fdsfadsf\""}"",
+                        ""fghfg"": ""ffgf"",
+                        ""longSomething"": 9223372036854775806,
+                        ""someInt"": 12,
+                        ""helloe"": 0.12999999523162842,
+                        ""blah"": ""blahd"",
+                        ""stringFormattedAsDate"": ""2020-04-03T10:01:00Z"",
+                        ""stringFormattedAsJson"": ""{\""a\"":2.0,\""b\"":4,\""c\"":\""someString\""}"",
+                        ""bool"": true,
+                        ""madBro"": ""madAF"",
+                        ""jsonKeys"": ""settingsConfig,gameConfig"",
+                        ""skiwdafsdwas"": ""hello"",
+                        ""jsonSetting"": ""{\""a\"":1.0,\""b\"":2,\""c\"":\""someString\""}"",
+                    }
                 },
-                ""analytics"": {
-                    ""enabled"": true
-                },
-                ""connect"": {
-                    ""limit_user_tracking"": false,
-                    ""player_opted_out"": false,
-                    ""enabled"": true
-                },
-                ""performance"": {
-                    ""enabled"": true
-                },
-                ""settings"": {
-                    ""raywagagwawd"": """",
-                    ""settingsConfig"": ""{\""hello\"":2.0,\""someInt\"":32,\""madBro\"":\""fdsfadsf\""}"",
-                    ""fghfg"": ""ffgf"",
-                    ""longSomething"": 9223372036854775806,
-                    ""someInt"": 12,
-                    ""helloe"": 0.12999999523162842,
-                    ""blah"": ""blahd"",
-                    ""stringFormattedAsDate"": ""2020-04-03T10:01:00Z"",
-                    ""stringFormattedAsJson"": ""{\""a\"":2.0,\""b\"":4,\""c\"":\""someString\""}"",
-                    ""bool"": true,
-                    ""madBro"": ""madAF"",
-                    ""jsonKeys"": ""settingsConfig,gameConfig"",
-                    ""skiwdafsdwas"": ""hello"",
-                    ""jsonSetting"": ""{\""a\"":1.0,\""b\"":2,\""c\"":\""someString\""}"",
-                },
-                ""settingsMetadata"": {
+                ""metadata"": {
                     ""assignmentId"": ""a04fb7ec-26e4-4247-b8b4-70dd6967a858"",
                     ""environmentId"": ""7d2e0e2d-4bcd-4b6e-8d5d-65d17a708db2"",
                 }
@@ -373,53 +390,55 @@ namespace Unity.RemoteConfig.Tests
 
         public static string jsonPayloadStringNoRCSection =
             @"{
-                ""prefs"": {
-                    ""testInt"": 1,
-                    ""boolField"": ""false"",
-                    ""dwadwd"": ""test""
+                ""configs"": {
+                    ""someOtherKey"": {
+                    }
                 },
-                ""analytics"": {
-                    ""enabled"": true
+                ""metadata"": {
+                    ""assignmentId"": ""a04fb7ec-26e4-4247-b8b4-70dd6967a858"",
+                    ""environmentId"": ""7d2e0e2d-4bcd-4b6e-8d5d-65d17a708db2"",
+                }
+            }";
+
+        public static string jsonPayloadEconomyConfig = 
+            @"{
+                ""configs"": {
+                    ""economy"": {
+                        ""item"": ""sword""
+                    }
                 },
-                ""connect"": {
-                    ""limit_user_tracking"": false,
-                    ""player_opted_out"": false,
-                    ""enabled"": true
-                },
-                ""performance"": {
-                    ""enabled"": true
+                ""metadata"": {
+                    ""assignmentId"": ""a04fb7ec-26e4-4247-b8b4-70dd6967a859"",
+                    ""environmentId"": ""7d2e0e2d-4bcd-4b6e-8d5d-65d17a708db3"",
                 }
             }";
 
         public static void SendPayloadToConfigManager(string payload)
         {
 
-            FieldInfo configmanagerImplInfo = typeof(ConfigManager).GetField("_configmanagerImpl", BindingFlags.Static | BindingFlags.NonPublic);
-            var configmanagerImpl = configmanagerImplInfo.GetValue(null);
-
-            var eventDescription = typeof(ConfigManagerImpl).GetField("ResponseParsed", BindingFlags.Instance | BindingFlags.NonPublic);
-            var eventDelegate = eventDescription.GetValue(configmanagerImpl) as Delegate;
-
-            if (eventDelegate != null)
-            {
-                foreach (var handler in eventDelegate.GetInvocationList())
+            ConfigManager.ConfigManagerImpl.HandleConfigResponse(
+                "settings", 
+                new ConfigResponse
                 {
-                    handler.Method.Invoke(handler.Target, new object[] { new ConfigResponse { requestOrigin = ConfigOrigin.Remote, status = ConfigRequestStatus.Success }, JObject.Parse(payload) });
+                    requestOrigin = ConfigOrigin.Remote,
+                    status = ConfigRequestStatus.Success,
+                    body = JObject.Parse(payload),
+                    headers = new Dictionary<string, string>()
                 }
-            }
+            );
         }
 
-        public static void SetAppIdOnCommonPayload()
+        public static void SetProjectIdOnRequestPayload()
         {
-            FieldInfo configmanagerImplInfo = typeof(ConfigManager).GetField("_configmanagerImpl", BindingFlags.Static | BindingFlags.NonPublic);
+            FieldInfo configmanagerImplInfo = typeof(ConfigManager).GetField("ConfigManagerImpl", BindingFlags.Static | BindingFlags.NonPublic);
             var configmanagerImpl = configmanagerImplInfo.GetValue(null);
 
-            FieldInfo commonFieldInfo = typeof(ConfigManagerImpl).GetField("commonPayload", BindingFlags.Instance | BindingFlags.NonPublic);
-            var common = commonFieldInfo.GetValue(configmanagerImpl);
+            FieldInfo rcRequestFieldInfo = typeof(ConfigManagerImpl).GetField("_remoteConfigRequest", BindingFlags.Instance | BindingFlags.NonPublic);
+            var common = rcRequestFieldInfo.GetValue(configmanagerImpl);
 
-            FieldInfo appIdFieldInfo = common.GetType().GetField("appid");
-            appIdFieldInfo.SetValue(common, "de2c88ca-80fc-448f-bfa9-ab598bf7a9e4");
-            commonFieldInfo.SetValue(configmanagerImpl, common);
+            FieldInfo projectIdFieldInfo = common.GetType().GetField("projectId");
+            projectIdFieldInfo.SetValue(common, "de2c88ca-80fc-448f-bfa9-ab598bf7a9e4");
+            rcRequestFieldInfo.SetValue(configmanagerImpl, common);
         }
 
         public static void FieldInvestigation(Type t)

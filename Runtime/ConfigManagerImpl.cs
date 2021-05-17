@@ -17,20 +17,8 @@ namespace Unity.RemoteConfig
 {
     public class ConfigManagerImpl
     {
-        /// <summary>
-        /// Returns the status of the current configuration request from the service.
-        /// </summary>
-        /// <returns>
-        /// An enum representing the status of the current Remote Config request.
-        /// </returns>
-        public ConfigRequestStatus requestStatus { get;  internal set; }
-        /// <summary>
-        /// This event fires when the configuration manager successfully fetches settings from the service.
-        /// </summary>
-        /// <returns>
-        /// A struct representing the response of a Remote Config fetch.
-        /// </returns>
-        public event Action<ConfigResponse> FetchCompleted;
+        internal const string DefaultConfigKey = "settings";
+        internal const string DefaultCacheFile = "RemoteConfigCache.json";
         /// <summary>
         /// Retrieves the <c>RuntimeConfig</c> object for handling Remote Config settings.
         /// </summary>
@@ -49,46 +37,74 @@ namespace Unity.RemoteConfig
         /// <returns>
         /// A class representing a single runtime settings configuration.
         /// </returns>
-        public RuntimeConfig appConfig { get; internal set; }
+        public RuntimeConfig appConfig
+        {
+            get
+            {
+                return configs.ContainsKey(DefaultConfigKey) ? configs[DefaultConfigKey] : null;
+            }
+            internal set
+            {
+                if (value != null)
+                {
+                    configs[DefaultConfigKey] = value;
+                }
+            }
+        }
+        internal Dictionary<string, RuntimeConfig> configs;
+        /// <summary>
+        /// Player Identity Token used for Remote Config request authentication.
+        /// </summary>
+        string _playerIdentityToken;
 
-        internal Delivery deliveryPayload;
-        internal Common commonPayload;
-        internal DeviceInfo deviceInfoPayload;
+        RemoteConfigRequest _remoteConfigRequest;
+        UnityAttributes _unityAttributes;
 
-        internal event Action<ConfigResponse, JObject> ResponseParsed;
-        internal event Action<ConfigOrigin, Dictionary<string, string>, string> RawResponseReturned;
-        internal event Action<ConfigOrigin, Dictionary<string, string>, string> RawResponseValidated;
-
-        internal List<Func<JObject>> requestPayloadProviders = new List<Func<JObject>>();
         internal List<Func<RequestHeaderTuple>> requestHeaderProviders = new List<Func<RequestHeaderTuple>>();
         internal List<Func<Dictionary<string, string>, string, bool>> rawResponseValidators = new List<Func<Dictionary<string, string>, string, bool>>();
 
         internal string cacheFile;
-        internal string cacheHeadersFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "1.0.2-exp.1";
+        internal const string pluginVersion = "2.0.0";
+
+        /// <summary>
+        /// This event fires when the configuration manager successfully fetches settings from the service.
+        /// </summary>
+        /// <returns>
+        /// A struct representing the response of a Remote Config fetch.
+        /// </returns>
+        internal event Action<ConfigResponse> FetchCompleted;
 
         /// <summary>
         /// Constructor for the ConfigManagerImpl.
         /// </summary>
         /// <param name="originService">Represents the origin for request, e.g 'GameSim'</param>
-        /// <param name="attributionMetadataStr">An attributtion string to ascribe metadata </param>
+        /// <param name="attributionMetadataStr">An attribution string to ascribe metadata </param>
         /// <param name="cacheFileRC">remote config cache file</param>
-        /// <param name="cacheHeadersFileRC">remote config headers cache file</param>
-        public ConfigManagerImpl(string originService, string attributionMetadataStr = "", string cacheFileRC = "RemoteConfig.json", string cacheHeadersFileRC = "RemoteConfigHeaders.json")
+        public ConfigManagerImpl(string originService, string attributionMetadataStr = "", string cacheFileRC = DefaultCacheFile)
         {
+            configs = new Dictionary<string, RuntimeConfig>();
             cacheFile = cacheFileRC;
-            cacheHeadersFile = cacheHeadersFileRC;
+            appConfig = new RuntimeConfig("settings");
 
-            appConfig = new RuntimeConfig(this, "settings");
-            deliveryPayload.packageVersion = pluginVersion + "+RCR";
-            deliveryPayload.originService = originService;
+            _remoteConfigRequest = new RemoteConfigRequest
+            {
+#if !UNITY_SWITCH && !UNITY_PS4
+                projectId = Application.cloudProjectId,
+                userId = AnalyticsSessionInfo.userId,
+#endif
+                isDebugBuild = Debug.isDebugBuild,
+                configType = "",
+                packageVersion = pluginVersion + "+RCR",
+                originService = originService,
+            };
+
             if (!string.IsNullOrEmpty(attributionMetadataStr))
             {
                 try
                 {
-                    deliveryPayload.attributionMetadata = JObject.Parse(attributionMetadataStr);
+                    _remoteConfigRequest.attributionMetadata = JObject.Parse(attributionMetadataStr);
                 }
                 catch (Exception e)
                 {
@@ -96,84 +112,71 @@ namespace Unity.RemoteConfig
                 }
             }
 
-            commonPayload = new Common()
-            {
-#if !UNITY_SWITCH && !UNITY_PS4
-                appid = Application.cloudProjectId,
-                userid = AnalyticsSessionInfo.userId,
-                sessionid = AnalyticsSessionInfo.sessionId,
-                session_count = AnalyticsSessionInfo.sessionCount,
-#endif
-                platform = Application.platform.ToString(),
-                platform_id = (int)Application.platform,
-                sdk_ver = Application.unityVersion,
-                debug_device = Debug.isDebugBuild,
-                device_id = SystemInfo.deviceUniqueIdentifier
-            };
-
-            deviceInfoPayload = new DeviceInfo();
-
-            requestStatus = ConfigRequestStatus.None;
-            RawResponseReturned += OnRawResponseReturned;
-            RawResponseValidated += SaveCache;
+            _unityAttributes = new UnityAttributes();
+            FetchCompleted += SaveCache;
             LoadFromCache();
         }
 
-        internal void OnRawResponseReturned(ConfigOrigin origin, Dictionary<string, string> headers, string body)
+        internal ConfigResponse ParseResponse(ConfigOrigin origin, Dictionary<string, string> headers, string body)
         {
+            var configResponse = new ConfigResponse {
+                requestOrigin = origin,
+                headers = headers
+            };
             if(body == null || headers == null)
             {
-                return;
+                configResponse.status = ConfigRequestStatus.Failed;
+                return configResponse;
             }
-            var configResponse = new ConfigResponse() {
-                requestOrigin = origin,
-                status = ConfigRequestStatus.Pending
-            };
             foreach (var validationFunc in rawResponseValidators)
             {
                 if(validationFunc(headers, body) == false)
                 {
                     configResponse.status = ConfigRequestStatus.Failed;
-                    requestStatus = configResponse.status;
-                    FetchCompleted?.Invoke(configResponse);
-                    return;
+                    return configResponse;
                 }
             }
 
-            RawResponseValidated?.Invoke(origin, headers, body);
-
-            JObject responseJObj = null;
             try
             {
-                responseJObj = JObject.Parse(body);
+                var responseJObj = JObject.Parse(body);
+                configResponse.body = responseJObj;
                 configResponse.status = ConfigRequestStatus.Success;
             }
-            catch
+            catch (Exception e)
             {
+                Debug.LogWarning("config response is not valid JSON:\n" + configResponse.body + "\n" + e);
                 configResponse.status = ConfigRequestStatus.Failed;
             }
-            ResponseParsed?.Invoke(configResponse, responseJObj);
 
-            requestStatus = configResponse.status;
-            FetchCompleted?.Invoke(configResponse);
+            return configResponse;
         }
 
         /// <summary>
-        /// Sets a custom user identifier for the Remote Config delivery request payload.
+        /// Sets a custom user identifier for the Remote Config request payload.
         /// </summary>
         /// <param name="customUserID">Custom user identifier.</param>
         public void SetCustomUserID(string customUserID)
         {
-            deliveryPayload.customUserId = customUserID;
+            _remoteConfigRequest.customUserId = customUserID;
         }
 
         /// <summary>
-        /// Sets an environment identifier in the Remote Config delivery request payload.
+        /// Sets an environment identifier in the Remote Config request payload.
         /// </summary>
         /// <param name="environmentID">Environment unique identifier.</param>
         public void SetEnvironmentID(string environmentID)
         {
-            deliveryPayload.environmentId = environmentID;
+            _remoteConfigRequest.environmentId = environmentID;
+        }
+
+        /// <summary>
+        /// Sets player Identity Token.
+        /// </summary>
+        /// <param name="identityToken">Player Identity identifier.</param>
+        public void SetPlayerIdentityToken(string identityToken)
+        {
+            _playerIdentityToken = identityToken;
         }
 
         /// <summary>
@@ -185,7 +188,19 @@ namespace Unity.RemoteConfig
         /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
         public void FetchConfigs<T, T2>(T userAttributes, T2 appAttributes) where T : struct where T2 : struct
         {
-            PostConfig(userAttributes, appAttributes);
+            PostConfigWithConfigType("settings", userAttributes, appAttributes);
+        }
+
+        /// <summary>
+        /// Fetches an app configuration settings from the remote server passing a configType.
+        /// </summary>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use an empty struct.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
+        /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
+        /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
+        public void FetchConfigs<T, T2>(string configType, T userAttributes, T2 appAttributes) where T : struct where T2 : struct
+        {
+            PostConfigWithConfigType(configType, userAttributes, appAttributes);
         }
 
         /// <summary>
@@ -195,70 +210,80 @@ namespace Unity.RemoteConfig
         /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use null.</param>
         public void FetchConfigs(object userAttributes, object appAttributes)
         {
-            PostConfig(userAttributes, appAttributes);
+            PostConfigWithConfigType("settings", userAttributes, appAttributes);
         }
 
-        internal void PostConfig(object userAttributes, object appAttributes)
+        /// <summary>
+        /// Fetches an app configuration settings from the remote server passing a configType.
+        /// </summary>
+        /// <param name="configType">A string containing configType. If none apply, use null.</param>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use null.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use null.</param>
+        public void FetchConfigs(string configType, object userAttributes, object appAttributes)
         {
-            var jsonText = PreparePayload(userAttributes, appAttributes);
-            DoRequest(jsonText);
+            if (string.IsNullOrEmpty(configType))
+            {
+                configType = "settings";
+            }
+            PostConfigWithConfigType(configType, userAttributes, appAttributes);
         }
 
-        internal string PreparePayload(object userAttributes, object appAttributes)
+        /// <summary>
+        /// Retrieves the particular config from multiple config object by passing config type.
+        /// </summary>
+        /// <param name="configType">Config type identifier.</param>
+        /// <returns>
+        /// Corresponding config as a RuntimeConfig.
+        /// </returns>
+        public RuntimeConfig GetConfig(string configType)
         {
-            requestStatus = ConfigRequestStatus.Pending;
-            long timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
-            long rtSinceStart = (long)(Time.realtimeSinceStartup * 1000000);
-            var commonJobj = JObject.FromObject(commonPayload);
-            commonJobj.Add("t_since_start", rtSinceStart);
-            JObject json = new JObject();
-            json.Add("common", commonJobj);
-            List<JObject> items = new List<JObject>();
-            items.Add(json);
-            items.Add(CreatePayloadJObjectFromValuesJObject(JObject.FromObject(deliveryPayload), "analytics.delivery.v1", timestamp));
-            var deviceInfoJObj = JObject.FromObject(deviceInfoPayload);
-            deviceInfoJObj.Add("t_since_start", rtSinceStart);
-            items.Add(CreatePayloadJObjectFromValuesJObject(deviceInfoJObj, "analytics.deviceInfo.v1", timestamp));
-            if(userAttributes == null)
+            if (configs.ContainsKey(configType))
             {
-                items.Add(CreatePayloadJObjectFromValuesJObject(new JObject(), "analytics.deliveryUserAttributes.v1", timestamp));
+                return configs[configType];
             }
-            else
-            {
-                items.Add(CreatePayloadJObjectFromValuesJObject(JObject.FromObject(userAttributes), "analytics.deliveryUserAttributes.v1", timestamp));
-            }
-            if(appAttributes == null)
-            {
-                items.Add(CreatePayloadJObjectFromValuesJObject(new JObject(), "analytics.deliveryAppAttributes.v1", timestamp));
-            }
-            else
-            {
-                items.Add(CreatePayloadJObjectFromValuesJObject(JObject.FromObject(appAttributes), "analytics.deliveryAppAttributes.v1", timestamp));
-            }
-
-            foreach(var func in requestPayloadProviders)
-            {
-                items.Add(func.Invoke());
-            }
-
-            var sb = new StringBuilder();
-
-            using (var textWriter = new StringWriter(sb))
-            {
-                ToNewlineDelimitedJson(textWriter, items);
-            }
-
-            return sb.ToString();
+            configs[configType] = new RuntimeConfig(configType);
+            return configs[configType];
         }
 
-        internal void DoRequest(string jsonText)
+        internal void PostConfigWithConfigType(string configType, object userAttributes, object appAttributes)
+        {
+            RuntimeConfig runtimeConfig = null;
+            if (configs.ContainsKey(configType))
+            {
+                runtimeConfig = configs[configType];
+            }
+            if (runtimeConfig == null)
+            {
+                runtimeConfig = new RuntimeConfig(configType);
+                configs[configType] = runtimeConfig;
+            }
+            runtimeConfig.RequestStatus = ConfigRequestStatus.Pending;
+            var jsonText = PreparePayloadWithConfigType(configType, userAttributes, appAttributes);
+            DoRequest(configType, jsonText);
+        }
+
+        internal string PreparePayloadWithConfigType(string configType, object userAttributes, object appAttributes)
+        {
+            var commonJobj = JObject.FromObject(_remoteConfigRequest);
+            commonJobj["configType"] = configType;
+            commonJobj["attributes"] = new JObject();
+            commonJobj["attributes"]["unity"] = JObject.FromObject(_unityAttributes);
+            commonJobj["attributes"]["unity"]["platform"] = Application.platform.ToString();
+            commonJobj["attributes"]["app"] = (appAttributes != null) ? JObject.FromObject(appAttributes) : new JObject();
+            commonJobj["attributes"]["user"] = (userAttributes != null) ? JObject.FromObject(userAttributes) : new JObject();
+            return commonJobj.ToString();
+        }
+
+        internal void DoRequest(string configType, string jsonText)
         {
             var request = new RCUnityWebRequest();
             request.unityWebRequest = new UnityWebRequest();
-            request.url = "https://config.uca.cloud.unity3d.com";
             request.method = UnityWebRequest.kHttpVerbPOST;
             request.SetRequestHeader("Content-Type", "application/json");
             request.timeout = 10;
+            request.url = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
+            request.SetRequestHeader("Authorization", "Bearer " + _playerIdentityToken);
+
             foreach(var headerProvider in requestHeaderProviders)
             {
                 var header = headerProvider.Invoke();
@@ -266,41 +291,48 @@ namespace Unity.RemoteConfig
             }
             request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonText));
             request.downloadHandler = new DownloadHandlerBuffer();
-            request.SendWebRequest().completed += (AsyncOperation op) => {
+            request.SendWebRequest().completed += op => {
                 var origin = ConfigOrigin.Remote;
-                var response = ((UnityWebRequestAsyncOperation)op).webRequest;
-                var configResponse = new ConfigResponse() { requestOrigin = origin, status = requestStatus };
-                if (response.isHttpError || response.isNetworkError)
+                var webRequest = ((UnityWebRequestAsyncOperation)op).webRequest;
+                if (webRequest.isHttpError || webRequest.isNetworkError)
                 {
-                    configResponse.status = ConfigRequestStatus.Failed;
-                    FetchCompleted?.Invoke(configResponse);
+                    var configResponse = ParseResponse(origin, null, null);
+                    HandleConfigResponse(configType, configResponse);
                 }
                 else
                 {
-                    RawResponseReturned?.Invoke(origin, request.GetResponseHeaders(), request.downloadHandler.text);
+                    var configResponse = ParseResponse(origin, request.GetResponseHeaders(), request.downloadHandler.text);
+                    HandleConfigResponse(configType, configResponse);
                 }
             };
         }
 
-        /// <summary>
-        /// Tries to create cache files (config and headers) and write into them if they are successfully fetched from remote location
-        /// </summary>
-        /// <param name="origin">represents config origin. If value is Remote, overwrite the file content </param>
-        /// <param name="headers">request headers as a key-value dictionary</param>
-        /// <param name="result">config value</param>
-        public void SaveCache(ConfigOrigin origin, Dictionary<string, string> headers, string result)
+        internal void HandleConfigResponse(string configType, ConfigResponse configResponse)
         {
-            if(origin == ConfigOrigin.Remote)
+            if (!configs.ContainsKey(configType)) configs[configType] = new RuntimeConfig(configType);
+            configs[configType].HandleConfigResponse(configResponse);
+            FetchCompleted?.Invoke(configResponse);
+        }
+
+        /// <summary>
+        /// Caches all configs previously fetched, called whenever FetchConfigs completes.
+        /// </summary>
+        /// <param name="response">the ConfigResponse resulting from the FetchConfigs call</param>
+        public void SaveCache(ConfigResponse response)
+        {
+            if(response.requestOrigin == ConfigOrigin.Remote)
             {
+                var responsesToCache = new Dictionary<string, ConfigResponse>();
+                foreach (var configType in configs.Keys)
+                {
+                    responsesToCache[configType] = configs[configType].ConfigResponse;
+                }
+
                 try
                 {
-                    using (StreamWriter writer = File.CreateText(Path.Combine(Application.persistentDataPath, cacheFile)))
+                    using (var writer = File.CreateText(Path.Combine(Application.persistentDataPath, cacheFile)))
                     {
-                        writer.Write(result);
-                    }
-                    using (StreamWriter writer = File.CreateText(Path.Combine(Application.persistentDataPath, cacheHeadersFile)))
-                    {
-                        writer.Write(JsonConvert.SerializeObject(headers));
+                        writer.Write(JsonConvert.SerializeObject(responsesToCache));
                     }
                 }
                 catch(Exception e)
@@ -318,90 +350,28 @@ namespace Unity.RemoteConfig
             try
             {
                 byte[] bodyResult;
-                using (FileStream reader = File.Open(Path.Combine(Application.persistentDataPath, cacheFile), FileMode.Open))
+                using (var reader = File.Open(Path.Combine(Application.persistentDataPath, cacheFile), FileMode.Open))
                 {
                     bodyResult = new byte[reader.Length];
                     reader.Read(bodyResult, 0, (int)reader.Length);
                 }
-
-                byte[] headerResult;
-                using (FileStream reader = File.Open(Path.Combine(Application.persistentDataPath, cacheHeadersFile), FileMode.Open))
+                var bodyString = Encoding.ASCII.GetString(bodyResult);
+                var bodyJObject = JObject.Parse(bodyString);
+                foreach (var kv in bodyJObject)
                 {
-                    headerResult = new byte[reader.Length];
-                    reader.Read(headerResult, 0, (int)reader.Length);
+                    var configType = kv.Key;
+                    if (kv.Value.Type == JTokenType.Object)
+                    {
+                        var cachedConfigResponse = kv.Value.ToObject<ConfigResponse>();
+                        configs[configType] = new RuntimeConfig(configType);
+                        configs[configType].HandleConfigResponse(cachedConfigResponse);
+                    }
                 }
-                RawResponseReturned?.Invoke(ConfigOrigin.Cached, JsonConvert.DeserializeObject<Dictionary<string, string>>(System.Text.Encoding.ASCII.GetString(headerResult)), System.Text.Encoding.ASCII.GetString(bodyResult));
             }
             catch
             {
-                RawResponseReturned?.Invoke(ConfigOrigin.Cached, null, null);
+                Debug.Log("Failed to load config from cache.");
             }
-        }
-
-        internal JObject CreatePayloadJObjectFromValuesJObject(JObject jObject, string type, long ts)
-        {
-            jObject.Add("ts", ts);
-            JObject returnObj = new JObject();
-            returnObj.Add("type", type);
-            returnObj.Add("msg", jObject);
-            return returnObj;
-        }
-
-        internal void ToNewlineDelimitedJson<T>(Stream stream, IEnumerable<T> items)
-        {
-            // Let caller dispose the underlying stream
-            using (var textWriter = new StreamWriter(stream, new UTF8Encoding(false, true), 1024, true))
-            {
-                ToNewlineDelimitedJson(textWriter, items);
-            }
-        }
-
-        internal void ToNewlineDelimitedJson<T>(TextWriter textWriter, IEnumerable<T> items)
-        {
-            var serializer = JsonSerializer.CreateDefault();
-
-            foreach (var item in items)
-            {
-                // Formatting.None is the default; I set it here for clarity.
-                using (var writer = new JsonTextWriter(textWriter) { Formatting = Formatting.None, CloseOutput = false })
-                {
-                    serializer.Serialize(writer, item);
-                }
-                // http://specs.okfnlabs.org/ndjson/
-                // Each JSON text MUST conform to the [RFC7159] standard and MUST be written to the stream followed by the newline character \n (0x0A).
-                // The newline charater MAY be preceeded by a carriage return \r (0x0D). The JSON texts MUST NOT contain newlines or carriage returns.
-                textWriter.Write("\n");
-            }
-        }
-
-        internal void AddRequestPayloadProvider(Func<JObject> provider)
-        {
-            requestPayloadProviders.Add(provider);
-        }
-
-        internal void RemoveRequestPayloadProvider(Func<JObject> provider)
-        {
-            requestPayloadProviders.Remove(provider);
-        }
-
-        internal void AddRequestHeaderProvider(Func<RequestHeaderTuple> provider)
-        {
-            requestHeaderProviders.Add(provider);
-        }
-
-        internal void RemoveRequestHeaderProvider(Func<RequestHeaderTuple> provider)
-        {
-            requestHeaderProviders.Remove(provider);
-        }
-
-        internal void AddRawPayloadValidatorFunc(Func<Dictionary<string, string>, string, bool> validatorFunc)
-        {
-            rawResponseValidators.Add(validatorFunc);
-        }
-
-        internal void RemoveRawPayloadValidatorFunc(Func<Dictionary<string, string>, string, bool> validatorFunc)
-        {
-            rawResponseValidators.Remove(validatorFunc);
         }
     }
 
@@ -466,32 +436,36 @@ namespace Unity.RemoteConfig
         /// An enum representing the status of the current Remote Config request.
         /// </returns>
         public ConfigRequestStatus status;
+        /// <summary>
+        /// The body of the Remote Config backend response.
+        /// </summary>
+        /// <returns>
+        /// The full response body as a JObject.
+        /// </returns>
+        public JObject body;
+        /// <summary>
+        /// The headers from the Remote Config backend response.
+        /// </summary>
+        /// <returns>
+        /// A Dictionary containing the headers..
+        /// </returns>
+        public Dictionary<string, string> headers;
     }
 
     [Serializable]
-    internal struct Delivery
+    internal struct RemoteConfigRequest
     {
+#if !UNITY_SWITCH && !UNITY_PS4
+        public string projectId;
+        public string userId;
+#endif
+        public bool isDebugBuild;
+        public string configType;
         public string customUserId;
         public string environmentId;
         public string packageVersion;
         public string originService;
         public JObject attributionMetadata;
-    }
-
-    [Serializable]
-    internal struct Common
-    {
-#if !UNITY_SWITCH && !UNITY_PS4
-        public string appid;
-        public string userid;
-        public long sessionid;
-        public long session_count;
-#endif
-        public string platform;
-        public int platform_id;
-        public string sdk_ver;
-        public bool debug_device;
-        public string device_id;
     }
  #pragma warning disable CS0649
     [Serializable]
@@ -501,60 +475,58 @@ namespace Unity.RemoteConfig
         public string value;
     }
 
-    internal class DeviceInfo
+    internal class UnityAttributes
     {
-        public string os_ver;
-        public string app_ver;
-        public bool rooted_jailbroken;
-        public bool debug_build;
+        public string osVersion;
+        public string appVersion;
+        public bool rootedJailbroken;
         public string model;
         public string cpu;
-        public int cpu_count;
-        public int cpu_freq;
+        public int cpuCount;
+        public int cpuFrequency;
         public int ram;
         public int vram;
         public string screen;
         public int dpi;
-        public string lang;
-        public string app_name;
-        public string app_install_mode;
-        public string app_install_store;
-        public int gfx_device_id;
-        public int gfx_device_vendor_id;
-        public string gfx_name;
-        public string gfx_vendor;
-        public string gfx_ver;
-        public int gfx_shader;
-        public int max_texture_size;
+        public string language;
+        public string appName;
+        public string appInstallMode;
+        public string appInstallStore;
+        public int graphicsDeviceId;
+        public int graphicsDeviceVendorId;
+        public string graphicsName;
+        public string graphicsDeviceVendor;
+        public string graphicsVersion;
+        public int graphicsShader;
+        public int maxTextureSize;
 
-        public DeviceInfo()
+        public UnityAttributes()
         {
-            os_ver = SystemInfo.operatingSystem;
-            app_ver = Application.version;
-            rooted_jailbroken = Application.sandboxType == ApplicationSandboxType.SandboxBroken;
-            debug_build = Debug.isDebugBuild;
+            osVersion = SystemInfo.operatingSystem;
+            appVersion = Application.version;
+            rootedJailbroken = Application.sandboxType == ApplicationSandboxType.SandboxBroken;
             model = GetDeviceModel();
             cpu = SystemInfo.processorType;
-            cpu_count = SystemInfo.processorCount;
-            cpu_freq = SystemInfo.processorFrequency;
+            cpuCount = SystemInfo.processorCount;
+            cpuFrequency = SystemInfo.processorFrequency;
             ram = SystemInfo.systemMemorySize;
             vram = SystemInfo.graphicsMemorySize;
             screen = Screen.currentResolution.ToString();
             dpi = (int)Screen.dpi;
-            lang = GetISOCodeFromLangStruct(Application.systemLanguage);
-            app_name = Application.identifier;
-            app_install_mode = Application.installMode.ToString();
-            app_install_store = Application.installerName;
-            gfx_device_id = SystemInfo.graphicsDeviceID;
-            gfx_device_vendor_id = SystemInfo.graphicsDeviceVendorID;
-            gfx_name = SystemInfo.graphicsDeviceName;
-            gfx_vendor = SystemInfo.graphicsDeviceVendor;
-            gfx_ver = SystemInfo.graphicsDeviceVersion;
-            gfx_shader = SystemInfo.graphicsShaderLevel;
-            max_texture_size = SystemInfo.maxTextureSize;
+            language = GetISOCodeFromLangStruct(Application.systemLanguage);
+            appName = Application.identifier;
+            appInstallMode = Application.installMode.ToString();
+            appInstallStore = Application.installerName;
+            graphicsDeviceId = SystemInfo.graphicsDeviceID;
+            graphicsDeviceVendorId = SystemInfo.graphicsDeviceVendorID;
+            graphicsName = SystemInfo.graphicsDeviceName;
+            graphicsDeviceVendor = SystemInfo.graphicsDeviceVendor;
+            graphicsVersion = SystemInfo.graphicsDeviceVersion;
+            graphicsShader = SystemInfo.graphicsShaderLevel;
+            maxTextureSize = SystemInfo.maxTextureSize;
         }
 
-        private string GetDeviceModel()
+        string GetDeviceModel()
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
         // Get manufacturer, model, and device
@@ -568,7 +540,7 @@ namespace Unity.RemoteConfig
 #endif
         }
 
-        private string GetISOCodeFromLangStruct(SystemLanguage systemLanguage)
+        string GetISOCodeFromLangStruct(SystemLanguage systemLanguage)
         {
             switch (systemLanguage)
             {

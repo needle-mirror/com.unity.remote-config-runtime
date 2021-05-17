@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Runtime.CompilerServices;
-using Newtonsoft.Json.Linq;
-using UnityEngine;
 
 [assembly: InternalsVisibleTo("Unity.RemoteConfig.Tests")]
 
@@ -16,7 +13,7 @@ namespace Unity.RemoteConfig
     /// </summary>
     public static class ConfigManager
     {
-        private static ConfigManagerImpl _configmanagerImpl = new ConfigManagerImpl("remote-config");
+        internal static ConfigManagerImpl ConfigManagerImpl = new ConfigManagerImpl("remote-config");
 
         /// <summary>
         /// Returns the status of the current configuration request from the service.
@@ -26,8 +23,8 @@ namespace Unity.RemoteConfig
         /// </returns>
         public static ConfigRequestStatus requestStatus
         {
-            get { return _configmanagerImpl.requestStatus; }
-            set { _configmanagerImpl.requestStatus = value; }
+            get { return ConfigManagerImpl.appConfig.RequestStatus; }
+            set { ConfigManagerImpl.appConfig.RequestStatus = value; }
         }
 
         /// <summary>
@@ -38,8 +35,8 @@ namespace Unity.RemoteConfig
         /// </returns>
         public static event Action<ConfigResponse> FetchCompleted
         {
-            add { _configmanagerImpl.FetchCompleted += value; }
-            remove { _configmanagerImpl.FetchCompleted -= value; }
+            add { ConfigManagerImpl.appConfig.FetchCompleted += value; }
+            remove { ConfigManagerImpl.appConfig.FetchCompleted -= value; }
         }
 
         /// <summary>
@@ -62,8 +59,20 @@ namespace Unity.RemoteConfig
         /// </returns>
         public static RuntimeConfig appConfig
         {
-            get { return _configmanagerImpl.appConfig; }
-            set { _configmanagerImpl.appConfig = value; }
+            get { return ConfigManagerImpl.appConfig; }
+            set { ConfigManagerImpl.appConfig = value; }
+        }
+
+        /// <summary>
+        /// Retrieves the particular config from multiple config object by passing config type.
+        /// </summary>
+        /// <param name="configType">Config type identifier.</param>
+        /// <returns>
+        /// Corresponding config as a RuntimeConfig.
+        /// </returns>
+        public static RuntimeConfig GetConfig(string configType)
+        {
+            return ConfigManagerImpl.GetConfig(configType);
         }
 
         /// <summary>
@@ -72,7 +81,7 @@ namespace Unity.RemoteConfig
         /// <param name="customUserID">Custom user identifier.</param>
         public static void SetCustomUserID(string customUserID)
         {
-            _configmanagerImpl.SetCustomUserID(customUserID);
+            ConfigManagerImpl.SetCustomUserID(customUserID);
         }
 
         /// <summary>
@@ -81,7 +90,16 @@ namespace Unity.RemoteConfig
         /// <param name="environmentID">Environment unique identifier.</param>
         public static void SetEnvironmentID(string environmentID)
         {
-            _configmanagerImpl.SetEnvironmentID(environmentID);
+            ConfigManagerImpl.SetEnvironmentID(environmentID);
+        }
+
+        /// <summary>
+        /// Sets player Identity Token.
+        /// </summary>
+        /// <param name="playerIdentityToken">Player Identity identifier.</param>
+        public static void SetPlayerIdentityToken(string playerIdentityToken)
+        {
+            ConfigManagerImpl.SetPlayerIdentityToken(playerIdentityToken);
         }
 
         /// <summary>
@@ -93,17 +111,39 @@ namespace Unity.RemoteConfig
         /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
         public static void FetchConfigs<T, T2>(T userAttributes, T2 appAttributes) where T : struct where T2 : struct
         {
-            _configmanagerImpl.FetchConfigs(userAttributes, appAttributes);
+            ConfigManagerImpl.FetchConfigs(userAttributes, appAttributes);
         }
 
+        /// <summary>
+        /// Fetches an app configuration settings from the remote server passing a configType.
+        /// </summary>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use an empty struct.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
+        /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
+        /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
+        public static void FetchConfigs<T, T2>(string configType, T userAttributes, T2 appAttributes) where T : struct where T2 : struct
+        {
+            ConfigManagerImpl.FetchConfigs(configType, userAttributes, appAttributes);
+        }
+
+        /// <summary>
+        /// Saves origin, headers and result from last fetch in a file.
+        /// </summary>
+        /// <param name="origin">Request origin.</param>
+        /// <param name="headers">Request headers.</param>
+        /// <param name="result">Config from last fetch.</param>
         internal static void SaveCache(ConfigOrigin origin, Dictionary<string, string> headers, string result)
         {
-            _configmanagerImpl.SaveCache(origin, headers, result);
+            var configResponse = ConfigManagerImpl.ParseResponse(origin, headers, result);
+            ConfigManagerImpl.SaveCache(configResponse);
         }
 
+        /// <summary>
+        /// Loads last config from a cache file.
+        /// </summary>
         internal static void LoadFromCache()
         {
-            _configmanagerImpl.LoadFromCache();
+            ConfigManagerImpl.LoadFromCache();
         }
 
     }

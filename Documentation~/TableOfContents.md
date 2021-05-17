@@ -1,4 +1,5 @@
 * [Unity Remote Config Runtime](index)
+    * [Upgrade Guide](upgrade-guide)
 * [Configuring your Project](ConfiguringYourProject)
 * [Environments](Environments)
 * [Code integration](CodeIntegration)

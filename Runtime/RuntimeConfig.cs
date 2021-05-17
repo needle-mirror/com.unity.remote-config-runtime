@@ -11,55 +11,47 @@ namespace Unity.RemoteConfig
     public class RuntimeConfig
     {
         /// <summary>
-        /// The Remote Config service generates this unique ID on configuration requests, for reporting and analytic purposes. Returns null if there is no assignmentId yet.
-        /// </summary>
-        /// <returns>
-        /// A unique string.
-        /// </returns>
-        public string assignmentID {
-            get {
-                try
-                {
-                    return metadata["assignmentId"].Value<string>();
-                }
-                catch
-                {
-                    return null;
-                }
-            }
-        }
-
-        /// <summary>
-        /// The Environment ID that has been returned by the Remote Config Delivery service.
-        /// </summary>
-        /// <returns>
-        /// A string of the environmentID returned.
-        /// </returns>
-        public string environmentID {
-            get {
-                try
-                {
-                    return metadata["environmentId"].Value<string>();
-                }
-                catch
-                {
-                    return null;
-                }
-            }
-        }
-
-        /// <summary>
         /// Retrieves the origin point from which your configuration settings loaded.
         /// </summary>
         /// <returns>
         /// An enum describing the origin point of your most recently loaded configuration settings.
         /// </returns>
         public ConfigOrigin origin { get; internal set; }
+        /// <summary>
+        /// The Environment ID that has been returned by the Remote Config Delivery service.
+        /// </summary>
+        /// <returns>
+        /// A string of the environmentID returned.
+        /// </returns>
+        public string environmentId { get; set; }
+        /// <summary>
+        /// The Remote Config service generates this unique ID on configuration requests, for reporting and analytic purposes. Returns null if there is no assignmentId yet.
+        /// </summary>
+        /// <returns>
+        /// A unique string.
+        /// </returns>
+        public string assignmentId { get; set; }
+        /// <summary>
+        /// The config type for this RuntimeConfig, default is "settings".
+        /// </summary>
+        /// <returns>
+        /// The configType as a string.
+        /// </returns>
+        public string configType;
+    
+        internal ConfigResponse ConfigResponse;
+        internal ConfigRequestStatus RequestStatus;
 
-        internal JObject _config;
-        internal JObject metadata;
-        string configKey;
+        JObject _config;
         JsonSerializerSettings rawDateSettings = new JsonSerializerSettings { DateParseHandling = DateParseHandling.None };
+
+        /// <summary>
+        /// This event fires when the config is successfully returned from the Remote Config backend.
+        /// </summary>
+        /// <returns>
+        /// A ConfigResponse struct representing the response.
+        /// </returns>
+        public event Action<ConfigResponse> FetchCompleted;
 
         /// <summary>
         /// Returns a copy of the entire config as a JObject.
@@ -72,25 +64,29 @@ namespace Unity.RemoteConfig
             }
         }
 
-        internal RuntimeConfig(ConfigManagerImpl _configmanagerImpl, string configKey)
+        internal RuntimeConfig(string configType)
         {
-            this.configKey = configKey;
-            _configmanagerImpl.ResponseParsed += ConfigManager_ResponseParsed;
+            this.configType = configType;
+            RequestStatus = ConfigRequestStatus.None;
             origin = ConfigOrigin.Default;
             _config = new JObject();
+            ConfigResponse = new ConfigResponse(); 
         }
 
-        private void ConfigManager_ResponseParsed(ConfigResponse configResponse, JObject obj)
+        internal void HandleConfigResponse(ConfigResponse configResponse)
         {
+            ConfigResponse = configResponse;
+            RequestStatus = ConfigResponse.status;
+            var responseBody = ConfigResponse.body;
             if(configResponse.status == ConfigRequestStatus.Success)
             {
-                if (obj[configKey] != null && obj[configKey + "Metadata"] != null)
-                {
-                    _config = (JObject)obj[configKey];
-                    metadata = (JObject)obj[configKey + "Metadata"];
-                    origin = configResponse.requestOrigin;
-                }
+                if (responseBody["configs"]?[configType]?.Type != JTokenType.Object) return;
+                _config = (JObject) responseBody["configs"][configType];
+                origin = configResponse.requestOrigin;
+                environmentId = responseBody["metadata"]?["environmentId"]?.ToString();
+                assignmentId = responseBody["metadata"]?["assignmentId"]?.ToString();
             }
+            FetchCompleted?.Invoke(ConfigResponse);
         }
 
         /// <summary>

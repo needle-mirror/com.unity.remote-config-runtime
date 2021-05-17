@@ -8,7 +8,7 @@ namespace Unity.RemoteConfig
   {
     /// <summary>
     /// UnityWebRequest object handles the flow of HTTP communication with web servers
-    /// <summary>
+    /// </summary>
     UnityWebRequest unityWebRequest { get; set; }
 
     /// <summary>
