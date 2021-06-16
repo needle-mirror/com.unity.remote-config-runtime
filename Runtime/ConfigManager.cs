@@ -115,8 +115,23 @@ namespace Unity.RemoteConfig
         }
 
         /// <summary>
+        /// Fetches an app configuration settings from the remote server passing filterAttributes.
+        /// </summary>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use an empty struct.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
+        /// <param name="filterAttributes">A struct containing filter attributes. If none apply, use an empty struct.</param>
+        /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
+        /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
+        /// <typeparam name="T3">The type of the <c>filterAttributes</c> struct.</typeparam>
+        public static void FetchConfigs<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes) where T : struct where T2 : struct where T3 : struct
+        {
+            ConfigManagerImpl.FetchConfigs(userAttributes, appAttributes, filterAttributes);
+        }
+
+        /// <summary>
         /// Fetches an app configuration settings from the remote server passing a configType.
         /// </summary>
+        /// <param name="configType">A string containing configType. If none apply, use null.</param>
         /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use an empty struct.</param>
         /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
         /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
@@ -124,6 +139,21 @@ namespace Unity.RemoteConfig
         public static void FetchConfigs<T, T2>(string configType, T userAttributes, T2 appAttributes) where T : struct where T2 : struct
         {
             ConfigManagerImpl.FetchConfigs(configType, userAttributes, appAttributes);
+        }
+
+        /// <summary>
+        /// Fetches an app configuration settings from the remote server passing a configType and filterAttributes.
+        /// </summary>
+        /// <param name="configType">A string containing configType. If none apply, use empty string.</param>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use an empty struct.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
+        /// <param name="filterAttributes">A struct containing filter attributes. If none apply, use an empty struct.</param>
+        /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
+        /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
+        /// <typeparam name="T3">The type of the <c>filterAttributes</c> struct.</typeparam>
+        public static void FetchConfigs<T, T2, T3>(string configType, T userAttributes, T2 appAttributes, T3 filterAttributes) where T : struct where T2 : struct where T3 : struct
+        {
+            ConfigManagerImpl.FetchConfigs(configType, userAttributes, appAttributes, filterAttributes);
         }
 
         /// <summary>

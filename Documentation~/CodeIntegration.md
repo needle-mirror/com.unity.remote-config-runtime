@@ -30,6 +30,13 @@ public class RemoteConfigExample : MonoBehaviour {
         public string appVersion;
     }
 
+    public struct filterAttributes {
+      // Optionally declare variables for any filter attributes:
+        public string[] key;
+        public string[] type;
+        public string[] schemaId;
+    }
+
     // Optionally declare a unique assignmentId if you need it for tracking:
     public string assignmentId;
 
@@ -68,8 +75,11 @@ The Remote Config service returns a [`ConfigManager`](../api/Unity.RemoteConfig.
         // Set the environment ID:
         ConfigManager.SetEnvironmentID("an-env-id");
 
-        // Fetch configuration setting from the remote service:
+        // Fetch configuration settings from the remote service:
         ConfigManager.FetchConfigs<userAttributes, appAttributes>(new userAttributes(), new appAttributes());
+
+        // Fetch configuration settings could be also called with filterAttributes in order to get response filtered by key, type or schemaId:
+        ConfigManager.FetchConfigs<userAttributes, appAttributes, filterAttributes>(new userAttributes(), new appAttributes(), new filterAttributes());
     }
 
     void ApplyRemoteSettings (ConfigResponse configResponse) {

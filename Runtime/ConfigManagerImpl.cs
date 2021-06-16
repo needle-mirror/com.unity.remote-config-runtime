@@ -66,7 +66,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "2.0.0";
+        internal const string pluginVersion = "2.0.1-exp.1";
 
         /// <summary>
         /// This event fires when the configuration manager successfully fetches settings from the service.
@@ -192,8 +192,23 @@ namespace Unity.RemoteConfig
         }
 
         /// <summary>
+        /// Fetches an app configuration settings from the remote server passing filterAttributes.
+        /// </summary>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use an empty struct.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
+        /// <param name="filterAttributes">A struct containing filter attributes. If none apply, use an empty struct.</param>
+        /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
+        /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
+        /// <typeparam name="T3">The type of the <c>filterAttributes</c> struct.</typeparam>
+        public void FetchConfigs<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes) where T : struct where T2 : struct where T3 : struct
+        {
+            PostConfigWithConfigType("settings",userAttributes, appAttributes, filterAttributes);
+        }
+
+        /// <summary>
         /// Fetches an app configuration settings from the remote server passing a configType.
         /// </summary>
+        /// <param name="configType">A string containing configType. If none apply, use null.</param>
         /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use an empty struct.</param>
         /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
         /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
@@ -204,6 +219,21 @@ namespace Unity.RemoteConfig
         }
 
         /// <summary>
+        /// Fetches an app configuration settings from the remote server passing a configType and filterAttributes.
+        /// </summary>
+        /// <param name="configType">A string containing configType. If none apply, use empty string.</param>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use an empty struct.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
+        /// <param name="filterAttributes">A struct containing filter attributes. If none apply, use an empty struct.</param>
+        /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
+        /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
+        /// <typeparam name="T3">The type of the <c>filterAttributes</c> struct.</typeparam>
+        public void FetchConfigs<T, T2, T3>(string configType, T userAttributes, T2 appAttributes, T3 filterAttributes) where T : struct where T2 : struct where T3 : struct
+        {
+            PostConfigWithConfigType(configType, userAttributes, appAttributes, filterAttributes);
+        }
+
+        /// <summary>
         /// Fetches an app configuration settings from the remote server.
         /// </summary>
         /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use null.</param>
@@ -211,6 +241,17 @@ namespace Unity.RemoteConfig
         public void FetchConfigs(object userAttributes, object appAttributes)
         {
             PostConfigWithConfigType("settings", userAttributes, appAttributes);
+        }
+
+        /// <summary>
+        /// Fetches an app configuration settings from the remote server passing filterAttributes.
+        /// </summary>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use null.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use null.</param>
+        /// <param name="filterAttributes">A struct containing filter attributes. If none apply, use an empty struct.</param>
+        public void FetchConfigs(object userAttributes, object appAttributes, object filterAttributes)
+        {
+            PostConfigWithConfigType("settings", userAttributes, appAttributes, filterAttributes);
         }
 
         /// <summary>
@@ -226,6 +267,18 @@ namespace Unity.RemoteConfig
                 configType = "settings";
             }
             PostConfigWithConfigType(configType, userAttributes, appAttributes);
+        }
+
+        /// <summary>
+        /// Fetches an app configuration settings from the remote server passing a configType.
+        /// </summary>
+        /// <param name="configType">A string containing configType. If none apply, use null.</param>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use null.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use null.</param>
+        /// <param name="filterAttributes">A struct containing filter attributes. If none apply, use an empty struct.</param>
+        public void FetchConfigs(string configType, object userAttributes, object appAttributes, object filterAttributes)
+        {
+            PostConfigWithConfigType(configType, userAttributes, appAttributes, filterAttributes);
         }
 
         /// <summary>
@@ -245,8 +298,13 @@ namespace Unity.RemoteConfig
             return configs[configType];
         }
 
-        internal void PostConfigWithConfigType(string configType, object userAttributes, object appAttributes)
+        internal void PostConfigWithConfigType(string configType, object userAttributes, object appAttributes, object filterAttributes = null)
         {
+            if (string.IsNullOrEmpty(configType))
+            {
+                configType = "settings";
+            }
+
             RuntimeConfig runtimeConfig = null;
             if (configs.ContainsKey(configType))
             {
@@ -258,11 +316,11 @@ namespace Unity.RemoteConfig
                 configs[configType] = runtimeConfig;
             }
             runtimeConfig.RequestStatus = ConfigRequestStatus.Pending;
-            var jsonText = PreparePayloadWithConfigType(configType, userAttributes, appAttributes);
+            var jsonText = PreparePayloadWithConfigType(configType, userAttributes, appAttributes, filterAttributes);
             DoRequest(configType, jsonText);
         }
 
-        internal string PreparePayloadWithConfigType(string configType, object userAttributes, object appAttributes)
+        internal string PreparePayloadWithConfigType(string configType, object userAttributes, object appAttributes, object filterAttributes)
         {
             var commonJobj = JObject.FromObject(_remoteConfigRequest);
             commonJobj["configType"] = configType;
@@ -271,6 +329,20 @@ namespace Unity.RemoteConfig
             commonJobj["attributes"]["unity"]["platform"] = Application.platform.ToString();
             commonJobj["attributes"]["app"] = (appAttributes != null) ? JObject.FromObject(appAttributes) : new JObject();
             commonJobj["attributes"]["user"] = (userAttributes != null) ? JObject.FromObject(userAttributes) : new JObject();
+           
+            var filterAttributesObj = (filterAttributes != null) ? JObject.FromObject(filterAttributes) : new JObject();
+            if (filterAttributesObj.ContainsKey("key"))
+            {
+                commonJobj["key"] = filterAttributesObj["key"];
+            }
+            if (filterAttributesObj.ContainsKey("type"))
+            {
+                commonJobj["type"] = filterAttributesObj["type"];
+            }
+            if (filterAttributesObj.ContainsKey("schemaId"))
+            {
+                commonJobj["schemaId"] = filterAttributesObj["schemaId"];
+            }
             return commonJobj.ToString();
         }
 
@@ -461,6 +533,9 @@ namespace Unity.RemoteConfig
 #endif
         public bool isDebugBuild;
         public string configType;
+        public string[] key;
+        public string[] type;
+        public string[] schemaId;
         public string customUserId;
         public string environmentId;
         public string packageVersion;

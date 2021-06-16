@@ -362,6 +362,11 @@ namespace Unity.RemoteConfig.Tests
 
         }
 
+        public struct FilterAttributes
+        {
+
+        }
+
         public static string jsonPayloadString =
             @"{
                 ""configs"": {

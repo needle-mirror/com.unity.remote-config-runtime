@@ -27,9 +27,11 @@ namespace Unity.RemoteConfig.Tests
         {
             ConfigManager.FetchConfigs<
                 ConfigManagerTestUtils.UserAttributes,
-                ConfigManagerTestUtils.AppAttributes>
+                ConfigManagerTestUtils.AppAttributes,
+                ConfigManagerTestUtils.FilterAttributes>
                 (new ConfigManagerTestUtils.UserAttributes(),
-                new ConfigManagerTestUtils.AppAttributes());
+                new ConfigManagerTestUtils.AppAttributes(),
+                new ConfigManagerTestUtils.FilterAttributes());
             testFinished = true;
         }
     }
