@@ -1,6 +1,33 @@
 # Code integration
 The `RemoteConfig` API is included in the `Unity` namespace. You must include this in your game script. For more information on its classes and methods, see the [Scripting API](../api/index.html) documentation.
 
+## Initialization
+The Remote Config package depends on Unity's authentication and core services.
+These dependencies require a small amount of user code for proper configuration.
+
+```c#
+using Unity.Services.Authentication;
+using Unity.Services.Core;
+using System.Threading.Tasks;
+
+async Task InitializeRemoteConfigAsync()
+{
+        // initialize handlers for unity game services
+        await UnityServices.InitializeAsync();
+
+        // remote config requires authentication for managing environment information
+        if (!AuthenticationService.Instance.IsSignedIn)
+        {
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+        }
+        while (!AuthenticationService.Instance.IsSignedIn)
+        {
+            await Task.Delay(1);
+        }
+}
+```
+
+
 ## Implementing custom attributes
 To provide custom attributes for [Rule conditions](RulesAndSettings.md#condition), implement the following `struct` variables in your game script:
 
@@ -12,7 +39,7 @@ To provide custom attributes for [Rule conditions](RulesAndSettings.md#condition
 
 Start by creating a framework for your script that implements your custom attributes and blocks out your functions:
 
-```
+```c#
 using UnityEngine;
 using Unity.RemoteConfig;
 
@@ -63,7 +90,7 @@ Next, implement your Remote Config support functions, and call them at runtime t
 
 The Remote Config service returns a [`ConfigManager`](../api/Unity.RemoteConfig.ConfigManager.html) object to fetch and apply your configuration settings at runtime. In this example, you’ll use it to fetch the key-value pairs from the remote service, and invoke your `ApplyRemoteSettings` function when the retrieval succeeds. `ApplyRemoteSettings` takes a [`ConfigResponse`](../api/Unity.RemoteConfig.ConfigResponse.html) struct, which represents the response to a fetch request, and uses the [`ConfigManager.appConfig`](../api/Unity.RemoteConfig.ConfigManager.appConfig.html) method to apply settings.
 
-```
+```c#
     // Retrieve and apply the current key-value pairs from the service on Awake:
     void Awake () {
         // Add a listener to apply settings when successfully retrieved:
@@ -106,7 +133,7 @@ The Remote Config service returns a [`ConfigManager`](../api/Unity.RemoteConfig.
 ### Utilizing setting of type Json for overwriting objects
 
 Let's say our code has a class `CubeInfo` as follows:
-```
+```c#
 [System.Serializable]
 public class CubeInfo
 {

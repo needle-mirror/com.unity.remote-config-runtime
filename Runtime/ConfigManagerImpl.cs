@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("Unity.RemoteConfig.Tests")]
 
@@ -66,7 +67,9 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "2.0.1-exp.1";
+        internal const string pluginVersion = "3.0.0-pre.7";
+
+        internal const string remoteConfigUrl = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
 
         /// <summary>
         /// This event fires when the configuration manager successfully fetches settings from the service.
@@ -177,6 +180,115 @@ namespace Unity.RemoteConfig
         public void SetPlayerIdentityToken(string identityToken)
         {
             _playerIdentityToken = identityToken;
+        }
+
+        /// <summary>
+        /// Fetches an app configuration settings from the remote server passing a configType.
+        /// </summary>
+        /// <param name="configType">A string containing configType. If none apply, use null.</param>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use null.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use null.</param>
+        /// <param name="filterAttributes">A struct containing filter attributes. If none apply, use an empty struct.</param>
+        public async Task<RuntimeConfig> FetchConfigsAsync(string configType, object userAttributes, object appAttributes, object filterAttributes)
+        {
+            if (string.IsNullOrEmpty(configType))
+            {
+                configType = "settings";
+            }
+
+            RuntimeConfig runtimeConfig = null;
+            if (configs.ContainsKey(configType))
+            {
+                runtimeConfig = configs[configType];
+            }
+
+            if (runtimeConfig == null)
+            {
+                runtimeConfig = new RuntimeConfig(configType);
+                configs[configType] = runtimeConfig;
+            }
+
+            runtimeConfig.RequestStatus = ConfigRequestStatus.Pending;
+
+            var jsonText = PreparePayloadWithConfigType(configType, userAttributes, appAttributes, filterAttributes);
+
+
+            var request = new UnityWebRequest
+            {
+                method = UnityWebRequest.kHttpVerbPOST,
+                timeout = 10,
+                url = remoteConfigUrl
+            };
+
+            request.SetRequestHeader("Content-Type", "application/json");
+            request.SetRequestHeader("Authorization", "Bearer " + _playerIdentityToken);
+
+            foreach (var headerProvider in requestHeaderProviders)
+            {
+                var header = headerProvider.Invoke();
+                request.SetRequestHeader(header.key, header.value);
+            }
+
+            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonText));
+            request.downloadHandler = new DownloadHandlerBuffer();
+
+            var requestOp = request.SendWebRequest();
+            while (!requestOp.isDone)
+            {
+                await Task.Delay(1);
+            }
+
+            ConfigResponse configResponse;
+            if (requestOp.webRequest.isHttpError || requestOp.webRequest.isNetworkError)
+            {
+                configResponse = ParseResponse(ConfigOrigin.Remote, null, null);
+            }
+            else
+            {
+                configResponse = ParseResponse(ConfigOrigin.Remote, request.GetResponseHeaders(), request.downloadHandler.text);
+            }
+
+            if (!configs.ContainsKey(configType))
+            {
+                configs[configType] = new RuntimeConfig(configType);
+            }
+
+            configs[configType].HandleConfigResponse(configResponse);
+            FetchCompleted?.Invoke(configResponse);
+
+            return configs[configType];
+        }
+
+        /// <summary>
+        /// Fetches an app configuration settings from the remote server passing a configType.
+        /// </summary>
+        /// <param name="configType">A string containing configType. If none apply, use null.</param>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use null.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use null.</param>
+        public async Task<RuntimeConfig> FetchConfigsAsync(string configType, object userAttributes, object appAttributes)
+        {
+            return await FetchConfigsAsync(configType, userAttributes, appAttributes, null);
+        }
+
+        /// <summary>
+        /// Fetches an app configuration settings from the remote server passing filterAttributes.
+        /// </summary>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use null.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use null.</param>
+        /// <param name="filterAttributes">A struct containing filter attributes. If none apply, use an empty struct.</param>
+        public async Task<RuntimeConfig> FetchConfigsAsync(object userAttributes, object appAttributes, object filterAttributes)
+        {
+            return await FetchConfigsAsync("settings", userAttributes, appAttributes, filterAttributes);
+        }
+
+        /// <summary>
+        /// Fetches an app configuration settings from the remote server.
+        /// </summary>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use null.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use null.</param>
+        public async Task<RuntimeConfig> FetchConfigsAsync(object userAttributes, object appAttributes)
+        {
+            return await FetchConfigsAsync("settings", userAttributes, appAttributes, null);
         }
 
         /// <summary>
@@ -329,7 +441,7 @@ namespace Unity.RemoteConfig
             commonJobj["attributes"]["unity"]["platform"] = Application.platform.ToString();
             commonJobj["attributes"]["app"] = (appAttributes != null) ? JObject.FromObject(appAttributes) : new JObject();
             commonJobj["attributes"]["user"] = (userAttributes != null) ? JObject.FromObject(userAttributes) : new JObject();
-           
+
             var filterAttributesObj = (filterAttributes != null) ? JObject.FromObject(filterAttributes) : new JObject();
             if (filterAttributesObj.ContainsKey("key"))
             {
@@ -353,7 +465,7 @@ namespace Unity.RemoteConfig
             request.method = UnityWebRequest.kHttpVerbPOST;
             request.SetRequestHeader("Content-Type", "application/json");
             request.timeout = 10;
-            request.url = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
+            request.url = remoteConfigUrl;
             request.SetRequestHeader("Authorization", "Bearer " + _playerIdentityToken);
 
             foreach(var headerProvider in requestHeaderProviders)

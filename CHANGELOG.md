@@ -4,13 +4,50 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.0.0-pre.7] - 2021-08-23
+
+- Updated editor versions for release
+
+## [3.0.0-pre.6] - 2021-08-19
+
+- Updated test fixtures for instabilities
+
+## [3.0.0-pre.5] - 2021-08-18
+
+- Updated test fixtures to allow cache creation
+- Update documentation and example to new async methods
+
+## [3.0.0-pre.4] - 2021-08-17
+
+- Updated `com.unity.services.authentication` dependency
+
+## [3.0.0-pre.3] - 2021-08-17
+
+- Updated `com.unity.services.core` dependency
+- Updated `com.unity.services.authentication` dependency
+
+## [3.0.0-pre.2] - 2021-08-10
+
+- Added async remote config request for fetching filtered settings
+- Updated `com.unity.services.core` dependency
+- Updated `com.unity.services.authentication` dependency
+- Updated Documentation
+
+## [3.0.0-pre.1] - 2021-07-28
+
+- Minimum Editor version is now 2019.4 with the addition of com.unity.services dependencies
+- Platform support is currently restricted to PC, Mac, Android, iOS with the 3.0.x versions of Remote Config Runtime
+- Added	`com.unity.services.core` as a dependency
+- Added `com.unity.services.authentication` as a dependency
+- Updated Documentation
+
 ## [2.0.1-exp.1] - 2021-06-16
 
 - Added support for filtering settings
 
 ## [2.0.0] - 2021-05-17
-
 - Promote Candidate experimental package to Verified Production
+
 ## [2.0.0-exp.1] - 2021-03-16
 
 - Added support for multiple configs with different configTypes

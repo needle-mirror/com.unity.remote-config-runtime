@@ -1,6 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
+using Unity.Services.Authentication;
+using Unity.Services.Authentication.Internal;
+using Unity.Services.Core;
+using Unity.Services.Core.Internal;
 
 [assembly: InternalsVisibleTo("Unity.RemoteConfig.Tests")]
 
@@ -13,7 +20,43 @@ namespace Unity.RemoteConfig
     /// </summary>
     public static class ConfigManager
     {
-        internal static ConfigManagerImpl ConfigManagerImpl = new ConfigManagerImpl("remote-config");
+        private static ConfigManagerImpl _configManagerImpl;
+        private static string _lastToken = null;
+        private static bool _autoLoadEnvironment = true;
+
+        internal static ConfigManagerImpl ConfigManagerImpl
+        {
+            get
+            {
+                if (_configManagerImpl == null)
+                {
+                    _configManagerImpl = new ConfigManagerImpl("remote-config");
+                }
+                
+                var token = CoreRegistry.Instance.GetServiceComponent<IAccessToken>();
+                if (_autoLoadEnvironment &&
+                    !string.IsNullOrEmpty(token.AccessToken) &&
+                    _lastToken != token.AccessToken)
+                {
+                    var parts = token.AccessToken.Split('.');
+                    var payload = parts[1];
+                    var payloadJson = Encoding.UTF8.GetString(JwtDecoder.Base64UrlDecode(payload));
+                    var payloadData = UnityEngine.JsonUtility.FromJson<AccessToken>(payloadJson);
+
+                    var envId = payloadData.aud.First(s => s.StartsWith("envId:")).Substring(6);
+                    
+                    _configManagerImpl.SetEnvironmentID(envId);
+
+                    _autoLoadEnvironment = true;
+                    _lastToken = token.AccessToken;
+                    
+                    _configManagerImpl.SetPlayerIdentityToken(_lastToken);
+                }
+                
+
+                return _configManagerImpl;
+            }
+        }
 
         /// <summary>
         /// Returns the status of the current configuration request from the service.
@@ -90,6 +133,7 @@ namespace Unity.RemoteConfig
         /// <param name="environmentID">Environment unique identifier.</param>
         public static void SetEnvironmentID(string environmentID)
         {
+            _autoLoadEnvironment = false;
             ConfigManagerImpl.SetEnvironmentID(environmentID);
         }
 
@@ -100,6 +144,60 @@ namespace Unity.RemoteConfig
         public static void SetPlayerIdentityToken(string playerIdentityToken)
         {
             ConfigManagerImpl.SetPlayerIdentityToken(playerIdentityToken);
+        }
+        
+        /// <summary>
+        /// Fetches an app configuration settings from the remote server.
+        /// </summary>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use an empty struct.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
+        /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
+        /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
+        public static Task<RuntimeConfig> FetchConfigsAsync<T, T2>(T userAttributes, T2 appAttributes)
+        {
+            return _configManagerImpl.FetchConfigsAsync(userAttributes, appAttributes);
+        }
+
+        /// <summary>
+        /// Fetches an app configuration settings from the remote server passing filterAttributes.
+        /// </summary>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use an empty struct.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
+        /// <param name="filterAttributes">A struct containing filter attributes. If none apply, use an empty struct.</param>
+        /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
+        /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
+        /// <typeparam name="T3">The type of the <c>filterAttributes</c> struct.</typeparam>
+        public static Task<RuntimeConfig> FetchConfigsAsync<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes)
+        {
+            return _configManagerImpl.FetchConfigsAsync(userAttributes, appAttributes, filterAttributes);
+        }
+
+        /// <summary>
+        /// Fetches an app configuration settings from the remote server passing a configType.
+        /// </summary>
+        /// <param name="configType">A string containing configType. If none apply, use null.</param>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use an empty struct.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
+        /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
+        /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
+        public static Task<RuntimeConfig> FetchConfigsAsync<T, T2>(string configType, T userAttributes, T2 appAttributes)
+        {
+            return _configManagerImpl.FetchConfigsAsync(configType, userAttributes, appAttributes);
+        }
+
+        /// <summary>
+        /// Fetches an app configuration settings from the remote server passing a configType and filterAttributes.
+        /// </summary>
+        /// <param name="configType">A string containing configType. If none apply, use empty string.</param>
+        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use an empty struct.</param>
+        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
+        /// <param name="filterAttributes">A struct containing filter attributes. If none apply, use an empty struct.</param>
+        /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
+        /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
+        /// <typeparam name="T3">The type of the <c>filterAttributes</c> struct.</typeparam>
+        public static Task<RuntimeConfig> FetchConfigsAsync<T, T2, T3>(string configType, T userAttributes, T2 appAttributes, T3 filterAttributes)
+        {
+            return _configManagerImpl.FetchConfigsAsync(configType, userAttributes, appAttributes, filterAttributes);
         }
 
         /// <summary>

@@ -1,13 +1,15 @@
 {
   "name": "com.unity.remote-config-runtime",
   "displayName": "Remote Config Runtime",
-  "version": "2.0.1-exp.1",
-  "unity": "2018.4",
-  "description": "Remote Config is a cloud service that lets you tune and customize your app over the air without requiring an update to your game.  You can use rules to enable or disable features, change the difficulty of your game or run special events to target specific audiences.  Rules control when updates are applied and to whom, while Unity manages delivery of your game content with minimal performance impact. \n\nRemote Config can be configured via the editor or through our public API’s.  Functionality includes: \n- Release new features without deploying code:\n   - Feature flagging\n   - Staged Rollouts\n   - Kill switch functionality\n   - Start & End Date\n   - Enable & disable rules\n- Personalized real-time segmentation with custom attributes\n   - Custom conditions for applying setting variants\n   - Device, user, game and other arbitrary attributes supporting\n- Reporting\n   - Tracing ID for decorating analytics events",
+  "version": "3.0.0-pre.7",
+  "unity": "2019.4",
+  "description": "Remote Config is a cloud service that lets you tune and customize your app over the air without requiring an update to your game.  This package is intended to be inherited as a dependency, and should not be directly installed, by end users. Unity Developers that want to implement Unity Remote Config in their game/application, should use the Remote Config Package `com.unity.remote-config` rather than this package directly.",
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "2.0.0",
     "com.unity.modules.unitywebrequest": "1.0.0",
-    "com.unity.modules.unityanalytics": "1.0.0"
+    "com.unity.modules.unityanalytics": "1.0.0",
+    "com.unity.services.core": "1.1.0-pre.8",
+    "com.unity.services.authentication": "1.0.0-pre.4"
   },
   "keywords": [
     "remote",
@@ -43,12 +45,12 @@
     "deploy"
   ],
   "upmCi": {
-    "footprint": "48ce5a17e2e55d3116407e4d7b15b914974addf3"
+    "footprint": "e767606fdb03419b5800289ec84141b44c0e8d01"
   },
   "repository": {
-    "url": "https://github.cds.internal.unity3d.com/unity/com.unity.monetization.remote-config-runtime.git",
+    "url": "https://github.cds.internal.unity3d.com/unity/com.unity.remote-config-runtime.git",
     "type": "git",
-    "revision": "d172de73dc7da66fe542eb2c5bfabce44df9ccef"
+    "revision": "c21c7acc290042fe3a0c37f4f362594a6468e56f"
   },
   "samples": [
     {

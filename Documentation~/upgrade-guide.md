@@ -1,5 +1,5 @@
 # Remote Config Runtime upgrade guide
 
-You do not need to take any actions to upgrade your project to this package version.
+Do not upgrade this package if you are using Unity Editor 2018 LTS or Tech Stream 2019. Versions below 2019.4 (LTS) are not supported. 
 
-For a full list of changes and updates in this version, see the [Remote Config Runtime](../changelog/CHANGELOG.html) package changelog. 
+For a full list of changes and updates in this version, see the [Remote Config Runtime](../changelog/CHANGELOG.html) package changelog.

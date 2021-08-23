@@ -5,8 +5,12 @@
 //
 // -----------------------------------------------------------------------------
 
-using UnityEngine;
+using System.Threading.Tasks;
 using Unity.RemoteConfig;
+using Unity.Services.Authentication;
+using Unity.Services.Core;
+using UnityEngine;
+
 
 public class ExampleSample : MonoBehaviour
 {
@@ -14,8 +18,21 @@ public class ExampleSample : MonoBehaviour
     public struct userAttributes {}
     public struct appAttributes {}
 
-    void Start()
+    async void Start()
     {
+		// initialize handlers for unity game services
+        await UnityServices.InitializeAsync();
+
+		// remote config requires authentication for managing environment information
+        if (!AuthenticationService.Instance.IsSignedIn)
+        {
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+        }
+        while (!AuthenticationService.Instance.IsSignedIn)
+        {
+            await Task.Delay(1);
+        }
+
         ConfigManager.FetchCompleted += ConfigManager_FetchCompleted;
         ConfigManager.FetchConfigs(new userAttributes(), new appAttributes());
     }
