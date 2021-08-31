@@ -16,6 +16,7 @@ using UnityEditor;
 
 namespace Unity.RemoteConfig.Tests
 {
+#if UNITY_EDITOR
     internal class ConfigManagerTests
     {
         private SerializedObject _projectSettingsObject;
@@ -214,7 +215,8 @@ namespace Unity.RemoteConfig.Tests
             }
         }
     }
-
+#endif
+    
     internal class RuntimeConfigTests
     {
         [UnityTest]

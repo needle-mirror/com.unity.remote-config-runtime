@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using UnityEngine;
-#if !UNITY_SWITCH && !UNITY_PS4
+#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE
 using UnityEngine.Analytics;
 #endif
 using UnityEngine.Networking;
@@ -67,7 +67,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.0.0-pre.7";
+        internal const string pluginVersion = "3.0.0-pre.8";
 
         internal const string remoteConfigUrl = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
 
@@ -93,7 +93,7 @@ namespace Unity.RemoteConfig
 
             _remoteConfigRequest = new RemoteConfigRequest
             {
-#if !UNITY_SWITCH && !UNITY_PS4
+#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE
                 projectId = Application.cloudProjectId,
                 userId = AnalyticsSessionInfo.userId,
 #endif
@@ -639,7 +639,7 @@ namespace Unity.RemoteConfig
     [Serializable]
     internal struct RemoteConfigRequest
     {
-#if !UNITY_SWITCH && !UNITY_PS4
+#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE
         public string projectId;
         public string userId;
 #endif
