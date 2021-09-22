@@ -20,10 +20,6 @@ async Task InitializeRemoteConfigAsync()
         {
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
         }
-        while (!AuthenticationService.Instance.IsSignedIn)
-        {
-            await Task.Delay(1);
-        }
 }
 ```
 
@@ -123,7 +119,7 @@ The Remote Config service returns a [`ConfigManager`](../api/Unity.RemoteConfig.
                 enemyVolume = ConfigManager.appConfig.GetInt ("enemyVolume");
                 enemyHealth = ConfigManager.appConfig.GetInt ("enemyHealth");
                 enemyDamage = ConfigManager.appConfig.GetFloat ("enemyDamage");
-                assignmentId = ConfigManager.appConfig.assignmentID;
+                assignmentId = ConfigManager.appConfig.assignmentId;
                 break;
         }
     }

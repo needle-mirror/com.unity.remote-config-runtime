@@ -4,6 +4,17 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.0.0-pre.10] - 2021-09-22
+
+- Updated com.unity.services.authentication dependency from "1.0.0-pre.5" to "1.0.0-pre.4"
+
+## [3.0.0-pre.9] - 2021-09-21
+
+- Updated Docs for Unity Gaming Services (UGS)
+- Fixed links in Documentation, and removed unneeded APIs Docs
+- Updated com.unity.services.authentication dependency from "1.0.0-pre.4" to "1.0.0-pre.5"
+- Updated ExampleSample
+
 ## [3.0.0-pre.8] - 2021-08-31
 
 - Updated Docs for Environments

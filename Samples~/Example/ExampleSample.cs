@@ -28,10 +28,6 @@ public class ExampleSample : MonoBehaviour
         {
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
         }
-        while (!AuthenticationService.Instance.IsSignedIn)
-        {
-            await Task.Delay(1);
-        }
 
         ConfigManager.FetchCompleted += ConfigManager_FetchCompleted;
         ConfigManager.FetchConfigs(new userAttributes(), new appAttributes());
