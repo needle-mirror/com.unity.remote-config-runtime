@@ -1,9 +1,9 @@
 {
   "name": "com.unity.remote-config-runtime",
   "displayName": "Remote Config Runtime",
-  "version": "2.0.1-exp.1",
+  "version": "2.1.1",
   "unity": "2018.4",
-  "description": "Remote Config is a cloud service that lets you tune and customize your app over the air without requiring an update to your game.  You can use rules to enable or disable features, change the difficulty of your game or run special events to target specific audiences.  Rules control when updates are applied and to whom, while Unity manages delivery of your game content with minimal performance impact. \n\nRemote Config can be configured via the editor or through our public API’s.  Functionality includes: \n- Release new features without deploying code:\n   - Feature flagging\n   - Staged Rollouts\n   - Kill switch functionality\n   - Start & End Date\n   - Enable & disable rules\n- Personalized real-time segmentation with custom attributes\n   - Custom conditions for applying setting variants\n   - Device, user, game and other arbitrary attributes supporting\n- Reporting\n   - Tracing ID for decorating analytics events",
+  "description": "Remote Config is a cloud service that lets you tune and customize your app over the air without requiring an update to your game.  You can use rules to enable or disable features, change the difficulty of your game or run special events to target specific audiences.  Rules control when updates are applied and to whom, while Unity manages delivery of your game content with minimal performance impact. \n\nRemote Config can be configured via the editor or through our public API’s.  Functionality includes:\n   - Release new features without deploying code:\n   - Feature flagging\n   - Staged Rollouts\n   - Kill switch functionality\n   - Start & End Date\n   - Enable & disable rules\n   - Personalized real-time segmentation with custom attributes\n   - Custom conditions for applying setting variants\n   - Device, user, game and other arbitrary attributes supporting\n   - Tracing ID for decorating analytics events",
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "2.0.0",
     "com.unity.modules.unitywebrequest": "1.0.0",
@@ -43,12 +43,12 @@
     "deploy"
   ],
   "upmCi": {
-    "footprint": "48ce5a17e2e55d3116407e4d7b15b914974addf3"
+    "footprint": "fcf62a45e7e1d5ce0145d212fc56f9aa3138e188"
   },
   "repository": {
-    "url": "https://github.cds.internal.unity3d.com/unity/com.unity.monetization.remote-config-runtime.git",
+    "url": "https://github.cds.internal.unity3d.com/unity/com.unity.remote-config-runtime.git",
     "type": "git",
-    "revision": "d172de73dc7da66fe542eb2c5bfabce44df9ccef"
+    "revision": "85df34b9cea7825d33093b2e6c5ef8998a68a215"
   },
   "samples": [
     {

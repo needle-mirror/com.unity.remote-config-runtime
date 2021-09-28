@@ -11,7 +11,7 @@ Use the [Web Dashboard](http://dashboard.unity3d.com/remote-config) to manage yo
 - The `Development` environment name is reserved and cannot be created by users
 
 ## Working with environments
-The [Web Dashboard](http://dashboard.unity3d.com/remote-config) lets you create, edit, and delete environments. This functionality is also available in the [REST APIs](RESTAPI.md).
+The [Web Dashboard](http://dashboard.unity3d.com/remote-config) lets you create, edit, and delete environments. The [REST APIs](RESTAPI.md) contain further information about this functionality.
 
 Each environment has the following main parameters.
 

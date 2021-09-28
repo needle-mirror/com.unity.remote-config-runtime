@@ -4,6 +4,17 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2021-09-28
+
+- Bump version to match RC for Verified Package Set for 2021 LTS
+- Doc Fixes
+- Update Console Flags
+
+## [2.0.1] - 2021-09-28
+
+- Updated docs
+- Verify Package 2.0.x release stream for 2021 LTS
+
 ## [2.0.1-exp.1] - 2021-06-16
 
 - Added support for filtering settings
@@ -11,6 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [2.0.0] - 2021-05-17
 
 - Promote Candidate experimental package to Verified Production
+
 ## [2.0.0-exp.1] - 2021-03-16
 
 - Added support for multiple configs with different configTypes

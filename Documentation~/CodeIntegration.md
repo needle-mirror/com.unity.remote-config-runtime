@@ -12,7 +12,7 @@ To provide custom attributes for [Rule conditions](RulesAndSettings.md#condition
 
 Start by creating a framework for your script that implements your custom attributes and blocks out your functions:
 
-```
+```c#
 using UnityEngine;
 using Unity.RemoteConfig;
 
@@ -63,7 +63,7 @@ Next, implement your Remote Config support functions, and call them at runtime t
 
 The Remote Config service returns a [`ConfigManager`](../api/Unity.RemoteConfig.ConfigManager.html) object to fetch and apply your configuration settings at runtime. In this example, you’ll use it to fetch the key-value pairs from the remote service, and invoke your `ApplyRemoteSettings` function when the retrieval succeeds. `ApplyRemoteSettings` takes a [`ConfigResponse`](../api/Unity.RemoteConfig.ConfigResponse.html) struct, which represents the response to a fetch request, and uses the [`ConfigManager.appConfig`](../api/Unity.RemoteConfig.ConfigManager.appConfig.html) method to apply settings.
 
-```
+```c#
     // Retrieve and apply the current key-value pairs from the service on Awake:
     void Awake () {
         // Add a listener to apply settings when successfully retrieved:
@@ -96,7 +96,7 @@ The Remote Config service returns a [`ConfigManager`](../api/Unity.RemoteConfig.
                 enemyVolume = ConfigManager.appConfig.GetInt ("enemyVolume");
                 enemyHealth = ConfigManager.appConfig.GetInt ("enemyHealth");
                 enemyDamage = ConfigManager.appConfig.GetFloat ("enemyDamage");
-                assignmentId = ConfigManager.appConfig.assignmentID;
+                assignmentId = ConfigManager.appConfig.assignmentId;
                 break;
         }
     }
@@ -106,7 +106,7 @@ The Remote Config service returns a [`ConfigManager`](../api/Unity.RemoteConfig.
 ### Utilizing setting of type Json for overwriting objects
 
 Let's say our code has a class `CubeInfo` as follows:
-```
+```c#
 [System.Serializable]
 public class CubeInfo
 {

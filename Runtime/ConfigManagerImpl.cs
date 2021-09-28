@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using UnityEngine;
-#if !UNITY_SWITCH && !UNITY_PS4
+#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE
 using UnityEngine.Analytics;
 #endif
 using UnityEngine.Networking;
@@ -66,7 +66,8 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "2.0.1-exp.1";
+        internal const string pluginVersion = "2.1.1";
+        internal const string remoteConfigUrl = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
 
         /// <summary>
         /// This event fires when the configuration manager successfully fetches settings from the service.
@@ -90,7 +91,7 @@ namespace Unity.RemoteConfig
 
             _remoteConfigRequest = new RemoteConfigRequest
             {
-#if !UNITY_SWITCH && !UNITY_PS4
+#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE
                 projectId = Application.cloudProjectId,
                 userId = AnalyticsSessionInfo.userId,
 #endif
@@ -329,7 +330,7 @@ namespace Unity.RemoteConfig
             commonJobj["attributes"]["unity"]["platform"] = Application.platform.ToString();
             commonJobj["attributes"]["app"] = (appAttributes != null) ? JObject.FromObject(appAttributes) : new JObject();
             commonJobj["attributes"]["user"] = (userAttributes != null) ? JObject.FromObject(userAttributes) : new JObject();
-           
+
             var filterAttributesObj = (filterAttributes != null) ? JObject.FromObject(filterAttributes) : new JObject();
             if (filterAttributesObj.ContainsKey("key"))
             {
@@ -353,7 +354,7 @@ namespace Unity.RemoteConfig
             request.method = UnityWebRequest.kHttpVerbPOST;
             request.SetRequestHeader("Content-Type", "application/json");
             request.timeout = 10;
-            request.url = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
+            request.url = remoteConfigUrl;
             request.SetRequestHeader("Authorization", "Bearer " + _playerIdentityToken);
 
             foreach(var headerProvider in requestHeaderProviders)
@@ -527,7 +528,7 @@ namespace Unity.RemoteConfig
     [Serializable]
     internal struct RemoteConfigRequest
     {
-#if !UNITY_SWITCH && !UNITY_PS4
+#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE
         public string projectId;
         public string userId;
 #endif
