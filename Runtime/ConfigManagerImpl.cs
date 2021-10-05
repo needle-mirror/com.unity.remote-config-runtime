@@ -66,7 +66,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "2.1.1";
+        internal const string pluginVersion = "2.1.2";
         internal const string remoteConfigUrl = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
 
         /// <summary>
@@ -377,6 +377,7 @@ namespace Unity.RemoteConfig
                     var configResponse = ParseResponse(origin, request.GetResponseHeaders(), request.downloadHandler.text);
                     HandleConfigResponse(configType, configResponse);
                 }
+                webRequest.Dispose();
             };
         }
 
