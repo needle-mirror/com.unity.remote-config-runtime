@@ -4,6 +4,12 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.0.0-pre.11] - 2021-10-18
+
+- Updated FetchConfigsAsync method in ConfigManager
+- Updated - Updated com.unity.services.authentication dependency from "1.0.0-pre.4" to "1.0.0-pre.6"
+- Updated - Updated com.unity.services.core dependency from "1.0.0-pre.8" to "1.0.0-pre.10"
+
 ## [3.0.0-pre.10] - 2021-09-22
 
 - Updated com.unity.services.authentication dependency from "1.0.0-pre.5" to "1.0.0-pre.4"

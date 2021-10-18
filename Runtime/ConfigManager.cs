@@ -155,7 +155,7 @@ namespace Unity.RemoteConfig
         /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
         public static Task<RuntimeConfig> FetchConfigsAsync<T, T2>(T userAttributes, T2 appAttributes)
         {
-            return _configManagerImpl.FetchConfigsAsync(userAttributes, appAttributes);
+            return ConfigManagerImpl.FetchConfigsAsync(userAttributes, appAttributes);
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace Unity.RemoteConfig
         /// <typeparam name="T3">The type of the <c>filterAttributes</c> struct.</typeparam>
         public static Task<RuntimeConfig> FetchConfigsAsync<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes)
         {
-            return _configManagerImpl.FetchConfigsAsync(userAttributes, appAttributes, filterAttributes);
+            return ConfigManagerImpl.FetchConfigsAsync(userAttributes, appAttributes, filterAttributes);
         }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace Unity.RemoteConfig
         /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
         public static Task<RuntimeConfig> FetchConfigsAsync<T, T2>(string configType, T userAttributes, T2 appAttributes)
         {
-            return _configManagerImpl.FetchConfigsAsync(configType, userAttributes, appAttributes);
+            return ConfigManagerImpl.FetchConfigsAsync(configType, userAttributes, appAttributes);
         }
 
         /// <summary>
@@ -197,7 +197,7 @@ namespace Unity.RemoteConfig
         /// <typeparam name="T3">The type of the <c>filterAttributes</c> struct.</typeparam>
         public static Task<RuntimeConfig> FetchConfigsAsync<T, T2, T3>(string configType, T userAttributes, T2 appAttributes, T3 filterAttributes)
         {
-            return _configManagerImpl.FetchConfigsAsync(configType, userAttributes, appAttributes, filterAttributes);
+            return ConfigManagerImpl.FetchConfigsAsync(configType, userAttributes, appAttributes, filterAttributes);
         }
 
         /// <summary>
