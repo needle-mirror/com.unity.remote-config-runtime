@@ -1,9 +1,6 @@
 using System;
 using System.Text;
 using UnityEngine;
-#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE
-using UnityEngine.Analytics;
-#endif
 using UnityEngine.Networking;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -67,7 +64,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.0.0-pre.11";
+        internal const string pluginVersion = "3.0.0-pre.12";
 
         internal const string remoteConfigUrl = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
 
@@ -95,7 +92,7 @@ namespace Unity.RemoteConfig
             {
 #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE
                 projectId = Application.cloudProjectId,
-                userId = AnalyticsSessionInfo.userId,
+                userId = "",
 #endif
                 isDebugBuild = Debug.isDebugBuild,
                 configType = "",
@@ -180,6 +177,15 @@ namespace Unity.RemoteConfig
         public void SetPlayerIdentityToken(string identityToken)
         {
             _playerIdentityToken = identityToken;
+        }
+
+        /// <summary>
+        /// Sets userId to InstallationID identifier coming from core services.
+        /// </summary>
+        /// <param name="iid">Installation unique identifier.</param>
+        public void SetUserID(string iid)
+        {
+            _remoteConfigRequest.userId = iid;
         }
 
         /// <summary>
@@ -488,6 +494,7 @@ namespace Unity.RemoteConfig
                     var configResponse = ParseResponse(origin, request.GetResponseHeaders(), request.downloadHandler.text);
                     HandleConfigResponse(configType, configResponse);
                 }
+                webRequest.Dispose();
             };
         }
 

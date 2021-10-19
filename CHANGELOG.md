@@ -4,21 +4,30 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.0.0-pre.12] - 2021-10-19
+
+- Bug fix to address editor memory leak
+- Removing dependency on `com.unity.modules.unityanalytics@1.0.0` package
+- Sending installationId as userId instead of AnalyticsSessionInfo.userId
+- Update with upm package docs
+- Add signature method to publishing
+- Cleaned up internal manifest.json file
+
 ## [3.0.0-pre.11] - 2021-10-18
 
 - Updated FetchConfigsAsync method in ConfigManager
-- Updated - Updated com.unity.services.authentication dependency from "1.0.0-pre.4" to "1.0.0-pre.6"
-- Updated - Updated com.unity.services.core dependency from "1.0.0-pre.8" to "1.0.0-pre.10"
+- Updated - Updated `com.unity.services.authentication` dependency from `1.0.0-pre.4` to `1.0.0-pre.6`
+- Updated - Updated `com.unity.services.core` dependency from `1.0.0-pre.8` to `1.0.0-pre.10`
 
 ## [3.0.0-pre.10] - 2021-09-22
 
-- Updated com.unity.services.authentication dependency from "1.0.0-pre.5" to "1.0.0-pre.4"
+- Updated `com.unity.services.authentication` dependency from `1.0.0-pre.5` to `1.0.0-pre.4`
 
 ## [3.0.0-pre.9] - 2021-09-21
 
 - Updated Docs for Unity Gaming Services (UGS)
 - Fixed links in Documentation, and removed unneeded APIs Docs
-- Updated com.unity.services.authentication dependency from "1.0.0-pre.4" to "1.0.0-pre.5"
+- Updated `com.unity.services.authentication` dependency from `1.0.0-pre.4` to `1.0.0-pre.5`
 - Updated ExampleSample
 
 ## [3.0.0-pre.8] - 2021-08-31

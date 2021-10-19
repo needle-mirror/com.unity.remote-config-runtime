@@ -1,13 +1,20 @@
 {
   "name": "com.unity.remote-config-runtime",
   "displayName": "Remote Config Runtime",
-  "version": "3.0.0-pre.11",
+  "version": "3.0.0-pre.12",
   "unity": "2019.4",
+  "_upm": {
+    "gameService": {
+      "genericDashboardUrl": "https://dashboard.unity3d.com/remote-config",
+      "projectDashboardUrl": "https://dashboard.unity3d.com/organizations/{0}/projects/{1}/environments/{2}/remote-config/configs",
+      "projectDashboardUrlType": "OrganizationKeyAndProjectGuid",
+      "useCasesUrl": "https://docs.unity3d.com/Packages/com.unity.remote-config@latest"
+    }
+  },
   "description": "Remote Config is a cloud service that lets you tune and customize your app over the air without requiring an update to your game.  This package is intended to be inherited as a dependency, and should not be directly installed, by end users. Unity Developers that want to implement Unity Remote Config in their game/application, should use the Remote Config Package `com.unity.remote-config` rather than this package directly.",
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "2.0.0",
     "com.unity.modules.unitywebrequest": "1.0.0",
-    "com.unity.modules.unityanalytics": "1.0.0",
     "com.unity.services.core": "1.1.0-pre.10",
     "com.unity.services.authentication": "1.0.0-pre.6"
   },
@@ -45,12 +52,12 @@
     "deploy"
   ],
   "upmCi": {
-    "footprint": "414551211b61ebcf6d8d5827b1f0fe8e6721684e"
+    "footprint": "e805b28529d9b537578c1fa1f9e4bed4fc0fdacb"
   },
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.remote-config-runtime.git",
     "type": "git",
-    "revision": "7e4a8102a0f8ab6d3f11ac4dd054f88b9c533068"
+    "revision": "051fd7e3c7b2b6e213570d498c787cb729a3b831"
   },
   "samples": [
     {

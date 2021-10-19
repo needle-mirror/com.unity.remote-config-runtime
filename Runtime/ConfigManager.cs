@@ -44,6 +44,7 @@ namespace Unity.RemoteConfig
                     var payloadData = UnityEngine.JsonUtility.FromJson<AccessToken>(payloadJson);
 
                     var envId = payloadData.aud.First(s => s.StartsWith("envId:")).Substring(6);
+                    var idd = payloadData.aud.First(s => s.StartsWith("idd:")).Substring(4);
                     
                     _configManagerImpl.SetEnvironmentID(envId);
 
@@ -51,6 +52,7 @@ namespace Unity.RemoteConfig
                     _lastToken = token.AccessToken;
                     
                     _configManagerImpl.SetPlayerIdentityToken(_lastToken);
+                    _configManagerImpl.SetUserID(idd);
                 }
                 
 
