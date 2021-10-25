@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Unity.Services.Authentication;
 using Unity.Services.Authentication.Internal;
 using Unity.Services.Core;
+using Unity.Services.Core.Device.Internal;
 using Unity.Services.Core.Internal;
 
 [assembly: InternalsVisibleTo("Unity.RemoteConfig.Tests")]
@@ -44,15 +45,27 @@ namespace Unity.RemoteConfig
                     var payloadData = UnityEngine.JsonUtility.FromJson<AccessToken>(payloadJson);
 
                     var envId = payloadData.aud.First(s => s.StartsWith("envId:")).Substring(6);
-                    var idd = payloadData.aud.First(s => s.StartsWith("idd:")).Substring(4);
-                    
+
                     _configManagerImpl.SetEnvironmentID(envId);
 
                     _autoLoadEnvironment = true;
                     _lastToken = token.AccessToken;
                     
                     _configManagerImpl.SetPlayerIdentityToken(_lastToken);
+                }
+
+                var IinstallationId = CoreRegistry.Instance.GetServiceComponent<IInstallationId>();
+                var idd = IinstallationId.GetOrCreateIdentifier();
+                if (!string.IsNullOrEmpty(idd))
+                {
                     _configManagerImpl.SetUserID(idd);
+                }
+
+                var IplayerId = CoreRegistry.Instance.GetServiceComponent<IPlayerId>();
+                var playerId = IplayerId.PlayerId;
+                if (!string.IsNullOrEmpty(playerId))
+                {
+                    _configManagerImpl.SetPlayerID(playerId);
                 }
                 
 

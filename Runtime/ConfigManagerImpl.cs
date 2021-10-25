@@ -64,7 +64,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.0.0-pre.12";
+        internal const string pluginVersion = "3.0.0-pre.13";
 
         internal const string remoteConfigUrl = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
 
@@ -96,6 +96,7 @@ namespace Unity.RemoteConfig
 #endif
                 isDebugBuild = Debug.isDebugBuild,
                 configType = "",
+                playerId = "",
                 packageVersion = pluginVersion + "+RCR",
                 originService = originService,
             };
@@ -186,6 +187,15 @@ namespace Unity.RemoteConfig
         public void SetUserID(string iid)
         {
             _remoteConfigRequest.userId = iid;
+        }
+
+        /// <summary>
+        /// Sets playerId identifier coming from auth services.
+        /// </summary>
+        /// <param name="playerId">Player Id unique identifier.</param>
+        public void SetPlayerID(string playerID)
+        {
+            _remoteConfigRequest.playerId = playerID;
         }
 
         /// <summary>
@@ -652,6 +662,7 @@ namespace Unity.RemoteConfig
 #endif
         public bool isDebugBuild;
         public string configType;
+        public string playerId;
         public string[] key;
         public string[] type;
         public string[] schemaId;
