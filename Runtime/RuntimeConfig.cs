@@ -78,11 +78,12 @@ namespace Unity.RemoteConfig
             ConfigResponse = configResponse;
             RequestStatus = ConfigResponse.status;
             var responseBody = ConfigResponse.body;
+            origin = configResponse.requestOrigin;
+
             if(configResponse.status == ConfigRequestStatus.Success)
             {
                 if (responseBody["configs"]?[configType]?.Type != JTokenType.Object) return;
                 _config = (JObject) responseBody["configs"][configType];
-                origin = configResponse.requestOrigin;
                 environmentId = responseBody["metadata"]?["environmentId"]?.ToString();
                 assignmentId = responseBody["metadata"]?["assignmentId"]?.ToString();
             }
