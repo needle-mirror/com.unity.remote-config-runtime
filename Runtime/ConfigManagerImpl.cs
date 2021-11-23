@@ -64,7 +64,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.0.0-pre.13";
+        internal const string pluginVersion = "3.0.0-pre.15";
 
         internal const string remoteConfigUrl = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
 
@@ -97,6 +97,7 @@ namespace Unity.RemoteConfig
                 isDebugBuild = Debug.isDebugBuild,
                 configType = "",
                 playerId = "",
+                analyticsUserId = "",
                 packageVersion = pluginVersion + "+RCR",
                 originService = originService,
             };
@@ -196,6 +197,15 @@ namespace Unity.RemoteConfig
         public void SetPlayerID(string playerID)
         {
             _remoteConfigRequest.playerId = playerID;
+        }
+
+        /// <summary>
+        /// Sets analyticsUserId identifier coming from core services.
+        /// </summary>
+        /// <param name="analyticsUserId">analyticsUserId unique identifier.</param>
+        public void SetAnalyticsUserID(string analyticsUserID)
+        {
+            _remoteConfigRequest.analyticsUserId = analyticsUserID;
         }
 
         /// <summary>
@@ -496,6 +506,7 @@ namespace Unity.RemoteConfig
                 var webRequest = ((UnityWebRequestAsyncOperation)op).webRequest;
                 if (webRequest.isHttpError || webRequest.isNetworkError)
                 {
+                    origin = File.Exists(Path.Combine(Application.persistentDataPath, cacheFile)) ? ConfigOrigin.Cached : ConfigOrigin.Default;
                     var configResponse = ParseResponse(origin, null, null);
                     HandleConfigResponse(configType, configResponse);
                 }
@@ -663,6 +674,7 @@ namespace Unity.RemoteConfig
         public bool isDebugBuild;
         public string configType;
         public string playerId;
+        public string analyticsUserId;
         public string[] key;
         public string[] type;
         public string[] schemaId;

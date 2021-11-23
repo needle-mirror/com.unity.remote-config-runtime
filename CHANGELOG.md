@@ -4,6 +4,18 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.0.0-pre.15] - 2021-11-23
+
+- Reverted `com.unity.services.core` dependency from `1.0.0-pre.18` to `1.0.0-pre.11`
+
+## [3.0.0-pre.14] - 2021-11-17
+
+- Bypassed exception error from core if there is no internet connection
+- Added analyticsCustomId from core package in the request payload
+- Updated `com.unity.services.core` dependency from `1.0.0-pre.11` to `1.0.0-pre.18`
+- Upgraded Newtonsoft version from 2.0.0 to 2.0.2
+- Fixed bug for returning incorrect request origin in case of a failed request
+
 ## [3.0.0-pre.13] - 2021-10-25
 
 - Added playerId from auth package in the request payload

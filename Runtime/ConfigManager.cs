@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Unity.Services.Authentication;
 using Unity.Services.Authentication.Internal;
 using Unity.Services.Core;
+using Unity.Services.Core.Configuration.Internal;
 using Unity.Services.Core.Device.Internal;
 using Unity.Services.Core.Internal;
 
@@ -33,41 +34,26 @@ namespace Unity.RemoteConfig
                 {
                     _configManagerImpl = new ConfigManagerImpl("remote-config");
                 }
-                
-                var token = CoreRegistry.Instance.GetServiceComponent<IAccessToken>();
-                if (_autoLoadEnvironment &&
-                    !string.IsNullOrEmpty(token.AccessToken) &&
-                    _lastToken != token.AccessToken)
+
+                var token = CoreConfig.Itoken.AccessToken;
+                if (_autoLoadEnvironment && !string.IsNullOrEmpty(token) && _lastToken != token)
                 {
-                    var parts = token.AccessToken.Split('.');
-                    var payload = parts[1];
+                    var payload = token.Split('.')[1];
                     var payloadJson = Encoding.UTF8.GetString(JwtDecoder.Base64UrlDecode(payload));
                     var payloadData = UnityEngine.JsonUtility.FromJson<AccessToken>(payloadJson);
-
                     var envId = payloadData.aud.First(s => s.StartsWith("envId:")).Substring(6);
 
                     _configManagerImpl.SetEnvironmentID(envId);
-
                     _autoLoadEnvironment = true;
-                    _lastToken = token.AccessToken;
-                    
+                    _lastToken = token;
                     _configManagerImpl.SetPlayerIdentityToken(_lastToken);
                 }
 
-                var IinstallationId = CoreRegistry.Instance.GetServiceComponent<IInstallationId>();
-                var idd = IinstallationId.GetOrCreateIdentifier();
-                if (!string.IsNullOrEmpty(idd))
-                {
-                    _configManagerImpl.SetUserID(idd);
-                }
-
-                var IplayerId = CoreRegistry.Instance.GetServiceComponent<IPlayerId>();
-                var playerId = IplayerId.PlayerId;
+                var playerId = CoreConfig.IplayerId.PlayerId;
                 if (!string.IsNullOrEmpty(playerId))
                 {
                     _configManagerImpl.SetPlayerID(playerId);
                 }
-                
 
                 return _configManagerImpl;
             }
@@ -160,6 +146,34 @@ namespace Unity.RemoteConfig
         {
             ConfigManagerImpl.SetPlayerIdentityToken(playerIdentityToken);
         }
+
+        /// <summary>
+        /// Sets userId to InstallationID identifier coming from core services.
+        /// </summary>
+        /// <param name="iid">Installation unique identifier.</param>
+        public static void SetUserID(string iid)
+        {
+            ConfigManagerImpl.SetUserID(iid);
+        }
+
+        /// <summary>
+        /// Sets playerId identifier coming from auth services.
+        /// </summary>
+        /// <param name="playerId">Player Id unique identifier.</param>
+        public static void SetPlayerID(string playerID)
+        {
+            ConfigManagerImpl.SetPlayerID(playerID);
+        }
+
+        /// <summary>
+        /// Sets analyticsUserId identifier coming from core services.
+        /// </summary>
+        /// <param name="analyticsUserId">analyticsUserId unique identifier.</param>
+        public static void SetAnalyticsUserID(string analyticsUserID)
+        {
+            ConfigManagerImpl.SetAnalyticsUserID(analyticsUserID);
+        }
+
         
         /// <summary>
         /// Fetches an app configuration settings from the remote server.
