@@ -4,6 +4,9 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.0.0-pre.16] - 2021-11-26
+
+- Retrieving projectId from core services, removing preprocessor directives for consoles
 ## [3.0.0-pre.15] - 2021-11-23
 
 - Reverted `com.unity.services.core` dependency from `1.0.0-pre.18` to `1.0.0-pre.11`

@@ -27,6 +27,7 @@ namespace Unity.RemoteConfig
             // And specify what components it requires, or provides.
             .DependsOn<IProjectConfiguration>()
             .DependsOn<IInstallationId>()
+            .DependsOn<ICloudProjectId>()
             .DependsOn<IAccessToken>()
             .DependsOn<IPlayerId>();
         }
@@ -46,6 +47,7 @@ namespace Unity.RemoteConfig
             // Get components, and cache references to them for later use if needed.
             var IprojectConfig = registry.GetServiceComponent<IProjectConfiguration>();
             var IinstallationId = registry.GetServiceComponent<IInstallationId>();
+            var IcloudProjectId = registry.GetServiceComponent<ICloudProjectId>();
             var IplayerId = registry.GetServiceComponent<IPlayerId>();
             var Itoken = registry.GetServiceComponent<IAccessToken>();
 
@@ -54,6 +56,7 @@ namespace Unity.RemoteConfig
             // IplayerId and Itoken are coming from Auth and they will be ready upon users login
             CoreConfig.analyticsUserId = IprojectConfig.GetString("com.unity.services.core.analytics-user-id");
             CoreConfig.installationId = IinstallationId.GetOrCreateIdentifier();
+            CoreConfig.cloudProjectId = IcloudProjectId.GetCloudProjectId();;
             CoreConfig.Itoken = Itoken;
             CoreConfig.IplayerId = IplayerId;
 
@@ -68,6 +71,10 @@ namespace Unity.RemoteConfig
             {
                 ConfigManager.SetUserID(CoreConfig.installationId);
             }
+            if (!string.IsNullOrEmpty(CoreConfig.cloudProjectId))
+            {
+                ConfigManager.SetProjectID(CoreConfig.cloudProjectId);
+            }
             if (!string.IsNullOrEmpty(CoreConfig.analyticsUserId))
             {
                 ConfigManager.SetAnalyticsUserID(CoreConfig.analyticsUserId);
@@ -79,6 +86,7 @@ namespace Unity.RemoteConfig
     {
         public static string analyticsUserId;
         public static string installationId;
+        public static string cloudProjectId;
         public static IAccessToken Itoken;
         public static IPlayerId IplayerId;
     }

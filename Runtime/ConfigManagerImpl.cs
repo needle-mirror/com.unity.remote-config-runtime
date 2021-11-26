@@ -64,7 +64,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.0.0-pre.15";
+        internal const string pluginVersion = "3.0.0-pre.16";
 
         internal const string remoteConfigUrl = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
 
@@ -90,10 +90,8 @@ namespace Unity.RemoteConfig
 
             _remoteConfigRequest = new RemoteConfigRequest
             {
-#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE
-                projectId = Application.cloudProjectId,
+                projectId = "",
                 userId = "",
-#endif
                 isDebugBuild = Debug.isDebugBuild,
                 configType = "",
                 playerId = "",
@@ -188,6 +186,15 @@ namespace Unity.RemoteConfig
         public void SetUserID(string iid)
         {
             _remoteConfigRequest.userId = iid;
+        }
+
+        /// <summary>
+        /// Sets projectId to cloudProjectId identifier coming from core services.
+        /// </summary>
+        /// <param name="cloudProjectId">cloudProjectId unique identifier.</param>
+        public void SetProjectID(string cloudProjectId)
+        {
+            _remoteConfigRequest.projectId = cloudProjectId;
         }
 
         /// <summary>
@@ -667,10 +674,8 @@ namespace Unity.RemoteConfig
     [Serializable]
     internal struct RemoteConfigRequest
     {
-#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE
         public string projectId;
         public string userId;
-#endif
         public bool isDebugBuild;
         public string configType;
         public string playerId;

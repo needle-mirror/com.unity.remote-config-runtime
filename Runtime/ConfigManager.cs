@@ -157,6 +157,15 @@ namespace Unity.RemoteConfig
         }
 
         /// <summary>
+        /// Sets projectId to cloudProjectId identifier coming from core services.
+        /// </summary>
+        /// <param name="cloudProjectId">cloudProjectId unique identifier.</param>
+        public static void SetProjectID(string cloudProjectId)
+        {
+            ConfigManagerImpl.SetProjectID(cloudProjectId);
+        }
+
+        /// <summary>
         /// Sets playerId identifier coming from auth services.
         /// </summary>
         /// <param name="playerId">Player Id unique identifier.</param>
