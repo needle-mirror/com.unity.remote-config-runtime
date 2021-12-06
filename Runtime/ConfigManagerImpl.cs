@@ -64,7 +64,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.0.0-pre.16";
+        internal const string pluginVersion = "3.0.0-pre.17";
 
         internal const string remoteConfigUrl = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
 
@@ -90,7 +90,7 @@ namespace Unity.RemoteConfig
 
             _remoteConfigRequest = new RemoteConfigRequest
             {
-                projectId = "",
+                projectId = Application.cloudProjectId ?? "",
                 userId = "",
                 isDebugBuild = Debug.isDebugBuild,
                 configType = "",
@@ -186,15 +186,6 @@ namespace Unity.RemoteConfig
         public void SetUserID(string iid)
         {
             _remoteConfigRequest.userId = iid;
-        }
-
-        /// <summary>
-        /// Sets projectId to cloudProjectId identifier coming from core services.
-        /// </summary>
-        /// <param name="cloudProjectId">cloudProjectId unique identifier.</param>
-        public void SetProjectID(string cloudProjectId)
-        {
-            _remoteConfigRequest.projectId = cloudProjectId;
         }
 
         /// <summary>

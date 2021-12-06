@@ -35,24 +35,30 @@ namespace Unity.RemoteConfig
                     _configManagerImpl = new ConfigManagerImpl("remote-config");
                 }
 
-                var token = CoreConfig.Itoken.AccessToken;
-                if (_autoLoadEnvironment && !string.IsNullOrEmpty(token) && _lastToken != token)
+                if (CoreConfig.Itoken != null)
                 {
-                    var payload = token.Split('.')[1];
-                    var payloadJson = Encoding.UTF8.GetString(JwtDecoder.Base64UrlDecode(payload));
-                    var payloadData = UnityEngine.JsonUtility.FromJson<AccessToken>(payloadJson);
-                    var envId = payloadData.aud.First(s => s.StartsWith("envId:")).Substring(6);
+                    var token = CoreConfig.Itoken.AccessToken;
+                    if (_autoLoadEnvironment && !string.IsNullOrEmpty(token) && _lastToken != token)
+                    {
+                        var payload = token.Split('.')[1];
+                        var payloadJson = Encoding.UTF8.GetString(JwtDecoder.Base64UrlDecode(payload));
+                        var payloadData = UnityEngine.JsonUtility.FromJson<AccessToken>(payloadJson);
+                        var envId = payloadData.aud.First(s => s.StartsWith("envId:")).Substring(6);
 
-                    _configManagerImpl.SetEnvironmentID(envId);
-                    _autoLoadEnvironment = true;
-                    _lastToken = token;
-                    _configManagerImpl.SetPlayerIdentityToken(_lastToken);
+                        _configManagerImpl.SetEnvironmentID(envId);
+                        _autoLoadEnvironment = true;
+                        _lastToken = token;
+                        _configManagerImpl.SetPlayerIdentityToken(_lastToken);
+                    }
                 }
 
-                var playerId = CoreConfig.IplayerId.PlayerId;
-                if (!string.IsNullOrEmpty(playerId))
+                if (CoreConfig.IplayerId != null)
                 {
-                    _configManagerImpl.SetPlayerID(playerId);
+                    var playerId = CoreConfig.IplayerId.PlayerId;
+                    if (!string.IsNullOrEmpty(playerId))
+                    {
+                        _configManagerImpl.SetPlayerID(playerId);
+                    }
                 }
 
                 return _configManagerImpl;
@@ -154,15 +160,6 @@ namespace Unity.RemoteConfig
         public static void SetUserID(string iid)
         {
             ConfigManagerImpl.SetUserID(iid);
-        }
-
-        /// <summary>
-        /// Sets projectId to cloudProjectId identifier coming from core services.
-        /// </summary>
-        /// <param name="cloudProjectId">cloudProjectId unique identifier.</param>
-        public static void SetProjectID(string cloudProjectId)
-        {
-            ConfigManagerImpl.SetProjectID(cloudProjectId);
         }
 
         /// <summary>
