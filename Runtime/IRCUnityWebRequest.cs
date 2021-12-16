@@ -123,11 +123,6 @@ namespace Unity.RemoteConfig
     int redirectLimit { get; set; }
 
     /// <summary>
-    /// Indicates whether the UnityWebRequest system should employ the HTTP/1.1 chunked-transfer encoding method.
-    /// </summary>
-    bool chunkedTransfer { get; set; }
-
-    /// <summary>
     /// Holds a reference to the UploadHandler object which manages body data to be uploaded to the remote server.
     /// </summary>
     UploadHandler uploadHandler { get; set; }

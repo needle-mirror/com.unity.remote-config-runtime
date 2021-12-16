@@ -64,9 +64,12 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.0.0-pre.17";
+        internal const string pluginVersion = "3.0.0-pre.18";
 
         internal const string remoteConfigUrl = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
+
+        internal const string authInitError = "Auth Service not initialized.\nRequest might result in empty or incomplete response\nPlease refer to https://docs.unity3d.com/Packages/com.unity.remote-config@3.0/manual/CodeIntegration.html";
+        internal const string coreInitError = "Core Service not initialized.\nRequest might result in empty or incomplete response\nPlease refer to https://docs.unity3d.com/Packages/com.unity.remote-config@3.0/manual/CodeIntegration.html";
 
         /// <summary>
         /// This event fires when the configuration manager successfully fetches settings from the service.
@@ -246,6 +249,17 @@ namespace Unity.RemoteConfig
 
             request.SetRequestHeader("Content-Type", "application/json");
             request.SetRequestHeader("Authorization", "Bearer " + _playerIdentityToken);
+            request.SetRequestHeader("unity-installation-id", _remoteConfigRequest.userId);
+            request.SetRequestHeader("unity-player-id", _remoteConfigRequest.playerId);
+
+            if (string.IsNullOrEmpty(_remoteConfigRequest.userId))
+            {
+                Debug.LogWarning(coreInitError);
+            }
+            if (string.IsNullOrEmpty(_remoteConfigRequest.playerId))
+            {
+                Debug.LogWarning(authInitError);
+            }
 
             foreach (var headerProvider in requestHeaderProviders)
             {
@@ -485,12 +499,26 @@ namespace Unity.RemoteConfig
         internal void DoRequest(string configType, string jsonText)
         {
             var request = new RCUnityWebRequest();
-            request.unityWebRequest = new UnityWebRequest();
-            request.method = UnityWebRequest.kHttpVerbPOST;
+            request.unityWebRequest = new UnityWebRequest
+            {
+                method = UnityWebRequest.kHttpVerbPOST,
+                timeout = 10,
+                url = remoteConfigUrl
+            };
+
             request.SetRequestHeader("Content-Type", "application/json");
-            request.timeout = 10;
-            request.url = remoteConfigUrl;
             request.SetRequestHeader("Authorization", "Bearer " + _playerIdentityToken);
+            request.SetRequestHeader("unity-installation-id", _remoteConfigRequest.userId);
+            request.SetRequestHeader("unity-player-id", _remoteConfigRequest.playerId);
+
+            if (string.IsNullOrEmpty(_remoteConfigRequest.userId))
+            {
+                Debug.LogWarning(coreInitError);
+            }
+            if (string.IsNullOrEmpty(_remoteConfigRequest.playerId))
+            {
+                Debug.LogWarning(authInitError);
+            }
 
             foreach(var headerProvider in requestHeaderProviders)
             {

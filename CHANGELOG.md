@@ -4,6 +4,14 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.0.0-pre.18] - 2021-12-16
+
+- Removed obsolete chunkedTransfer property from UnityWebRequest
+- Added playerId and installationId in the request headers
+- Updated `com.unity.services.core` dependency from `1.0.0-pre.11` to `1.0.0-pre.41`
+- Updated `com.unity.services.authentication` dependency from `1.0.0-pre.6` to `1.0.0-pre.37`
+- Added warnings if core / auth services are not initialized
+
 ## [3.0.0-pre.17] - 2021-12-06
 
 - Bypassed exception error from auth if token or playerId is not available

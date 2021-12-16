@@ -39,15 +39,6 @@ namespace Unity.RemoteConfig
         }
 
         /// <summary>
-        /// Indicates whether the UnityWebRequest system should employ the HTTP/1.1 chunked-transfer encoding method.
-        /// </summary>
-        public bool chunkedTransfer
-        {
-            get => _unityWebRequest.chunkedTransfer;
-            set => chunkedTransfer = value;
-        }
-
-        /// <summary>
         /// Returns true after the UnityWebRequest has finished communicating with the remote server. (Read Only)
         /// </summary>
         public bool isDone => _unityWebRequest.isDone;
