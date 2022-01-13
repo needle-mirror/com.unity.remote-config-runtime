@@ -120,8 +120,6 @@ The Remote Config service returns a [`ConfigManager`](https://docs.unity3d.com/P
 
         // Example on how to fetch configuration settings if you have dedicated configType:
         var configType = "specialConfigType";
-        // Change context to new configType
-        ConfigManager.appConfig = ConfigManager.GetConfig(configType);
         // Fetch configs of that configType
         ConfigManager.FetchConfigs(configType, new userAttributes(), new appAttributes());
         // Configuration can be fetched with both configType and fAttributes passed

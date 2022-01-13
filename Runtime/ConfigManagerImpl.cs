@@ -35,17 +35,25 @@ namespace Unity.RemoteConfig
         /// <returns>
         /// A class representing a single runtime settings configuration.
         /// </returns>
+
+        private RuntimeConfig _appConfig;
         public RuntimeConfig appConfig
         {
             get
             {
+                if (_appConfig != null)
+                {
+                    return _appConfig;
+                }
+
                 return configs.ContainsKey(DefaultConfigKey) ? configs[DefaultConfigKey] : null;
             }
             internal set
             {
-                if (value != null)
+                if (value != null && !string.IsNullOrEmpty(value.configType))
                 {
-                    configs[DefaultConfigKey] = value;
+                    configs[value.configType] = value;
+                    _appConfig = value;
                 }
             }
         }
@@ -64,7 +72,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.0.0-pre.18";
+        internal const string pluginVersion = "3.0.0-pre.19";
 
         internal const string remoteConfigUrl = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
 
@@ -291,6 +299,7 @@ namespace Unity.RemoteConfig
                 configs[configType] = new RuntimeConfig(configType);
             }
 
+            appConfig = ConfigManager.GetConfig(configType);
             configs[configType].HandleConfigResponse(configResponse);
             FetchCompleted?.Invoke(configResponse);
 
@@ -466,6 +475,7 @@ namespace Unity.RemoteConfig
                 configs[configType] = runtimeConfig;
             }
             runtimeConfig.RequestStatus = ConfigRequestStatus.Pending;
+            appConfig = ConfigManager.GetConfig(configType);
             var jsonText = PreparePayloadWithConfigType(configType, userAttributes, appAttributes, filterAttributes);
             DoRequest(configType, jsonText);
         }
