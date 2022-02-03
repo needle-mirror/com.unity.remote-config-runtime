@@ -1,10 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
-using Newtonsoft.Json;
-using Unity.Services.Authentication.Models;
-using Unity.Services.Authentication.Utilities;
 using UnityEngine.Scripting;
 
 namespace Unity.RemoteConfig

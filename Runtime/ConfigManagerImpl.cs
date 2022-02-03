@@ -72,9 +72,9 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.0.0-pre.19";
+        internal const string pluginVersion = "3.0.0-pre.21";
 
-        internal const string remoteConfigUrl = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
+        internal const string remoteConfigUrl = "https://config.unity3d.com/settings";
 
         internal const string authInitError = "Auth Service not initialized.\nRequest might result in empty or incomplete response\nPlease refer to https://docs.unity3d.com/Packages/com.unity.remote-config@3.0/manual/CodeIntegration.html";
         internal const string coreInitError = "Core Service not initialized.\nRequest might result in empty or incomplete response\nPlease refer to https://docs.unity3d.com/Packages/com.unity.remote-config@3.0/manual/CodeIntegration.html";
@@ -107,6 +107,7 @@ namespace Unity.RemoteConfig
                 configType = "",
                 playerId = "",
                 analyticsUserId = "",
+                configAssignmentHash = null,
                 packageVersion = pluginVersion + "+RCR",
                 originService = originService,
             };
@@ -202,7 +203,7 @@ namespace Unity.RemoteConfig
         /// <summary>
         /// Sets playerId identifier coming from auth services.
         /// </summary>
-        /// <param name="playerId">Player Id unique identifier.</param>
+        /// <param name="playerID">Player Id unique identifier.</param>
         public void SetPlayerID(string playerID)
         {
             _remoteConfigRequest.playerId = playerID;
@@ -211,10 +212,19 @@ namespace Unity.RemoteConfig
         /// <summary>
         /// Sets analyticsUserId identifier coming from core services.
         /// </summary>
-        /// <param name="analyticsUserId">analyticsUserId unique identifier.</param>
+        /// <param name="analyticsUserID">analyticsUserId unique identifier.</param>
         public void SetAnalyticsUserID(string analyticsUserID)
         {
             _remoteConfigRequest.analyticsUserId = analyticsUserID;
+        }
+
+        /// <summary>
+        /// Sets configAssignmentHash identifier.
+        /// </summary>
+        /// <param name="configAssignmentHashID">configAssignmentHash unique identifier.</param>
+        public void SetConfigAssignmentHash(string configAssignmentHashID)
+        {
+            _remoteConfigRequest.configAssignmentHash = configAssignmentHashID;
         }
 
         /// <summary>
@@ -558,6 +568,7 @@ namespace Unity.RemoteConfig
         internal void HandleConfigResponse(string configType, ConfigResponse configResponse)
         {
             if (!configs.ContainsKey(configType)) configs[configType] = new RuntimeConfig(configType);
+            appConfig = ConfigManager.GetConfig(configType);
             configs[configType].HandleConfigResponse(configResponse);
             FetchCompleted?.Invoke(configResponse);
         }
@@ -612,6 +623,7 @@ namespace Unity.RemoteConfig
                     {
                         var cachedConfigResponse = kv.Value.ToObject<ConfigResponse>();
                         configs[configType] = new RuntimeConfig(configType);
+                        //configs[configType] = ResetConfig(configType);
                         configs[configType].HandleConfigResponse(cachedConfigResponse);
                     }
                 }
@@ -709,6 +721,7 @@ namespace Unity.RemoteConfig
         public string configType;
         public string playerId;
         public string analyticsUserId;
+        public string configAssignmentHash;
         public string[] key;
         public string[] type;
         public string[] schemaId;

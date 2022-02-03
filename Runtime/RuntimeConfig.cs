@@ -32,6 +32,13 @@ namespace Unity.RemoteConfig
         /// </returns>
         public string assignmentId { get; set; }
         /// <summary>
+        /// The Remote Config service generates this unique ID on configuration requests, for reporting and analytic purposes. Returns null if there is no configAssignmentHash yet.
+        /// </summary>
+        /// <returns>
+        /// A unique string.
+        /// </returns>
+        public string configAssignmentHash { get; set; }
+        /// <summary>
         /// The config type for this RuntimeConfig, default is "settings".
         /// </summary>
         /// <returns>
@@ -70,7 +77,10 @@ namespace Unity.RemoteConfig
             RequestStatus = ConfigRequestStatus.None;
             origin = ConfigOrigin.Default;
             _config = new JObject();
-            ConfigResponse = new ConfigResponse(); 
+            ConfigResponse = new ConfigResponse();
+            environmentId = "";
+            assignmentId = "";
+            configAssignmentHash = "";
         }
 
         internal void HandleConfigResponse(ConfigResponse configResponse)
@@ -86,6 +96,7 @@ namespace Unity.RemoteConfig
                 _config = (JObject) responseBody["configs"][configType];
                 environmentId = responseBody["metadata"]?["environmentId"]?.ToString();
                 assignmentId = responseBody["metadata"]?["assignmentId"]?.ToString();
+                configAssignmentHash = responseBody["metadata"]?["configAssignmentHash"]?.ToString();
             }
             FetchCompleted?.Invoke(ConfigResponse);
         }

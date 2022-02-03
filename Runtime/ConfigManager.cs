@@ -4,12 +4,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using Unity.Services.Authentication;
-using Unity.Services.Authentication.Internal;
-using Unity.Services.Core;
-using Unity.Services.Core.Configuration.Internal;
-using Unity.Services.Core.Device.Internal;
-using Unity.Services.Core.Internal;
 
 [assembly: InternalsVisibleTo("Unity.RemoteConfig.Tests")]
 
@@ -165,7 +159,7 @@ namespace Unity.RemoteConfig
         /// <summary>
         /// Sets playerId identifier coming from auth services.
         /// </summary>
-        /// <param name="playerId">Player Id unique identifier.</param>
+        /// <param name="playerID">Player Id unique identifier.</param>
         public static void SetPlayerID(string playerID)
         {
             ConfigManagerImpl.SetPlayerID(playerID);
@@ -174,10 +168,19 @@ namespace Unity.RemoteConfig
         /// <summary>
         /// Sets analyticsUserId identifier coming from core services.
         /// </summary>
-        /// <param name="analyticsUserId">analyticsUserId unique identifier.</param>
+        /// <param name="analyticsUserID">analyticsUserId unique identifier.</param>
         public static void SetAnalyticsUserID(string analyticsUserID)
         {
             ConfigManagerImpl.SetAnalyticsUserID(analyticsUserID);
+        }
+
+        /// <summary>
+        /// Sets configAssignmentHash identifier coming from core services.
+        /// </summary>
+        /// <param name="configAssignmentHashID">configAssignmentHash unique identifier.</param>
+        public static void SetConfigAssignmentHash(string configAssignmentHashID)
+        {
+            ConfigManagerImpl.SetConfigAssignmentHash(configAssignmentHashID);
         }
 
         

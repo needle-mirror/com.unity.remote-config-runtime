@@ -4,6 +4,16 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.0.0-pre.21] - 2022-02-03
+
+- Utilized configAssignmentHash parameter in the request in order to ensure persistent config in response
+- Updated delivery endpoint from `https://remote-config-prd.uca.cloud.unity3d.com/settings` to `https://config.unity3d.com/settings`
+- Removed unnecessary auth and core assembly dependencies
+- Removed unnecessary using directives
+- Refactored unit tests
+- Set userAnalyticsId to installationId by default, overwrite possible if userAnalyticsId is set from within the app
+- Resolved CS1998 warning when installing new package version
+
 ## [3.0.0-pre.19] - 2022-01-13
 
 - Fixed bug for successive requests with different config types
@@ -35,7 +45,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Bypassed exception error from core if there is no internet connection
 - Added analyticsCustomId from core package in the request payload
 - Updated `com.unity.services.core` dependency from `1.0.0-pre.11` to `1.0.0-pre.18`
-- Upgraded Newtonsoft version from 2.0.0 to 2.0.2
+- Upgraded Newtonsoft version from `2.0.0` to `2.0.2`
 - Fixed bug for returning incorrect request origin in case of a failed request
 
 ## [3.0.0-pre.13] - 2021-10-25

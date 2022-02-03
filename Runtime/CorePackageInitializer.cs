@@ -1,12 +1,9 @@
 using System.Threading.Tasks;
-using Unity.Services.Authentication;
 using Unity.Services.Authentication.Internal;
-using Unity.Services.Core;
 using Unity.Services.Core.Configuration.Internal;
 using Unity.Services.Core.Device.Internal;
 using Unity.Services.Core.Internal;
 using UnityEngine;
-using System.Text;
 
 namespace Unity.RemoteConfig
 {
@@ -58,8 +55,9 @@ namespace Unity.RemoteConfig
             CoreConfig.IplayerId = IplayerId;
 
             ApplyCoreConfig();
-            
+
             // Do any other initialization needed.
+            await Task.Yield();
         }
 
         void ApplyCoreConfig()
@@ -67,6 +65,7 @@ namespace Unity.RemoteConfig
             if (!string.IsNullOrEmpty(CoreConfig.installationId))
             {
                 ConfigManager.SetUserID(CoreConfig.installationId);
+                ConfigManager.SetAnalyticsUserID(CoreConfig.analyticsUserId);
             }
             if (!string.IsNullOrEmpty(CoreConfig.analyticsUserId))
             {

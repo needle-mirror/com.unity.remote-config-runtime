@@ -27,7 +27,7 @@ namespace Unity.RemoteConfig.Tests
             responseHeaders.Add("Server", "Jetty(9.4.z-SNAPSHOT)");
 
             var downloadHandlerText =
-                @"{""configs"": {""settings"":{""testInt"":232}},""metadata"":{""assignmentId"":""3049bfea-05fa-4ddf-acc6-ce43c888fe92"",""environmentId"":""83fff3e2-a945-4601-9ccc-5e9d16d12ea8""}}";
+                @"{""configs"": {""settings"":{""testInt"":232, ""bool"":true, ""madBro"": ""madAF"", ""someInt"":12, ""heloe"":0.12999999523162842, ""longSomething"": 9223372036854775806, ""stringFormattedAsDate"": ""2020-04-03T10:01:00Z"", ""stringFormattedAsJson"": ""{\""a\"":2.0,\""b\"":4,\""c\"":\""someString\""}"", ""jsonSetting"": ""{\""a\"":1.0,\""b\"":2,\""c\"":\""someString\""}"" }},""metadata"":{""assignmentId"":""3049bfea-05fa-4ddf-acc6-ce43c888fe92"",""environmentId"":""83fff3e2-a945-4601-9ccc-5e9d16d12ea8""}}";
             var managerImpl = ConfigManager.ConfigManagerImpl;
             var configResponse = managerImpl.ParseResponse(ConfigOrigin.Remote, responseHeaders, downloadHandlerText);
             managerImpl.HandleConfigResponse(ConfigManagerImpl.DefaultConfigKey, configResponse);

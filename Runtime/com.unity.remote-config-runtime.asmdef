@@ -1,8 +1,6 @@
 {
     "name": "Unity.RemoteConfig",
     "references": [
-        "Unity.Services.Authentication",
-        "Unity.Services.Core",
         "Unity.Services.Core.Internal"
     ],
     "includePlatforms": [],

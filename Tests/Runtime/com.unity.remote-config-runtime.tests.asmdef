@@ -3,10 +3,7 @@
     "references": [
         "Unity.RemoteConfig",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner",
-        "Unity.Services.Authentication",
-        "Unity.Services.Core",
-        "Unity.Services.Core.Internal"
+        "UnityEditor.TestRunner"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -18,7 +15,6 @@
     ],
     "autoReferenced": false,
     "defineConstraints": [
-        "UNITY_INCLUDE_TESTS",
         "UNITY_INCLUDE_TESTS"
     ],
     "versionDefines": [],
