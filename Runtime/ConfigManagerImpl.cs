@@ -72,7 +72,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.0.0-pre.21";
+        internal const string pluginVersion = "3.0.0-pre.22";
 
         internal const string remoteConfigUrl = "https://config.unity3d.com/settings";
 
@@ -241,22 +241,9 @@ namespace Unity.RemoteConfig
                 configType = "settings";
             }
 
-            RuntimeConfig runtimeConfig = null;
-            if (configs.ContainsKey(configType))
-            {
-                runtimeConfig = configs[configType];
-            }
-
-            if (runtimeConfig == null)
-            {
-                runtimeConfig = new RuntimeConfig(configType);
-                configs[configType] = runtimeConfig;
-            }
-
-            runtimeConfig.RequestStatus = ConfigRequestStatus.Pending;
-
+            appConfig = GetConfig(configType);
+            appConfig.RequestStatus = ConfigRequestStatus.Pending;
             var jsonText = PreparePayloadWithConfigType(configType, userAttributes, appAttributes, filterAttributes);
-
 
             var request = new UnityWebRequest
             {
@@ -303,17 +290,11 @@ namespace Unity.RemoteConfig
             {
                 configResponse = ParseResponse(ConfigOrigin.Remote, request.GetResponseHeaders(), request.downloadHandler.text);
             }
+            requestOp.webRequest.Dispose();
 
-            if (!configs.ContainsKey(configType))
-            {
-                configs[configType] = new RuntimeConfig(configType);
-            }
-
-            appConfig = ConfigManager.GetConfig(configType);
-            configs[configType].HandleConfigResponse(configResponse);
+            appConfig.HandleConfigResponse(configResponse);
             FetchCompleted?.Invoke(configResponse);
-
-            return configs[configType];
+            return appConfig;
         }
 
         /// <summary>
@@ -474,18 +455,8 @@ namespace Unity.RemoteConfig
                 configType = "settings";
             }
 
-            RuntimeConfig runtimeConfig = null;
-            if (configs.ContainsKey(configType))
-            {
-                runtimeConfig = configs[configType];
-            }
-            if (runtimeConfig == null)
-            {
-                runtimeConfig = new RuntimeConfig(configType);
-                configs[configType] = runtimeConfig;
-            }
-            runtimeConfig.RequestStatus = ConfigRequestStatus.Pending;
-            appConfig = ConfigManager.GetConfig(configType);
+            appConfig = GetConfig(configType);
+            appConfig.RequestStatus = ConfigRequestStatus.Pending;
             var jsonText = PreparePayloadWithConfigType(configType, userAttributes, appAttributes, filterAttributes);
             DoRequest(configType, jsonText);
         }
@@ -568,8 +539,8 @@ namespace Unity.RemoteConfig
         internal void HandleConfigResponse(string configType, ConfigResponse configResponse)
         {
             if (!configs.ContainsKey(configType)) configs[configType] = new RuntimeConfig(configType);
-            appConfig = ConfigManager.GetConfig(configType);
-            configs[configType].HandleConfigResponse(configResponse);
+            appConfig = GetConfig(configType);
+            appConfig.HandleConfigResponse(configResponse);
             FetchCompleted?.Invoke(configResponse);
         }
 
@@ -623,7 +594,6 @@ namespace Unity.RemoteConfig
                     {
                         var cachedConfigResponse = kv.Value.ToObject<ConfigResponse>();
                         configs[configType] = new RuntimeConfig(configType);
-                        //configs[configType] = ResetConfig(configType);
                         configs[configType].HandleConfigResponse(cachedConfigResponse);
                     }
                 }

@@ -53,14 +53,6 @@ namespace Unity.RemoteConfig
         JsonSerializerSettings rawDateSettings = new JsonSerializerSettings { DateParseHandling = DateParseHandling.None };
 
         /// <summary>
-        /// This event fires when the config is successfully returned from the Remote Config backend.
-        /// </summary>
-        /// <returns>
-        /// A ConfigResponse struct representing the response.
-        /// </returns>
-        public event Action<ConfigResponse> FetchCompleted;
-
-        /// <summary>
         /// Returns a copy of the entire config as a JObject.
         /// </summary>
         public JObject config
@@ -98,7 +90,6 @@ namespace Unity.RemoteConfig
                 assignmentId = responseBody["metadata"]?["assignmentId"]?.ToString();
                 configAssignmentHash = responseBody["metadata"]?["configAssignmentHash"]?.ToString();
             }
-            FetchCompleted?.Invoke(ConfigResponse);
         }
 
         /// <summary>

@@ -4,6 +4,12 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.0.0-pre.22] - 2022-02-05
+
+- FetchCompleted callback works within the app for multiple configs
+- WebRequest properly disposed for async FetchConfig
+- Updated unit tests to use standard c# `while (!condition) yield return null` instead of Unity's `WaitUntil()`
+
 ## [3.0.0-pre.21] - 2022-02-03
 
 - Utilized configAssignmentHash parameter in the request in order to ensure persistent config in response

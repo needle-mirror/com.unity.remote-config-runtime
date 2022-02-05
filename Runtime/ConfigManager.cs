@@ -79,8 +79,8 @@ namespace Unity.RemoteConfig
         /// </returns>
         public static event Action<ConfigResponse> FetchCompleted
         {
-            add { ConfigManagerImpl.appConfig.FetchCompleted += value; }
-            remove { ConfigManagerImpl.appConfig.FetchCompleted -= value; }
+            add { ConfigManagerImpl.FetchCompleted += value; }
+            remove { ConfigManagerImpl.FetchCompleted -= value; }
         }
 
         /// <summary>

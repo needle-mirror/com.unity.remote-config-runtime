@@ -157,7 +157,7 @@ namespace Unity.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
             Assert.That(File.Exists(fileName));
             string text = File.ReadAllText(fileName);
             Assert.That(text.Contains("testInt"));
@@ -180,7 +180,7 @@ namespace Unity.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
             var managerImpl = ConfigManager.ConfigManagerImpl;
 
             var configResponse = managerImpl.ParseResponse(ConfigOrigin.Remote,new Dictionary<string, string>(),ConfigManagerTestUtils.jsonPayloadEconomyConfig);
@@ -215,7 +215,7 @@ namespace Unity.RemoteConfig.Tests
             yield return monoTest;
 
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             Assert.That(File.Exists(fileName));
             Assert.AreEqual("3049bfea-05fa-4ddf-acc6-ce43c888fe92", ConfigManager.appConfig.assignmentId);
@@ -228,7 +228,7 @@ namespace Unity.RemoteConfig.Tests
             yield return monoTest;
 
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             Assert.That(File.Exists(fileName));
             Assert.AreEqual("3049bfea-05fa-4ddf-acc6-ce43c888fe92", ConfigManager.appConfig.assignmentId);
@@ -242,7 +242,7 @@ namespace Unity.RemoteConfig.Tests
             yield return monoTest;
 
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             Assert.That(File.Exists(fileName));
             Assert.AreEqual("83fff3e2-a945-4601-9ccc-5e9d16d12ea8", ConfigManager.appConfig.environmentId);
@@ -256,7 +256,7 @@ namespace Unity.RemoteConfig.Tests
             yield return monoTest;
 
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             Assert.That(File.Exists(fileName));
             Assert.AreEqual("83fff3e2-a945-4601-9ccc-5e9d16d12ea8", ConfigManager.appConfig.environmentId);
@@ -270,7 +270,7 @@ namespace Unity.RemoteConfig.Tests
             yield return monoTest;
 
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             Assert.That(File.Exists(fileName));
             Assert.AreEqual(9, ConfigManager.appConfig.GetKeys().Length);
@@ -282,9 +282,14 @@ namespace Unity.RemoteConfig.Tests
         public IEnumerator ResponseParsedEventHandler_ProperlySetsConfigWhenBadResponse()
         {
             var configBeforeRequest = ConfigManager.appConfig.config;
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadStringNoRCSection);
+
+            var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
+
             Assert.That(File.Exists(fileName));
             Assert.AreEqual(configBeforeRequest.ToString(), ConfigManager.appConfig.config.ToString());
         }
@@ -293,7 +298,7 @@ namespace Unity.RemoteConfig.Tests
         public IEnumerator GetBool_ReturnsRightValue()
         {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
@@ -307,7 +312,7 @@ namespace Unity.RemoteConfig.Tests
         public IEnumerator GetBool_ReturnsRightValueWhenBadResponse()
         {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var managerImpl = ConfigManager.ConfigManagerImpl;
             var configResponse = managerImpl.ParseResponse(ConfigOrigin.Remote,new Dictionary<string, string>(),ConfigManagerTestUtils.jsonPayloadString);
@@ -327,7 +332,7 @@ namespace Unity.RemoteConfig.Tests
         public IEnumerator GetFloat_ReturnsRightValue()
         {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
@@ -345,7 +350,7 @@ namespace Unity.RemoteConfig.Tests
             yield return monoTest;
 
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             Assert.That(File.Exists(fileName));
             // at this point we have multiple configs in cache, but we are still able to get "heloe"
@@ -357,7 +362,7 @@ namespace Unity.RemoteConfig.Tests
         public IEnumerator GetInt_ReturnsRightValue()
         {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
@@ -370,7 +375,7 @@ namespace Unity.RemoteConfig.Tests
         public IEnumerator GetInt_ReturnsRightValueWhenBadResponse()
         {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
@@ -384,7 +389,7 @@ namespace Unity.RemoteConfig.Tests
         public IEnumerator GetString_ReturnsRightValue()
         {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
@@ -398,7 +403,7 @@ namespace Unity.RemoteConfig.Tests
         public IEnumerator GetString_ReturnsRightValueIfFormattedAsDate()
         {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
@@ -412,7 +417,7 @@ namespace Unity.RemoteConfig.Tests
         public IEnumerator GetString_ReturnsRightValueIfFormattedAsJson()
         {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
@@ -426,7 +431,7 @@ namespace Unity.RemoteConfig.Tests
         public IEnumerator GetString_ReturnsRightValueWhenBadResponse()
         {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
@@ -440,7 +445,7 @@ namespace Unity.RemoteConfig.Tests
         public IEnumerator GetLong_ReturnsRightValue()
         {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
@@ -454,7 +459,7 @@ namespace Unity.RemoteConfig.Tests
         public IEnumerator GetLong_ReturnsRightValueWhenBadResponse()
         {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
@@ -468,7 +473,7 @@ namespace Unity.RemoteConfig.Tests
          public IEnumerator GetJson_ReturnsRightValue()
          {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
@@ -482,7 +487,7 @@ namespace Unity.RemoteConfig.Tests
          public IEnumerator GetJson_ReturnsRightValueWhenBadResponse()
          {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
@@ -497,7 +502,7 @@ namespace Unity.RemoteConfig.Tests
         {
             ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
@@ -511,7 +516,7 @@ namespace Unity.RemoteConfig.Tests
         public IEnumerator HasKey_ReturnsRightValueWhenBadResponse()
         {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
@@ -525,7 +530,7 @@ namespace Unity.RemoteConfig.Tests
         public IEnumerator GetKeys_ReturnsRightValue()
         {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
@@ -539,7 +544,7 @@ namespace Unity.RemoteConfig.Tests
         public IEnumerator GetKeys_ReturnsRightValueWhenBadResponse()
         {
             var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
-            yield return new WaitUntil(() => File.Exists(fileName));
+            while(!File.Exists(fileName)) yield return null;
 
             var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
