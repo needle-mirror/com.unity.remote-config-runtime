@@ -4,6 +4,12 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.0.0-pre.23] - 2022-02-10
+
+- Bypassing cache mechanism for consoles
+- Refactored unit tests
+- Updated useCasesUrl in package.json
+
 ## [3.0.0-pre.22] - 2022-02-05
 
 - FetchCompleted callback works within the app for multiple configs

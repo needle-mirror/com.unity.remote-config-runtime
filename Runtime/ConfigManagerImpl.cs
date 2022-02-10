@@ -72,7 +72,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.0.0-pre.22";
+        internal const string pluginVersion = "3.0.0-pre.23";
 
         internal const string remoteConfigUrl = "https://config.unity3d.com/settings";
 
@@ -125,8 +125,11 @@ namespace Unity.RemoteConfig
             }
 
             _unityAttributes = new UnityAttributes();
-            FetchCompleted += SaveCache;
-            LoadFromCache();
+            
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                FetchCompleted += SaveCache;
+                LoadFromCache();
+            #endif
         }
 
         internal ConfigResponse ParseResponse(ConfigOrigin origin, Dictionary<string, string> headers, string body)
