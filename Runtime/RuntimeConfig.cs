@@ -63,6 +63,14 @@ namespace Unity.RemoteConfig
             }
         }
 
+        /// <summary>
+        /// This event fires when the config is successfully returned from the Remote Config backend.
+        /// </summary>
+        /// <returns>
+        /// A ConfigResponse struct representing the response.
+        /// </returns>
+        public event Action<ConfigResponse> FetchCompleted;
+
         internal RuntimeConfig(string configType)
         {
             this.configType = configType;
@@ -90,6 +98,7 @@ namespace Unity.RemoteConfig
                 assignmentId = responseBody["metadata"]?["assignmentId"]?.ToString();
                 configAssignmentHash = responseBody["metadata"]?["configAssignmentHash"]?.ToString();
             }
+            FetchCompleted?.Invoke(ConfigResponse);
         }
 
         /// <summary>
