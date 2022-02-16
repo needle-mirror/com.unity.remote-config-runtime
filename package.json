@@ -1,7 +1,7 @@
 {
   "name": "com.unity.remote-config-runtime",
   "displayName": "Remote Config Runtime",
-  "version": "3.0.0-pre.24",
+  "version": "3.0.0-pre.25",
   "unity": "2019.4",
   "_upm": {
     "gameService": {
@@ -52,12 +52,12 @@
     "deploy"
   ],
   "upmCi": {
-    "footprint": "78b056fd6b7c37bf0aced5a96eb90ff3232fc94b"
+    "footprint": "a8bb20cef87dc198a86be5acb1acec36808293e3"
   },
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.remote-config-runtime.git",
     "type": "git",
-    "revision": "09e52f39821f2b63d0d76e3fb2173252de1315e8"
+    "revision": "f780f6f5f3c9b17b1dde1bd58df2fb5f851553a6"
   },
   "samples": [
     {

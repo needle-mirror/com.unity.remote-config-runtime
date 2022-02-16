@@ -4,6 +4,11 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+
+## [3.0.0-pre.25] - 2022-02-16
+
+- changed encoding from ASCII to UTF8 when reading from cache file
+
 ## [3.0.0-pre.24] - 2022-02-14
 
 - added FetchCompleted listener on RuntimeConfig

@@ -72,7 +72,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.0.0-pre.24";
+        internal const string pluginVersion = "3.0.0-pre.25";
 
         internal const string remoteConfigUrl = "https://config.unity3d.com/settings";
 
@@ -588,7 +588,7 @@ namespace Unity.RemoteConfig
                     bodyResult = new byte[reader.Length];
                     reader.Read(bodyResult, 0, (int)reader.Length);
                 }
-                var bodyString = Encoding.ASCII.GetString(bodyResult);
+                var bodyString = Encoding.UTF8.GetString(bodyResult);
                 var bodyJObject = JObject.Parse(bodyString);
                 foreach (var kv in bodyJObject)
                 {
