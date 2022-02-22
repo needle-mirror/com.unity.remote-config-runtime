@@ -35,8 +35,8 @@ namespace Unity.RemoteConfig
         /// </returns>
         public static event Action<ConfigResponse> FetchCompleted
         {
-            add { ConfigManagerImpl.appConfig.FetchCompleted += value; }
-            remove { ConfigManagerImpl.appConfig.FetchCompleted -= value; }
+            add { ConfigManagerImpl.FetchCompleted += value; }
+            remove { ConfigManagerImpl.FetchCompleted -= value; }
         }
 
         /// <summary>
@@ -94,12 +94,30 @@ namespace Unity.RemoteConfig
         }
 
         /// <summary>
+        /// Sets userId identifier in the Remote Config request payload.
+        /// </summary>
+        /// <param name="userID">User identifier.</param>
+        public static void SetUserID(string userID)
+        {
+            ConfigManagerImpl.SetUserID(userID);
+        }
+
+        /// <summary>
         /// Sets player Identity Token.
         /// </summary>
         /// <param name="playerIdentityToken">Player Identity identifier.</param>
         public static void SetPlayerIdentityToken(string playerIdentityToken)
         {
             ConfigManagerImpl.SetPlayerIdentityToken(playerIdentityToken);
+        }
+
+        /// <summary>
+        /// Sets configAssignmentHash identifier coming from core services.
+        /// </summary>
+        /// <param name="configAssignmentHashID">configAssignmentHash unique identifier.</param>
+        public static void SetConfigAssignmentHash(string configAssignmentHashID)
+        {
+            ConfigManagerImpl.SetConfigAssignmentHash(configAssignmentHashID);
         }
 
         /// <summary>

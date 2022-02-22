@@ -6,14 +6,14 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
-using System.Linq;
 using System.IO;
-using System.Net.NetworkInformation;
 
 namespace Unity.RemoteConfig.Tests
 {
+#if UNITY_EDITOR
     internal class ConfigManagerTests
     {
+
         [UnityTest]
         public IEnumerator SetCustomUserID_SetsCustomUserID()
         {
@@ -83,9 +83,10 @@ namespace Unity.RemoteConfig.Tests
         [UnityTest]
         public IEnumerator SaveCache_CreatesFileIfNotThereAndCachesRightContent()
         {
-            if (File.Exists(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile)))
+            var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+            if (File.Exists(fileName))
             {
-                File.Delete(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile));
+                File.Delete(fileName);
             }
 
             ConfigManagerTestUtils.SetProjectIdOnRequestPayload();
@@ -93,259 +94,450 @@ namespace Unity.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            yield return new WaitForSeconds(2f);
-            Assert.That(File.Exists(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile)));
-            string text = File.ReadAllText(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile));
+            while(!File.Exists(fileName)) yield return null;
+            Assert.That(File.Exists(fileName));
+            string text = File.ReadAllText(fileName);
             Assert.That(text.Contains("testInt"));
             ConfigManager.ConfigManagerImpl.configs.Remove(ConfigManagerImpl.DefaultConfigKey);
             ConfigManager.ConfigManagerImpl.LoadFromCache();
-            Assert.That(ConfigManager.appConfig.GetInt("testInt") == 232);
+            Assert.AreEqual(232, ConfigManager.appConfig.GetInt("testInt"));
         }
 
         [UnityTest]
         public IEnumerator SaveCache_CachesMultipleRuntimeConfigs()
         {
-            if (File.Exists(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile)))
+            var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+            if (File.Exists(fileName))
             {
-                File.Delete(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile));
+                File.Delete(fileName);
             }
 
             ConfigManagerTestUtils.SetProjectIdOnRequestPayload();
             var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
             monoTest.component.StartTest();
             yield return monoTest;
+
+            while(!File.Exists(fileName)) yield return null;
             var managerImpl = ConfigManager.ConfigManagerImpl;
-            var configResponse = managerImpl.ParseResponse(
-                ConfigOrigin.Remote,
-                new Dictionary<string, string>(),
-                ConfigManagerTestUtils.jsonPayloadEconomyConfig);
+
+            var configResponse = managerImpl.ParseResponse(ConfigOrigin.Remote,new Dictionary<string, string>(),ConfigManagerTestUtils.jsonPayloadEconomyConfig);
             managerImpl.HandleConfigResponse("economy", configResponse);
-            yield return new WaitForSeconds(2f);
-            Assert.That(File.Exists(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile)));
-            string text = File.ReadAllText(Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile));
-            Assert.That(text.Contains("testInt"));
+
+            var configResponseSettings = managerImpl.ParseResponse(ConfigOrigin.Remote,new Dictionary<string, string>(),ConfigManagerTestUtils.jsonPayloadString);
+            managerImpl.HandleConfigResponse(ConfigManagerImpl.DefaultConfigKey, configResponseSettings);
+
+            Assert.That(File.Exists(fileName));
+            string text = File.ReadAllText(fileName);
+            Assert.That(text.Contains(ConfigManagerImpl.DefaultConfigKey));
             Assert.That(text.Contains("economy"));
             Assert.That(managerImpl.configs.Count == 2);
             Assert.That(ConfigManager.GetConfig("economy").GetString("item") == "sword");
             managerImpl.configs.Remove(ConfigManagerImpl.DefaultConfigKey);
             managerImpl.configs.Remove("economy");
             managerImpl.LoadFromCache();
-            Assert.That(ConfigManager.appConfig.GetInt("testInt") == 232);
+            Assert.AreEqual(12, ConfigManager.appConfig.GetInt("someInt"));
             Assert.That(ConfigManager.GetConfig("economy").GetString("item") == "sword");
-            Assert.That(ConfigManager.GetConfig("economy").assignmentId ==
-                        JObject.Parse(ConfigManagerTestUtils.jsonPayloadEconomyConfig)["metadata"]["assignmentId"].ToString());
+            Assert.That(ConfigManager.GetConfig("economy").assignmentId == JObject.Parse(ConfigManagerTestUtils.jsonPayloadEconomyConfig)["metadata"]["assignmentId"].ToString()); 
         }
     }
+#endif
 
     internal class RuntimeConfigTests
     {
         [UnityTest]
-        public IEnumerator ResponseParsedEventHanlder_ProperlySetsAssignmentId()
+        public IEnumerator ResponseParsedEventHandler_ProperlySetsAssignmentId()
         {
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
+            var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
 
-            yield return null;
-            Assert.That(ConfigManager.appConfig.assignmentId == "a04fb7ec-26e4-4247-b8b4-70dd6967a858");
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual("3049bfea-05fa-4ddf-acc6-ce43c888fe92", ConfigManager.appConfig.assignmentId);
         }
         [UnityTest]
-        public IEnumerator ResponseParsedEventHanlder_ReturnsNullAssignmentIdWhenBadResponse()
+        public IEnumerator ResponseParsedEventHandler_ReturnsNullAssignmentIdWhenBadResponse()
         {
-            var assignmentIdBeforeRequest = ConfigManager.appConfig.assignmentId;
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadStringNoRCSection);
+            var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
 
-            yield return null;
-            Assert.That(ConfigManager.appConfig.assignmentId == assignmentIdBeforeRequest);
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual("3049bfea-05fa-4ddf-acc6-ce43c888fe92", ConfigManager.appConfig.assignmentId);
         }
 
         [UnityTest]
         public IEnumerator ResponseParsedEventHandler_ProperlySetsEnvironmentId()
         {
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
+            var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
 
-            yield return null;
-            Assert.That(ConfigManager.appConfig.environmentId == "7d2e0e2d-4bcd-4b6e-8d5d-65d17a708db2");
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual("83fff3e2-a945-4601-9ccc-5e9d16d12ea8", ConfigManager.appConfig.environmentId);
         }
 
         [UnityTest]
         public IEnumerator ResponseParsedEventHandler_ReturnsNullEnvironmentIdWhenBadResponse()
         {
-            var environmentIdBeforeRequest = ConfigManager.appConfig.environmentId;
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadStringNoRCSection);
+            var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
 
-            yield return null;
-            Assert.That(ConfigManager.appConfig.environmentId == environmentIdBeforeRequest);
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual("83fff3e2-a945-4601-9ccc-5e9d16d12ea8", ConfigManager.appConfig.environmentId);
         }
 
         [UnityTest]
         public IEnumerator ResponseParsedEventHandler_ProperlySetsConfig()
         {
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
+            var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
 
-            yield return null;
-            Assert.That(ConfigManager.appConfig.config.ToString() == ((JObject)JObject.Parse(ConfigManagerTestUtils.jsonPayloadString)["configs"]?["settings"])?.ToString());
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual(9, ConfigManager.appConfig.GetKeys().Length);
+            Assert.AreEqual(true, ConfigManager.appConfig.HasKey("testInt"));
+            Assert.AreEqual(true, ConfigManager.appConfig.HasKey("longSomething"));
         }
 
         [UnityTest]
         public IEnumerator ResponseParsedEventHandler_ProperlySetsConfigWhenBadResponse()
         {
             var configBeforeRequest = ConfigManager.appConfig.config;
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadStringNoRCSection);
 
-            yield return null;
-            Assert.That(ConfigManager.appConfig.config.ToString() == configBeforeRequest.ToString());
+            var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual(configBeforeRequest.ToString(), ConfigManager.appConfig.config.ToString());
         }
 
         [UnityTest]
         public IEnumerator GetBool_ReturnsRightValue()
         {
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
-            yield return null;
+            var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
             Assert.That(ConfigManager.appConfig.GetBool("bool") == true);
         }
 
         [UnityTest]
         public IEnumerator GetBool_ReturnsRightValueWhenBadResponse()
         {
-            var boolBeforeRequest = ConfigManager.appConfig.GetBool("bool");
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadStringNoRCSection);
-            yield return null;
-            Assert.That(ConfigManager.appConfig.GetBool("bool") == boolBeforeRequest);
+            var managerImpl = ConfigManager.ConfigManagerImpl;
+            var configResponse = managerImpl.ParseResponse(ConfigOrigin.Remote,new Dictionary<string, string>(),ConfigManagerTestUtils.jsonPayloadString);
+            managerImpl.HandleConfigResponse(ConfigManagerImpl.DefaultConfigKey, configResponse);
+
+            var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            // at this point we have multiple configs in cache, but we are still able to get "bool"
+            // from "settings" configType, eventhough we loaded "someOtherConfig" configType
+            Assert.AreEqual(true, ConfigManager.appConfig.GetBool("bool"));
         }
 
         [UnityTest]
         public IEnumerator GetFloat_ReturnsRightValue()
         {
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
-            yield return null;
-            Assert.That(ConfigManager.appConfig.GetFloat("helloe") == 0.12999999523162842);
+            var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual(0.12999999523162842, ConfigManager.appConfig.GetFloat("heloe"));
         }
+
        [UnityTest]
         public IEnumerator GetFloat_ReturnsRightValueWhenBadResponse()
         {
-            var floatBeforeRequest = ConfigManager.appConfig.GetFloat("helloe");
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadStringNoRCSection);
-            yield return null;
-            Assert.That(ConfigManager.appConfig.GetFloat("helloe") == floatBeforeRequest);
+            var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            // at this point we have multiple configs in cache, but we are still able to get "heloe"
+            // from "settings" configType, eventhough we loaded "someOtherConfig" configType
+            Assert.AreEqual(0.12999999523162842, ConfigManager.appConfig.GetFloat("heloe"));
         }
 
         [UnityTest]
         public IEnumerator GetInt_ReturnsRightValue()
         {
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
-            yield return null;
-            Assert.That(ConfigManager.appConfig.GetInt("someInt") == 12);
+            var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual(12, ConfigManager.appConfig.GetInt("someInt"));
         }
        [UnityTest]
         public IEnumerator GetInt_ReturnsRightValueWhenBadResponse()
         {
-            var intBeforeRequest = ConfigManager.appConfig.GetFloat("someInt");
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadStringNoRCSection);
-            yield return null;
-            Assert.That(ConfigManager.appConfig.GetInt("someInt") == intBeforeRequest);
+            var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual(12, ConfigManager.appConfig.GetInt("someInt"));
         }
 
         [UnityTest]
         public IEnumerator GetString_ReturnsRightValue()
         {
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
-            yield return null;
-            Assert.That(ConfigManager.appConfig.GetString("madBro") == "madAF");
+            var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual("madAF", ConfigManager.appConfig.GetString("madBro"));
         }
 
         [UnityTest]
         public IEnumerator GetString_ReturnsRightValueIfFormattedAsDate()
         {
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
-            yield return null;
-            Assert.That(ConfigManager.appConfig.GetString("stringFormattedAsDate") == "2020-04-03T10:01:00Z");
+            var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual("2020-04-03T10:01:00Z", ConfigManager.appConfig.GetString("stringFormattedAsDate"));
         }
 
         [UnityTest]
         public IEnumerator GetString_ReturnsRightValueIfFormattedAsJson()
         {
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
-            yield return null;
-            Assert.That(ConfigManager.appConfig.GetString("stringFormattedAsJson") == "{\"a\":2.0,\"b\":4,\"c\":\"someString\"}");
-        }
+            var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
 
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual("{\"a\":2.0,\"b\":4,\"c\":\"someString\"}", ConfigManager.appConfig.GetString("stringFormattedAsJson"));
+        }
 
         [UnityTest]
         public IEnumerator GetString_ReturnsRightValueWhenBadResponse()
         {
-            var stringBeforeRequest = ConfigManager.appConfig.GetString("madBro");
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadStringNoRCSection);
-            yield return null;
-            Assert.That(ConfigManager.appConfig.GetString("madBro") == stringBeforeRequest);
+            var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual("madAF", ConfigManager.appConfig.GetString("madBro"));
         }
 
         [UnityTest]
         public IEnumerator GetLong_ReturnsRightValue()
         {
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
-            yield return null;
-            Assert.That(ConfigManager.appConfig.GetLong("longSomething") == 9223372036854775806);
+            var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual(9223372036854775806, ConfigManager.appConfig.GetLong("longSomething"));
         }
 
         [UnityTest]
         public IEnumerator GetLong_ReturnsRightValueWhenBadResponse()
         {
-            var longBeforeRequest = ConfigManager.appConfig.GetLong("longSomething");
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadStringNoRCSection);
-            yield return null;
-            Assert.That(ConfigManager.appConfig.GetLong("longSomething") == longBeforeRequest);
+            var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual(9223372036854775806, ConfigManager.appConfig.GetLong("longSomething"));
         }
 
         [UnityTest]
          public IEnumerator GetJson_ReturnsRightValue()
          {
-              ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
-              yield return null;
-              Assert.That(ConfigManager.appConfig.GetJson("jsonSetting") == "{\"a\":1.0,\"b\":2,\"c\":\"someString\"}");
+            var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual("{\"a\":1.0,\"b\":2,\"c\":\"someString\"}", ConfigManager.appConfig.GetJson("jsonSetting"));
          }
 
          [UnityTest]
          public IEnumerator GetJson_ReturnsRightValueWhenBadResponse()
          {
-              var jsonBeforeRequest = ConfigManager.appConfig.GetJson("jsonSetting");
-              ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadStringNoRCSection);
-              yield return null;
-              Assert.That(ConfigManager.appConfig.GetJson("jsonSetting") == jsonBeforeRequest);
+            var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual("{\"a\":1.0,\"b\":2,\"c\":\"someString\"}", ConfigManager.appConfig.GetJson("jsonSetting"));
          }
 
         [UnityTest]
         public IEnumerator HasKey_ReturnsRightValue()
         {
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
-            yield return null;
+            var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
             Assert.That(ConfigManager.appConfig.HasKey("longSomething"));
         }
 
         [UnityTest]
         public IEnumerator HasKey_ReturnsRightValueWhenBadResponse()
         {
-            var hasKeylongBeforeRequest = ConfigManager.appConfig.HasKey("longSomething");
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadStringNoRCSection);
-            yield return null;
-            Assert.That(ConfigManager.appConfig.HasKey("longSomething") == hasKeylongBeforeRequest);
+            var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual(true, ConfigManager.appConfig.HasKey("longSomething"));
         }
 
         [UnityTest]
         public IEnumerator GetKeys_ReturnsRightValue()
         {
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadString);
-            yield return null;
-            Assert.That(ConfigManager.appConfig.GetKeys().Length == ((JObject)JObject.Parse(ConfigManagerTestUtils.jsonPayloadString)["configs"]["settings"]).Properties().Select(prop => prop.Name).ToArray<string>().Length);
+            var monoTest = new MonoBehaviourTest<FetchConfigsComplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual(9, ConfigManager.appConfig.GetKeys().Length );
         }
 
         [UnityTest]
         public IEnumerator GetKeys_ReturnsRightValueWhenBadResponse()
         {
-            var keyLengthBeforeRequest = ConfigManager.appConfig.GetKeys().Length;
-            ConfigManagerTestUtils.SendPayloadToConfigManager(ConfigManagerTestUtils.jsonPayloadStringNoRCSection);
-            yield return null;
-            Assert.That(ConfigManager.appConfig.GetKeys().Length == keyLengthBeforeRequest);
+            var monoTest = new MonoBehaviourTest<FetchConfigsIncomplete_MonobehaviorTest>(false);
+            monoTest.component.StartTest();
+            yield return monoTest;
+
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+                var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
+                while(!File.Exists(fileName)) yield return null;
+                Assert.That(File.Exists(fileName));
+            #endif
+
+            Assert.AreEqual(9, ConfigManager.appConfig.GetKeys().Length);
         }
-   }
+    }
 
     internal static class ConfigManagerTestUtils
     {
@@ -400,8 +592,8 @@ namespace Unity.RemoteConfig.Tests
                     }
                 },
                 ""metadata"": {
-                    ""assignmentId"": ""a04fb7ec-26e4-4247-b8b4-70dd6967a858"",
-                    ""environmentId"": ""7d2e0e2d-4bcd-4b6e-8d5d-65d17a708db2"",
+                    ""assignmentId"": ""a04fb7ec-26e4-4247-b8b4-70dd6967a811"",
+                    ""environmentId"": ""7d2e0e2d-4bcd-4b6e-8d5d-65d17a708d11"",
                 }
             }";
 
@@ -413,25 +605,10 @@ namespace Unity.RemoteConfig.Tests
                     }
                 },
                 ""metadata"": {
-                    ""assignmentId"": ""a04fb7ec-26e4-4247-b8b4-70dd6967a859"",
-                    ""environmentId"": ""7d2e0e2d-4bcd-4b6e-8d5d-65d17a708db3"",
+                    ""assignmentId"": ""a04fb7ec-26e4-4247-b8b4-70dd6967a822"",
+                    ""environmentId"": ""7d2e0e2d-4bcd-4b6e-8d5d-65d17a708d22"",
                 }
             }";
-
-        public static void SendPayloadToConfigManager(string payload)
-        {
-
-            ConfigManager.ConfigManagerImpl.HandleConfigResponse(
-                "settings", 
-                new ConfigResponse
-                {
-                    requestOrigin = ConfigOrigin.Remote,
-                    status = ConfigRequestStatus.Success,
-                    body = JObject.Parse(payload),
-                    headers = new Dictionary<string, string>()
-                }
-            );
-        }
 
         public static void SetProjectIdOnRequestPayload()
         {

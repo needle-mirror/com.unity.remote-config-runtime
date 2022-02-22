@@ -4,6 +4,19 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.1.3-exp.2] - 2022-02-22
+
+- Changed encoding from ASCII to UTF8 when reading from cache file
+- Bypassing cache mechanism for consoles
+- Refactored unit tests to reflect bypassing cache for consoles and support multiple configs
+- Updated useCasesUrl in package.json
+- FetchCompleted callback works within the app for multiple configs
+- Updated unit tests to use standard c# `while (!condition) yield return null` instead of Unity's `WaitUntil()`
+- Utilized configAssignmentHash parameter in the request in order to ensure persistent config in response
+- Updated delivery endpoint from `https://remote-config-prd.uca.cloud.unity3d.com/settings` to `https://config.unity3d.com/settings`
+- Set userId to non-null value so it can work for consoles, added SetUserId() method in ConfigManager
+- Fixed bug for successive requests with different config types
+
 ## [2.1.3-exp.1] - 2021-11-16
 
 - Upgraded Newtonsoft version from 2.0.0 to 2.0.2

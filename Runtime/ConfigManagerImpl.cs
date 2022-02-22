@@ -1,8 +1,8 @@
 using System;
 using System.Text;
 using UnityEngine;
-#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE
-using UnityEngine.Analytics;
+#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE && !UNITY_WII
+  using UnityEngine.Analytics;
 #endif
 using UnityEngine.Networking;
 using Newtonsoft.Json;
@@ -37,17 +37,24 @@ namespace Unity.RemoteConfig
         /// <returns>
         /// A class representing a single runtime settings configuration.
         /// </returns>
+        private RuntimeConfig _appConfig;
         public RuntimeConfig appConfig
         {
             get
             {
+                if (_appConfig != null)
+                {
+                    return _appConfig;
+                }
+
                 return configs.ContainsKey(DefaultConfigKey) ? configs[DefaultConfigKey] : null;
             }
             internal set
             {
-                if (value != null)
+                if (value != null && !string.IsNullOrEmpty(value.configType))
                 {
-                    configs[DefaultConfigKey] = value;
+                    configs[value.configType] = value;
+                    _appConfig = value;
                 }
             }
         }
@@ -66,8 +73,8 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "2.1.3-exp.1";
-        internal const string remoteConfigUrl = "https://remote-config-prd.uca.cloud.unity3d.com/settings";
+        internal const string pluginVersion = "2.1.3-exp.2";
+        internal const string remoteConfigUrl = "https://config.unity3d.com/settings";
 
         /// <summary>
         /// This event fires when the configuration manager successfully fetches settings from the service.
@@ -91,12 +98,15 @@ namespace Unity.RemoteConfig
 
             _remoteConfigRequest = new RemoteConfigRequest
             {
-#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE
                 projectId = Application.cloudProjectId,
-                userId = AnalyticsSessionInfo.userId,
-#endif
+                #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE && !UNITY_WII
+                    userId = AnalyticsSessionInfo.userId,
+                #else
+                    userId = Guid.NewGuid().ToString(),
+                #endif
                 isDebugBuild = Debug.isDebugBuild,
                 configType = "",
+                configAssignmentHash = null,
                 packageVersion = pluginVersion + "+RCR",
                 originService = originService,
             };
@@ -114,8 +124,10 @@ namespace Unity.RemoteConfig
             }
 
             _unityAttributes = new UnityAttributes();
-            FetchCompleted += SaveCache;
-            LoadFromCache();
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE && !UNITY_WII
+                FetchCompleted += SaveCache;
+                LoadFromCache();
+            #endif
         }
 
         internal ConfigResponse ParseResponse(ConfigOrigin origin, Dictionary<string, string> headers, string body)
@@ -172,12 +184,30 @@ namespace Unity.RemoteConfig
         }
 
         /// <summary>
+        /// Sets userId identifier in the Remote Config request payload.
+        /// </summary>
+        /// <param name="userID">User identifier.</param>
+        public void SetUserID(string userID)
+        {
+            _remoteConfigRequest.userId = userID;
+        }
+
+        /// <summary>
         /// Sets player Identity Token.
         /// </summary>
         /// <param name="identityToken">Player Identity identifier.</param>
         public void SetPlayerIdentityToken(string identityToken)
         {
             _playerIdentityToken = identityToken;
+        }
+
+        /// <summary>
+        /// Sets configAssignmentHash identifier.
+        /// </summary>
+        /// <param name="configAssignmentHashID">configAssignmentHash unique identifier.</param>
+        public void SetConfigAssignmentHash(string configAssignmentHashID)
+        {
+            _remoteConfigRequest.configAssignmentHash = configAssignmentHashID;
         }
 
         /// <summary>
@@ -306,17 +336,8 @@ namespace Unity.RemoteConfig
                 configType = "settings";
             }
 
-            RuntimeConfig runtimeConfig = null;
-            if (configs.ContainsKey(configType))
-            {
-                runtimeConfig = configs[configType];
-            }
-            if (runtimeConfig == null)
-            {
-                runtimeConfig = new RuntimeConfig(configType);
-                configs[configType] = runtimeConfig;
-            }
-            runtimeConfig.RequestStatus = ConfigRequestStatus.Pending;
+            appConfig = GetConfig(configType);
+            appConfig.RequestStatus = ConfigRequestStatus.Pending;
             var jsonText = PreparePayloadWithConfigType(configType, userAttributes, appAttributes, filterAttributes);
             DoRequest(configType, jsonText);
         }
@@ -385,7 +406,8 @@ namespace Unity.RemoteConfig
         internal void HandleConfigResponse(string configType, ConfigResponse configResponse)
         {
             if (!configs.ContainsKey(configType)) configs[configType] = new RuntimeConfig(configType);
-            configs[configType].HandleConfigResponse(configResponse);
+            appConfig = GetConfig(configType);
+            appConfig.HandleConfigResponse(configResponse);
             FetchCompleted?.Invoke(configResponse);
         }
 
@@ -430,7 +452,7 @@ namespace Unity.RemoteConfig
                     bodyResult = new byte[reader.Length];
                     reader.Read(bodyResult, 0, (int)reader.Length);
                 }
-                var bodyString = Encoding.ASCII.GetString(bodyResult);
+                var bodyString = Encoding.UTF8.GetString(bodyResult);
                 var bodyJObject = JObject.Parse(bodyString);
                 foreach (var kv in bodyJObject)
                 {
@@ -536,6 +558,7 @@ namespace Unity.RemoteConfig
 #endif
         public bool isDebugBuild;
         public string configType;
+        public string configAssignmentHash;
         public string[] key;
         public string[] type;
         public string[] schemaId;

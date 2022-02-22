@@ -33,7 +33,9 @@ namespace Unity.RemoteConfig.Tests
             var downloadHandlerText = "{'analytics':{'enabled':true},'connect':{'limit_user_tracking':false,'player_opted_out':false,'enabled':true},'performance':{'enabled':true},'settings':{'testInt':232},'settingsMetadata':{'assignmentId':'3049bfea-05fa-4ddf-acc6-ce43c888fe92','environmentId':'83fff3e2-a945-4601-9ccc-5e9d16d12ea8'}}";
             ConfigManager.requestStatus = ConfigRequestStatus.Success;
             ConfigManager.appConfig.origin = origin;
-            ConfigManager.SaveCache(origin, responseHeaders, downloadHandlerText);
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE && !UNITY_WII
+                ConfigManager.SaveCache(origin, responseHeaders, downloadHandlerText);
+            #endif
             testFinished = true;
         }
     }
