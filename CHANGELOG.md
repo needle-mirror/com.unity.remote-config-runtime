@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [3.0.0-pre.26] - 2022-03-08
+
+- Updated `com.unity.services.core` dependency from `1.1.0-pre.41` to `1.2.0`
+- Updated `com.unity.nuget.newtonsoft-json` dependency from `2.0.2` to `3.0.1`
+- Updated documentation regarding metadata parameters within web response
+
 ## [3.0.0-pre.25] - 2022-02-16
 
 - changed encoding from ASCII to UTF8 when reading from cache file

@@ -153,6 +153,34 @@ The Remote Config service returns a [`ConfigManager`](https://docs.unity3d.com/P
     }
 ```
 
+## Metadata Parameters
+
+Upon every request, we create an assignment event on the backend.
+
+Within response to that request, together with `configs` block, a `metadata` block is returned as a part of response with following parameters:
+
+![MetaDataBlock](images/MetaDataBlock.png)
+
+- `assignmentId` gets created on each assignment event and it is used to track events and eventual user segmentation
+- `environmentId` represents environment in which assignment happened
+- `configAssignmentHash` is created upon assignment and presents a unique signature of that particular assignment
+
+`configAssignmentHash` can be accessed from `appConfig`: 
+```c#
+ConfigManager.appConfig.configAssignmentHash
+```
+
+Once we know the `configAssignmentHash` we want to use, it can be passed to the backend within the payload by using the `SetConfigAssignmentHash()` method:
+```c#
+ConfigManager.SetConfigAssignmentHash("4d1064c5198a26f073fe8301da3fc5ead35d20d1"); 
+```
+
+If `configAssignmentHash` is passed to the backend, the backend will return the config present at the time of creation of that particular `configAssignmentHash`.
+
+TTL for the lifetime of `configAssignmentHash` is 56 hours. After that time, `configAssignmentHash` can be requested again, and TTL will reset to 56 hrs again.
+
+
+
 ## Other considerations
 ### Utilizing Setting of type JSON for overwriting objects
 
