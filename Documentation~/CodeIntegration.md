@@ -2,13 +2,14 @@
 The `RemoteConfig` API is included in the `Unity` namespace. You must include this in your game script. For more information on its classes and methods, see the [Scripting API](../api/index.html) documentation.
 
 ## Implementing custom attributes
-To provide custom attributes for [Rule conditions](RulesAndSettings.md#condition), implement the following `struct` variables in your game script:
+To provide custom attributes for [Rule conditions](CampaignsAndSettings.md#condition), implement the following `struct` variables in your game script:
 
 * Use the `Delivery` structure to provide a custom player ID attribute by using the `SetCustomUserID` method if your application uses its own tracking method. Remote Config will auto-generate an ID if no developer-defined attribute is available.
 * Use the `userAttributes` structure to provide custom **user**-category attributes.
 * Use the `appAttributes` structure to provide custom **app**-category attributes.
+* Use the `filterAttributes` structure to provide custom **filter**-category attributes in order to reduce the payload.
 
-**Note**: Custom attributes are entirely optional. You can implement Remote Config Runtime without these structs and use the predefined unity attributes for Rule conditions.
+**Note**: Custom attributes are entirely optional. You can implement Unity Remote Config without these structs and use the predefined Unity attributes for Rule conditions. For more information on attribute categories, see documentation on [conditions](CampaignsAndSettings.md#condition).
 
 Start by creating a framework for your script that implements your custom attributes and blocks out your functions:
 
@@ -31,7 +32,7 @@ public class RemoteConfigExample : MonoBehaviour {
     }
 
     public struct filterAttributes {
-      // Optionally declare variables for any filter attributes:
+      // Optionally declare variables for attributes to filter on any of following parameters:
         public string[] key;
         public string[] type;
         public string[] schemaId;
@@ -78,8 +79,18 @@ The Remote Config service returns a [`ConfigManager`](../api/Unity.RemoteConfig.
         // Fetch configuration settings from the remote service:
         ConfigManager.FetchConfigs<userAttributes, appAttributes>(new userAttributes(), new appAttributes());
 
-        // Fetch configuration settings could be also called with filterAttributes in order to get response filtered by key, type or schemaId:
-        ConfigManager.FetchConfigs<userAttributes, appAttributes, filterAttributes>(new userAttributes(), new appAttributes(), new filterAttributes());
+        // Example on how to fetch configuration settings using filter attributes:
+        var fAttributes = new filterAttributes();
+        fAttributes.key = new string[] { "sword","cannon" };
+        ConfigManager.FetchConfigs(new userAttributes(), new appAttributes(), fAttributes);
+
+        // Example on how to fetch configuration settings if you have dedicated configType:
+        var configType = "specialConfigType";
+        // Fetch configs of that configType
+        ConfigManager.FetchConfigs(configType, new userAttributes(), new appAttributes());
+        // Configuration can be fetched with both configType and fAttributes passed
+        ConfigManager.FetchConfigs(configType, new userAttributes(), new appAttributes(), fAttributes);
+
     }
 
     void ApplyRemoteSettings (ConfigResponse configResponse) {
@@ -102,8 +113,36 @@ The Remote Config service returns a [`ConfigManager`](../api/Unity.RemoteConfig.
     }
 ```
 
+## Metadata Parameters
+
+Upon every request, we create an assignment event on the backend.
+
+Within response to that request, together with `configs` block, a `metadata` block is returned as a part of response with following parameters:
+
+![MetaDataBlock](images/MetaDataBlock.png)
+
+- `assignmentId` gets created on each assignment event and it is used to track events and eventual user segmentation
+- `environmentId` represents environment in which assignment happened
+- `configAssignmentHash` is created upon assignment and presents a unique signature of that particular assignment
+
+`configAssignmentHash` can be accessed from `appConfig`: 
+```c#
+ConfigManager.appConfig.configAssignmentHash
+```
+
+Once we know the `configAssignmentHash` we want to use, it can be passed to the backend within the payload by using the `SetConfigAssignmentHash()` method:
+```c#
+ConfigManager.SetConfigAssignmentHash("4d1064c5198a26f073fe8301da3fc5ead35d20d1"); 
+```
+
+If `configAssignmentHash` is passed to the backend, the backend will return the config present at the time of creation of that particular `configAssignmentHash`.
+
+TTL for the lifetime of `configAssignmentHash` is 56 hours. After that time, `configAssignmentHash` can be requested again, and TTL will reset to 56 hrs again.
+
+
+
 ## Other considerations
-### Utilizing setting of type Json for overwriting objects
+### Utilizing Setting of type JSON for overwriting objects
 
 Let's say our code has a class `CubeInfo` as follows:
 ```c#
@@ -118,14 +157,36 @@ public class CubeInfo
 }
 
 ```
+The JSON editor modal supports JSON conversion of following types:
+- Text Assets
+- Scriptable Objects
+- Custom Scripts attached to Game Objects
+
+If we want to use a Text Asset, we set up a Setting which structurally matches the `CubeInfo` class:
+![CubeJsonTextAsset](images/CubeJsonTextAsset.png)
+
+For Scriptable Objects, click on the upper right dot next to selection box, and if you pick a scriptable object, it should automatically convert to json:
+![CubeJsonSO](images/CubeJsonSO.png)
+
+If you select your Game Object from the scene, an additional dropdown will show for all Monobehavior Custom Scripts attached to that Game Object.
+The one you select should be converted to JSON:
+![CubeJsonCustomScript](images/CubeJsonCustomScript.png)
+
+To apply those settings to the CubeInfo object in runtime, use [JsonUtility](https://docs.unity3d.com/ScriptReference/JsonUtility.html) class for that matter:
+```c#
+case ConfigOrigin.Remote:
+    var jsonCubeString = ConfigManager.appConfig.GetJson("jsonCubeString");
+    JsonUtility.FromJsonOverwrite(jsonCubeString, CubeInfo);
+```
 
 ### Custom ID verification
 To check that you implemented a request with `customUserId` correctly, you can use a utility such as [Charles proxy](https://support.unity3d.com/hc/en-us/articles/115002917683-Using-Charles-Proxy-with-Unity) to check the contents of the actual network request messages. Using Charles, you can check your implementation of a Remote Config request with custom user IDs by following these steps:
 
-1. Open the Charles proxy and clear all events. You can also add "unity" in the filter field.<br><br>![Opening Charles proxy to verify custom IDs.](images/CharlesProxy.png)
-2. In the Unity Editor, select the **Play** button, then look in Charles for the POST request to `config.uca.cloud.unity3d.com/` . Your custom user ID should be in the request as a value inside the `"msg"` key for `"type": "analytics.delivery.v1"`.<br><br>![Observing the Charles response for your custom ID.](images/CharlesPostRequest.png)
+1. In the Editor, open the **Remote Config** window (**Window** > **Remote Config**).
+2. Open the Charles proxy and clear all events. You can also add "unity" in the filter field.<br><br>![Opening Charles proxy to verify custom IDs.](images/CharlesProxy.png)
+3. In the Unity Editor, click the **Play** button, then look in Charles for the POST request to `config.uca.cloud.unity3d.com/` . Your custom user ID should be in the request as a value inside the `"msg"` key for `"type": "analytics.delivery.v1"`.<br><br>![Observing the Charles response for your custom ID.](images/CharlesPostRequest.png)
 
-After the test, close Charles so it doesn't interfere with other web requests.
+After the test, close Charles so it won’t interfere with other web requests.
 
 ### Security
 The web service from which Unity downloads Remote Config data is read-only, but not secure. This means third parties could view your Remote Config data. Do not store sensitive or secret information in your configuration settings. Similarly, the saved settings file could be read and modified by end-users (although Remote Config would overwrite any modifications the next time a session starts with an available Internet connection).

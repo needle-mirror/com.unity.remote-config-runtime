@@ -1,7 +1,7 @@
 {
   "name": "com.unity.remote-config-runtime",
   "displayName": "Remote Config Runtime",
-  "version": "2.1.3-exp.2",
+  "version": "2.1.3-exp.3",
   "unity": "2018.4",
   "_upm": {
     "gameService": {
@@ -13,7 +13,7 @@
   },
   "description": "Remote Config is a cloud service that lets you tune and customize your app over the air without requiring an update to your game.  You can use rules to enable or disable features, change the difficulty of your game or run special events to target specific audiences.  Rules control when updates are applied and to whom, while Unity manages delivery of your game content with minimal performance impact. \n\nRemote Config can be configured via the editor or through our public API’s.  Functionality includes:\n   - Release new features without deploying code:\n   - Feature flagging\n   - Staged Rollouts\n   - Kill switch functionality\n   - Start & End Date\n   - Enable & disable rules\n   - Personalized real-time segmentation with custom attributes\n   - Custom conditions for applying setting variants\n   - Device, user, game and other arbitrary attributes supporting\n   - Tracing ID for decorating analytics events",
   "dependencies": {
-    "com.unity.nuget.newtonsoft-json": "2.0.2",
+    "com.unity.nuget.newtonsoft-json": "3.0.1",
     "com.unity.modules.unitywebrequest": "1.0.0",
     "com.unity.modules.unityanalytics": "1.0.0"
   },
@@ -51,15 +51,15 @@
     "deploy"
   ],
   "upm": {
-    "changelog": "- Changed encoding from ASCII to UTF8 when reading from cache file,- Bypassing cache mechanism for consoles,- Refactored unit tests to reflect bypassing cache for consoles and support multiple configs,- Updated useCasesUrl in package.json,- FetchCompleted callback works within the app for multiple configs,- Updated unit tests to use standard c# `while (!condition) yield return null` instead of Unity's `WaitUntil()`,- Utilized configAssignmentHash parameter in the request in order to ensure persistent config in response,- Updated delivery endpoint from `https://remote-config-prd.uca.cloud.unity3d.com/settings` to `https://config.unity3d.com/settings`,- Set userId to non-null value so it can work for consoles, added SetUserId() method in ConfigManager,- Fixed bug for successive requests with different config types"
+    "changelog": "- Upgraded Newtonsoft version from 2.0.2 to 3.0.1,- Updated documentation regarding metadata parameters within web response"
   },
   "upmCi": {
-    "footprint": "fcb54128f884f07bfd0869405436c6a6cd079fc6"
+    "footprint": "b1af6b02b5e0b390e0f34a2c5bfd3cfb3c561940"
   },
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.remote-config-runtime.git",
     "type": "git",
-    "revision": "d33df21f434c0c6f453d5627cd01e9407f408d67"
+    "revision": "82b9a2817fb9706cb46517612d91013cc656201b"
   },
   "samples": [
     {
