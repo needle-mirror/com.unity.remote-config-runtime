@@ -73,7 +73,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "2.1.3-exp.3";
+        internal const string pluginVersion = "2.1.3-exp.4";
         internal const string remoteConfigUrl = "https://config.unity3d.com/settings";
 
         /// <summary>
@@ -386,17 +386,17 @@ namespace Unity.RemoteConfig
             request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonText));
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SendWebRequest().completed += op => {
-                var origin = ConfigOrigin.Remote;
                 var webRequest = ((UnityWebRequestAsyncOperation)op).webRequest;
                 if (webRequest.isHttpError || webRequest.isNetworkError)
                 {
-                    origin = File.Exists(Path.Combine(Application.persistentDataPath, cacheFile)) ? ConfigOrigin.Cached : ConfigOrigin.Default;
+                    var configTypeHasKeys = configs[configType].GetKeys().Length > 0;
+                    var origin = File.Exists(Path.Combine(Application.persistentDataPath, cacheFile)) && configTypeHasKeys ? ConfigOrigin.Cached : ConfigOrigin.Default;
                     var configResponse = ParseResponse(origin, null, null);
                     HandleConfigResponse(configType, configResponse);
                 }
                 else
                 {
-                    var configResponse = ParseResponse(origin, request.GetResponseHeaders(), request.downloadHandler.text);
+                    var configResponse = ParseResponse(ConfigOrigin.Remote, request.GetResponseHeaders(), request.downloadHandler.text);
                     HandleConfigResponse(configType, configResponse);
                 }
                 webRequest.Dispose();
