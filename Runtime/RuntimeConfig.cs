@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Unity.RemoteConfig
+namespace Unity.Services.RemoteConfig
 {
     /// <summary>
     /// This class represents a single runtime settings configuration. Access its methods and properties via the <c>ConfigManager.appConfig</c> wrapper.

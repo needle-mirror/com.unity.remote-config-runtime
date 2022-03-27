@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [3.0.0-pre.28] - 2022-03-27
+
+- Added `RemoteConfigService.Instance` as an access pattern instead of static class `ConfigManager`
+- Added API Updater [Obsolete] for ConfigManager
+- Refactored CorePackageInitializer
+- Adjusted unit tests
+- Project namespace changed from `Unity.RemoteConfig` to `Unity.Services.RemoteConfig`
+
 ## [3.0.0-pre.27] - 2022-03-17
 
 - Fixed bug for origin value if there is no internet

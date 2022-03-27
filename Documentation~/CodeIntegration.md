@@ -1,5 +1,5 @@
 # Code integration
-The `RemoteConfig` API is included in the `Unity` namespace, which you must include in your game script. For more information on its classes and methods, see the [Remote Config Scripting API](../api/index.html) and the [Remote Config Runtime Scripting API](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.0/api/index.html) documentation.
+The `RemoteConfig` API is included in the `Unity.Service` namespace, which you must include in your game script. For more information on its classes and methods, see the [Remote Config Scripting API](../api/index.html) and the [Remote Config Runtime Scripting API](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.0/api/index.html) documentation.
 
 ## Initialization
 The Remote Config package depends on Unity's authentication and core services.
@@ -15,8 +15,10 @@ async Task InitializeRemoteConfigAsync()
         // initialize handlers for unity game services
         await UnityServices.InitializeAsync();
 
-        // options can be passed in the initializer, e.g if you want to set analytics-user-id use two lines from below:
-        // var options = new InitializationOptions().SetOption("com.unity.services.core.analytics-user-id", "my-user-id-123");
+        // options can be passed in the initializer, e.g if you want to set analytics-user-id or an environment-name use the lines from below:
+        // var options = new InitializationOptions()
+        //   .SetOption("com.unity.services.core.analytics-user-id", "my-user-id-1234")
+        //   .SetOption("com.unity.services.core.environment-name", "production");
         // await UnityServices.InitializeAsync(options);
 
         // remote config requires authentication for managing environment information
@@ -28,20 +30,20 @@ async Task InitializeRemoteConfigAsync()
 ```
 
 ## Implementing custom attributes
-To provide custom attributes for [Rule conditions](CampaignsAndSettings.md#condition), implement the following `struct` variables in your game script:
+To provide custom attributes for [Campaigns conditions](CampaignsAndSettings.md#condition), implement the following `struct` variables in your game script:
 
 * Use the `Delivery` structure to provide a custom player ID attribute by using the `SetCustomUserID` method if your application uses its own tracking method. Remote Config will auto-generate an ID if no developer-defined attribute is available.
 * Use the `userAttributes` structure to provide custom **user**-category attributes.
 * Use the `appAttributes` structure to provide custom **app**-category attributes.
 * Use the `filterAttributes` structure to provide custom **filter**-category attributes in order to reduce the payload.
 
-**Note**: Custom attributes are entirely optional. You can implement Unity Remote Config without these structs and use the predefined Unity attributes for Rule conditions. For more information on attribute categories, see documentation on [conditions](CampaignsAndSettings.md#condition).
+**Note**: Custom attributes are entirely optional. You can implement Unity Remote Config without these structs and use the predefined Unity attributes for Campaigns conditions. For more information on attribute categories, see documentation on [conditions](CampaignsAndSettings.md#condition).
 
 Start by creating a framework for your script that implements your custom attributes and blocks out your functions:
 
 ```c#
 using UnityEngine;
-using Unity.RemoteConfig;
+using Unity.Services.RemoteConfig;
 
 public class RemoteConfigExample : MonoBehaviour {
 
@@ -72,7 +74,7 @@ public class RemoteConfigExample : MonoBehaviour {
     public float enemyHealth;
     public float enemyDamage;    
 
-    // ConfigManager.FetchConfigs must be called with the attributes structs (empty or with custom attributes) to initiate the WebRequest.
+    // RemoteConfigService.Instance.FetchConfigs() must be called with the attributes structs (empty or with custom attributes) to initiate the WebRequest.
 
     async void Awake () {
         // In this example, you will fetch configuration settings on Awake.
@@ -88,7 +90,7 @@ public class RemoteConfigExample : MonoBehaviour {
 ## Fetching and applying settings at runtime
 Next, implement your Remote Config support functions and call them at runtime to retrieve key-value pairs from the service then map them to the appropriate variables.
 
-The Remote Config service returns a [`ConfigManager`](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.0/api/Unity.RemoteConfig.ConfigManager.html) object to handle fetching and applying your configuration settings at runtime. In this example, you’ll use it to fetch the key-value pairs from the remote service, and invoke your `ApplyRemoteSettings` function on retrieval. `ApplyRemoteSettings` takes a [`ConfigResponse`](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.0/api/Unity.RemoteConfig.ConfigResponse.html) struct, which represents the response to a fetch request, and uses the [`ConfigManager.appConfig`](../api/Unity.RemoteConfig.ConfigManager.appConfig.html) method to apply settings.
+The Remote Config service returns a [`RemoteConfigService.Instance`](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.0/api/Unity.Service.RemoteConfig.RemoteConfigService.html) object to handle fetching and applying your configuration settings at runtime. In this example, you’ll use it to fetch the key-value pairs from the remote service, and invoke your `ApplyRemoteSettings` function on retrieval. `ApplyRemoteSettings` takes a [`ConfigResponse`](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.0/api/Unity.Service.RemoteConfig.ConfigResponse.html) struct, which represents the response to a fetch request, and uses the [`RemoteConfigService.Instance.appConfig`](../api/Unity.Service.RemoteConfig.RemoteConfigService.appConfig.html) method to apply settings.
 
 ```c#
     // Retrieve and apply the current key-value pairs from the service on Awake:
@@ -102,34 +104,34 @@ The Remote Config service returns a [`ConfigManager`](https://docs.unity3d.com/P
         }
 
         // Add a listener to apply settings when successfully retrieved:
-        ConfigManager.FetchCompleted += ApplyRemoteSettings;
+        RemoteConfigService.Instance.FetchCompleted += ApplyRemoteSettings;
 
         // Set the user’s unique ID:
-        ConfigManager.SetCustomUserID("some-user-id");
+        RemoteConfigService.Instance.SetCustomUserID("some-user-id");
 
         // Set the environment ID:
-        ConfigManager.SetEnvironmentID("an-env-id");
+        RemoteConfigService.Instance.SetEnvironmentID("an-env-id");
 
         // Fetch configuration settings from the remote service:
-        ConfigManager.FetchConfigs<userAttributes, appAttributes>(new userAttributes(), new appAttributes());
+        RemoteConfigService.Instance.FetchConfigs<userAttributes, appAttributes>(new userAttributes(), new appAttributes());
 
         // Example on how to fetch configuration settings using filter attributes:
         var fAttributes = new filterAttributes();
         fAttributes.key = new string[] { "sword","cannon" };
-        ConfigManager.FetchConfigs(new userAttributes(), new appAttributes(), fAttributes);
+        RemoteConfigService.Instance.FetchConfigs(new userAttributes(), new appAttributes(), fAttributes);
 
         // Example on how to fetch configuration settings if you have dedicated configType:
         var configType = "specialConfigType";
         // Fetch configs of that configType
-        ConfigManager.FetchConfigs(configType, new userAttributes(), new appAttributes());
+        RemoteConfigService.Instance.FetchConfigs(configType, new userAttributes(), new appAttributes());
         // Configuration can be fetched with both configType and fAttributes passed
-        ConfigManager.FetchConfigs(configType, new userAttributes(), new appAttributes(), fAttributes);
+        RemoteConfigService.Instance.FetchConfigs(configType, new userAttributes(), new appAttributes(), fAttributes);
 
         // All examples from above will also work asynchronously, returning Task<RuntimeConfig>
-        await ConfigManager.FetchConfigsAsync(new userAttributes(), new appAttributes());
-        await ConfigManager.FetchConfigsAsync(new userAttributes(), new appAttributes(), fAttributes);
-        await ConfigManager.FetchConfigsAsync(configType, new userAttributes(), new appAttributes());
-        await ConfigManager.FetchConfigsAsync(configType, new userAttributes(), new appAttributes(), fAttributes);
+        await RemoteConfigService.Instance.FetchConfigsAsync(new userAttributes(), new appAttributes());
+        await RemoteConfigService.Instance.FetchConfigsAsync(new userAttributes(), new appAttributes(), fAttributes);
+        await RemoteConfigService.Instance.FetchConfigsAsync(configType, new userAttributes(), new appAttributes());
+        await RemoteConfigService.Instance.FetchConfigsAsync(configType, new userAttributes(), new appAttributes(), fAttributes);
 
     }
 
@@ -144,10 +146,10 @@ The Remote Config service returns a [`ConfigManager`](https://docs.unity3d.com/P
                 break;
             case ConfigOrigin.Remote:
                 Debug.Log ("New settings loaded this session; update values accordingly.");
-                enemyVolume = ConfigManager.appConfig.GetInt ("enemyVolume");
-                enemyHealth = ConfigManager.appConfig.GetInt ("enemyHealth");
-                enemyDamage = ConfigManager.appConfig.GetFloat ("enemyDamage");
-                assignmentId = ConfigManager.appConfig.assignmentId;
+                enemyVolume = RemoteConfigService.Instance.appConfig.GetInt ("enemyVolume");
+                enemyHealth = RemoteConfigService.Instance.appConfig.GetInt ("enemyHealth");
+                enemyDamage = RemoteConfigService.Instance.appConfig.GetFloat ("enemyDamage");
+                assignmentId = RemoteConfigService.Instance.appConfig.assignmentId;
                 break;
         }
     }
@@ -167,12 +169,12 @@ Within response to that request, together with `configs` block, a `metadata` blo
 
 `configAssignmentHash` can be accessed from `appConfig`: 
 ```c#
-ConfigManager.appConfig.configAssignmentHash
+RemoteConfigService.Instance.appConfig.configAssignmentHash
 ```
 
 Once we know the `configAssignmentHash` we want to use, it can be passed to the backend within the payload by using the `SetConfigAssignmentHash()` method:
 ```c#
-ConfigManager.SetConfigAssignmentHash("4d1064c5198a26f073fe8301da3fc5ead35d20d1"); 
+RemoteConfigService.Instance.SetConfigAssignmentHash("4d1064c5198a26f073fe8301da3fc5ead35d20d1"); 
 ```
 
 If `configAssignmentHash` is passed to the backend, the backend will return the config present at the time of creation of that particular `configAssignmentHash`.
@@ -215,7 +217,7 @@ The one you select should be converted to JSON:
 To apply those settings to the CubeInfo object in runtime, use [JsonUtility](https://docs.unity3d.com/ScriptReference/JsonUtility.html) class for that matter:
 ```c#
 case ConfigOrigin.Remote:
-    var jsonCubeString = ConfigManager.appConfig.GetJson("jsonCubeString");
+    var jsonCubeString = RemoteConfigService.Instance.appConfig.GetJson("jsonCubeString");
     JsonUtility.FromJsonOverwrite(jsonCubeString, CubeInfo);
 ```
 

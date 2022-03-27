@@ -1,7 +1,7 @@
 {
   "name": "com.unity.remote-config-runtime",
   "displayName": "Remote Config Runtime",
-  "version": "3.0.0-pre.27",
+  "version": "3.0.0-pre.28",
   "unity": "2019.4",
   "_upm": {
     "gameService": {
@@ -52,15 +52,15 @@
     "deploy"
   ],
   "upm": {
-    "changelog": "- Fixed bug for origin value if there is no internet"
+    "changelog": "- Added `RemoteConfigService.Instance` as an access pattern instead of static class `ConfigManager`\r\n- Added API Updater [Obsolete] for ConfigManager\r\n- Refactored CorePackageInitializer\r\n- Adjusted unit tests\r\n- Project namespace changed from `Unity.RemoteConfig` to `Unity.Services.RemoteConfig`"
   },
   "upmCi": {
-    "footprint": "835515139e13d5a403e47da2a7e8c7fcc06293a2"
+    "footprint": "711a1dde3e2adde4c87756e8944b6863e40c6e34"
   },
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.remote-config-runtime.git",
     "type": "git",
-    "revision": "71f81538dbebea5fdbd93891c1adf21983c82c9f"
+    "revision": "a34566a13cafaba1842a5a9ae4572c22a8391eca"
   },
   "samples": [
     {

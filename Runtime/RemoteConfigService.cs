@@ -11,17 +11,39 @@ namespace Unity.Services.RemoteConfig
 {
     /// <summary>
     /// Use this class to fetch and apply your configuration settings at runtime.
-    /// ConfigManager is wrapper class to mimic the functionality of underlying ConfigManagerImpl class.
+    /// RemoteConfigService is wrapper class to mimic the functionality of underlying ConfigManagerImpl class.
     /// It uses an instance of ConfigManagerImpl class, making it a primitive class of ConfigManagerImpl.
     /// </summary>
-    [Obsolete("All methods from ConfigManager have been moved to RemoteConfigService type. Please access them through RemoteConfigService.Instance instead of ConfigManager", false)]
-    public static class ConfigManager
+    public sealed class RemoteConfigService
     {
-        private static ConfigManagerImpl _configManagerImpl;
-        private static string _lastToken = null;
-        private static bool _autoLoadEnvironment = true;
+        
+        private static RemoteConfigService instance = null;
+        private static readonly object padlock = new object();
 
-        internal static ConfigManagerImpl ConfigManagerImpl
+        RemoteConfigService()
+        {
+        }
+
+        public static RemoteConfigService Instance
+        {
+            get
+            {
+                lock (padlock)
+                {
+                    if (instance == null)
+                    {
+                        instance = new RemoteConfigService();
+                    }
+                    return instance;
+                }
+            }
+        }
+        
+        private ConfigManagerImpl _configManagerImpl;
+        private string _lastToken = null;
+        private bool _autoLoadEnvironment = true;
+
+        internal ConfigManagerImpl ConfigManagerImpl
         {
             get
             {
@@ -77,7 +99,7 @@ namespace Unity.Services.RemoteConfig
         /// <returns>
         /// An enum representing the status of the current Remote Config request.
         /// </returns>
-        public static ConfigRequestStatus requestStatus
+        public ConfigRequestStatus requestStatus
         {
             get { return ConfigManagerImpl.appConfig.RequestStatus; }
             set { ConfigManagerImpl.appConfig.RequestStatus = value; }
@@ -89,7 +111,7 @@ namespace Unity.Services.RemoteConfig
         /// <returns>
         /// A struct representing the response of a Remote Config fetch.
         /// </returns>
-        public static event Action<ConfigResponse> FetchCompleted
+        public event Action<ConfigResponse> FetchCompleted
         {
             add { ConfigManagerImpl.FetchCompleted += value; }
             remove { ConfigManagerImpl.FetchCompleted -= value; }
@@ -113,7 +135,7 @@ namespace Unity.Services.RemoteConfig
         /// <returns>
         /// A class representing a single runtime settings configuration.
         /// </returns>
-        public static RuntimeConfig appConfig
+        public RuntimeConfig appConfig
         {
             get { return ConfigManagerImpl.appConfig; }
             set { ConfigManagerImpl.appConfig = value; }
@@ -126,7 +148,7 @@ namespace Unity.Services.RemoteConfig
         /// <returns>
         /// Corresponding config as a RuntimeConfig.
         /// </returns>
-        public static RuntimeConfig GetConfig(string configType)
+        public RuntimeConfig GetConfig(string configType)
         {
             return ConfigManagerImpl.GetConfig(configType);
         }
@@ -135,7 +157,7 @@ namespace Unity.Services.RemoteConfig
         /// Sets a custom user identifier for the Remote Config delivery request payload.
         /// </summary>
         /// <param name="customUserID">Custom user identifier.</param>
-        public static void SetCustomUserID(string customUserID)
+        public void SetCustomUserID(string customUserID)
         {
             ConfigManagerImpl.SetCustomUserID(customUserID);
         }
@@ -144,7 +166,7 @@ namespace Unity.Services.RemoteConfig
         /// Sets an environment identifier in the Remote Config delivery request payload.
         /// </summary>
         /// <param name="environmentID">Environment unique identifier.</param>
-        public static void SetEnvironmentID(string environmentID)
+        public void SetEnvironmentID(string environmentID)
         {
             _autoLoadEnvironment = false;
             ConfigManagerImpl.SetEnvironmentID(environmentID);
@@ -154,7 +176,7 @@ namespace Unity.Services.RemoteConfig
         /// Sets player Identity Token.
         /// </summary>
         /// <param name="playerIdentityToken">Player Identity identifier.</param>
-        public static void SetPlayerIdentityToken(string playerIdentityToken)
+        public void SetPlayerIdentityToken(string playerIdentityToken)
         {
             ConfigManagerImpl.SetPlayerIdentityToken(playerIdentityToken);
         }
@@ -163,7 +185,7 @@ namespace Unity.Services.RemoteConfig
         /// Sets userId to InstallationID identifier coming from core services.
         /// </summary>
         /// <param name="iid">Installation unique identifier.</param>
-        public static void SetUserID(string iid)
+        public void SetUserID(string iid)
         {
             ConfigManagerImpl.SetUserID(iid);
         }
@@ -172,7 +194,7 @@ namespace Unity.Services.RemoteConfig
         /// Sets playerId identifier coming from auth services.
         /// </summary>
         /// <param name="playerID">Player Id unique identifier.</param>
-        public static void SetPlayerID(string playerID)
+        public void SetPlayerID(string playerID)
         {
             ConfigManagerImpl.SetPlayerID(playerID);
         }
@@ -181,7 +203,7 @@ namespace Unity.Services.RemoteConfig
         /// Sets analyticsUserId identifier coming from core services.
         /// </summary>
         /// <param name="analyticsUserID">analyticsUserId unique identifier.</param>
-        public static void SetAnalyticsUserID(string analyticsUserID)
+        public void SetAnalyticsUserID(string analyticsUserID)
         {
             ConfigManagerImpl.SetAnalyticsUserID(analyticsUserID);
         }
@@ -190,7 +212,7 @@ namespace Unity.Services.RemoteConfig
         /// Sets configAssignmentHash identifier coming from core services.
         /// </summary>
         /// <param name="configAssignmentHashID">configAssignmentHash unique identifier.</param>
-        public static void SetConfigAssignmentHash(string configAssignmentHashID)
+        public void SetConfigAssignmentHash(string configAssignmentHashID)
         {
             ConfigManagerImpl.SetConfigAssignmentHash(configAssignmentHashID);
         }
@@ -203,7 +225,7 @@ namespace Unity.Services.RemoteConfig
         /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
         /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
         /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
-        public static Task<RuntimeConfig> FetchConfigsAsync<T, T2>(T userAttributes, T2 appAttributes)
+        public Task<RuntimeConfig> FetchConfigsAsync<T, T2>(T userAttributes, T2 appAttributes)
         {
             return ConfigManagerImpl.FetchConfigsAsync(userAttributes, appAttributes);
         }
@@ -217,7 +239,7 @@ namespace Unity.Services.RemoteConfig
         /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
         /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
         /// <typeparam name="T3">The type of the <c>filterAttributes</c> struct.</typeparam>
-        public static Task<RuntimeConfig> FetchConfigsAsync<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes)
+        public Task<RuntimeConfig> FetchConfigsAsync<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes)
         {
             return ConfigManagerImpl.FetchConfigsAsync(userAttributes, appAttributes, filterAttributes);
         }
@@ -230,7 +252,7 @@ namespace Unity.Services.RemoteConfig
         /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
         /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
         /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
-        public static Task<RuntimeConfig> FetchConfigsAsync<T, T2>(string configType, T userAttributes, T2 appAttributes)
+        public Task<RuntimeConfig> FetchConfigsAsync<T, T2>(string configType, T userAttributes, T2 appAttributes)
         {
             return ConfigManagerImpl.FetchConfigsAsync(configType, userAttributes, appAttributes);
         }
@@ -245,7 +267,7 @@ namespace Unity.Services.RemoteConfig
         /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
         /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
         /// <typeparam name="T3">The type of the <c>filterAttributes</c> struct.</typeparam>
-        public static Task<RuntimeConfig> FetchConfigsAsync<T, T2, T3>(string configType, T userAttributes, T2 appAttributes, T3 filterAttributes)
+        public Task<RuntimeConfig> FetchConfigsAsync<T, T2, T3>(string configType, T userAttributes, T2 appAttributes, T3 filterAttributes)
         {
             return ConfigManagerImpl.FetchConfigsAsync(configType, userAttributes, appAttributes, filterAttributes);
         }
@@ -257,7 +279,7 @@ namespace Unity.Services.RemoteConfig
         /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
         /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
         /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
-        public static void FetchConfigs<T, T2>(T userAttributes, T2 appAttributes) where T : struct where T2 : struct
+        public void FetchConfigs<T, T2>(T userAttributes, T2 appAttributes) where T : struct where T2 : struct
         {
             ConfigManagerImpl.FetchConfigs(userAttributes, appAttributes);
         }
@@ -271,7 +293,7 @@ namespace Unity.Services.RemoteConfig
         /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
         /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
         /// <typeparam name="T3">The type of the <c>filterAttributes</c> struct.</typeparam>
-        public static void FetchConfigs<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes) where T : struct where T2 : struct where T3 : struct
+        public void FetchConfigs<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes) where T : struct where T2 : struct where T3 : struct
         {
             ConfigManagerImpl.FetchConfigs(userAttributes, appAttributes, filterAttributes);
         }
@@ -284,7 +306,7 @@ namespace Unity.Services.RemoteConfig
         /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use an empty struct.</param>
         /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
         /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
-        public static void FetchConfigs<T, T2>(string configType, T userAttributes, T2 appAttributes) where T : struct where T2 : struct
+        public void FetchConfigs<T, T2>(string configType, T userAttributes, T2 appAttributes) where T : struct where T2 : struct
         {
             ConfigManagerImpl.FetchConfigs(configType, userAttributes, appAttributes);
         }
@@ -299,7 +321,7 @@ namespace Unity.Services.RemoteConfig
         /// <typeparam name="T">The type of the <c>userAttributes</c> struct.</typeparam>
         /// <typeparam name="T2">The type of the <c>appAttributes</c> struct.</typeparam>
         /// <typeparam name="T3">The type of the <c>filterAttributes</c> struct.</typeparam>
-        public static void FetchConfigs<T, T2, T3>(string configType, T userAttributes, T2 appAttributes, T3 filterAttributes) where T : struct where T2 : struct where T3 : struct
+        public void FetchConfigs<T, T2, T3>(string configType, T userAttributes, T2 appAttributes, T3 filterAttributes) where T : struct where T2 : struct where T3 : struct
         {
             ConfigManagerImpl.FetchConfigs(configType, userAttributes, appAttributes, filterAttributes);
         }
@@ -310,7 +332,7 @@ namespace Unity.Services.RemoteConfig
         /// <param name="origin">Request origin.</param>
         /// <param name="headers">Request headers.</param>
         /// <param name="result">Config from last fetch.</param>
-        internal static void SaveCache(ConfigOrigin origin, Dictionary<string, string> headers, string result)
+        internal void SaveCache(ConfigOrigin origin, Dictionary<string, string> headers, string result)
         {
             var configResponse = ConfigManagerImpl.ParseResponse(origin, headers, result);
             ConfigManagerImpl.SaveCache(configResponse);
@@ -319,7 +341,7 @@ namespace Unity.Services.RemoteConfig
         /// <summary>
         /// Loads last config from a cache file.
         /// </summary>
-        internal static void LoadFromCache()
+        internal void LoadFromCache()
         {
             ConfigManagerImpl.LoadFromCache();
         }

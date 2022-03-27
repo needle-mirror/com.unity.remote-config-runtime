@@ -52,11 +52,11 @@ The **Name** is the name for your Campaign. For example, you might name a diffic
 ### Condition
 The **Condition** is a JEXL expression (see **JEXL support** section below) of contextual data attributes used to define the audience for which you want a Campaign to apply. You can use multiple criteria to define this segment. Remote Config currently supports three attribute categories:
 
-* The **user** category contains custom developer-defined attributes that describe the user (for example, subscriber status, name, age), which you must pass to [ConfigManager.FetchConfigs<T, T2>(T userAttributes, T2 appAttributes)](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@2.0/api/Unity.RemoteConfig.ConfigManager.html#Unity_RemoteConfig_ConfigManager_FetchConfigs__2___0___1_).
+* The **user** category contains custom developer-defined attributes that describe the user (for example, subscriber status, name, age), which you must pass to [RemoteConfigService.Instance.FetchConfigs<T, T2>(T userAttributes, T2 appAttributes)](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.0/api/Unity.Services.RemoteConfig.RemoteConfigService.Instance.html#Unity_RemoteConfig_RemoteConfigService_Instance_FetchConfigs__3___0___0_).
 
   **Note:** When using `SetCustomUserId`, the id you pass in is automatically attached to your `user` attributes as `customUserId`. See the [REST API documentation](https://remote-config-api-docs.uca.cloud.unity3d.com/#tag/Campaigns/paths/Campaigns?projectId={projectId}/post) for more details.
 
-* The **app** category contains custom developer-defined attributes that describe the application (for example, connectivity status, app version, current level), which you must pass to [ConfigManager.FetchConfigs<T, T2>(T userAttributes, T2 appAttributes)](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@2.0/api/Unity.RemoteConfig.ConfigManager.html#Unity_RemoteConfig_ConfigManager_FetchConfigs__2___0___1_).
+* The **app** category contains custom developer-defined attributes that describe the application (for example, connectivity status, app version, current level), which you must pass to [RemoteConfigService.Instance.FetchConfigs<T, T2>(T userAttributes, T2 appAttributes)](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.0/api/Unity.Services.RemoteConfig.RemoteConfigService.Instance.html#Unity_RemoteConfig_RemoteConfigService_Instance_FetchConfigs__3___0___0_).
 * The **unity** category contains predefined attributes, detailed in the table below:
 
 | **Attribute** | **Description** | **Example** |
@@ -121,7 +121,7 @@ To apply a Setting to a Campaign, navigate to the desired Campaign and **edit** 
 Use the button at the top of the Campaign page to activate or deactivate it. Click the **Save** button in the section of the window that has been edited to store your Campaigns and Settings remotely.
 
 ## Editing Settings in the Editor Window
-For editing of Settings Keys and Values in the Remote Config Window in the Editor, make sure you save and **Push** your chanages.
+For editing of Settings Keys and Values in the Remote Config Window in the Editor, make sure you save and **Push** your changes.
 Until you do so, your configurations are only stored locally. Make sure you push your changes to save them before switching Remote Config environments.
 
 You can delete a Setting by clicking the **trashcan** button next to the respective element you wish to delete. Note that you should not delete a Setting if an active Campaign is currently using it.

@@ -5,9 +5,9 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Unity.RemoteConfig.Tests
+namespace Unity.Services.RemoteConfig.Tests
 {
-    internal class FetchConfigsIncomplete_MonobehaviorTest : MonoBehaviour, IMonoBehaviourTest, IRCTest
+    internal class FetchConfigsIncomplete_MonobehaviorTest : MonoBehaviour, IMonoBehaviourTest, IRCSTest
     {
         private bool testFinished = false;
         public bool IsTestFinished
@@ -28,7 +28,7 @@ namespace Unity.RemoteConfig.Tests
 
             var downloadHandlerText =
                 @"{""configs"": {""someOtherConfigType"":{""someTestInt"":555}},""metadata"":{""assignmentId"":""5555555-05fa-4ddf-acc6-ce43c888fe92"",""environmentId"":""5555555-a945-4601-9ccc-5e9d16d12ea8""}}";
-            var managerImpl = ConfigManager.ConfigManagerImpl;
+            var managerImpl = RemoteConfigService.Instance.ConfigManagerImpl;
             var configResponse = managerImpl.ParseResponse(ConfigOrigin.Remote, responseHeaders, downloadHandlerText);
             managerImpl.HandleConfigResponse(ConfigManagerImpl.DefaultConfigKey, configResponse);
             testFinished = true;

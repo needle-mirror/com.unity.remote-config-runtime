@@ -1,6 +1,6 @@
-using System.Net;
+﻿using System.Net;
 
-namespace Unity.RemoteConfig
+namespace Unity.Services.RemoteConfig
 {
     public static class Utilities
     {

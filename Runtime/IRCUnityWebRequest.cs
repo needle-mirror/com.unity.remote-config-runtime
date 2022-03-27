@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine.Networking;
 
-namespace Unity.RemoteConfig
+namespace Unity.Services.RemoteConfig
 {
   public interface IRCUnityWebRequest
   {

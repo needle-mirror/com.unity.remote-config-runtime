@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using UnityEngine.Scripting;
 
-namespace Unity.RemoteConfig
+namespace Unity.Services.RemoteConfig
 {
     [Serializable]
     class AccessToken

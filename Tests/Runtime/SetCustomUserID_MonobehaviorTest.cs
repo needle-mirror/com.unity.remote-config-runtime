@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Unity.RemoteConfig.Tests
+namespace Unity.Services.RemoteConfig.Tests
 {
-    internal class SetCustomUserID_MonobehaviorTest : MonoBehaviour, IMonoBehaviourTest, IRCTest
+    internal class SetCustomUserID_MonobehaviorTest : MonoBehaviour, IMonoBehaviourTest, IRCSTest
     {
         private bool testFinished = false;
         public bool IsTestFinished
@@ -13,7 +13,7 @@ namespace Unity.RemoteConfig.Tests
 
         public void StartTest()
         {
-            ConfigManager.SetCustomUserID(ConfigManagerTestUtils.userId);
+            RemoteConfigService.Instance.SetCustomUserID(RemoteConfigServiceTestUtils.userId);
             testFinished = true;
         }
 

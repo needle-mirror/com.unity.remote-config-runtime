@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Unity.RemoteConfig.Tests
+namespace Unity.Services.RemoteConfig.Tests
 {
-    internal class FetchConfigs_MonobehaviorTest : MonoBehaviour, IMonoBehaviourTest, IRCTest
+    internal class FetchConfigs_MonobehaviorTest : MonoBehaviour, IMonoBehaviourTest, IRCSTest
     {
         private bool testFinished = false;
         public bool IsTestFinished
@@ -31,10 +31,10 @@ namespace Unity.RemoteConfig.Tests
             responseHeaders.Add("Server", "Jetty(9.4.z-SNAPSHOT)");
 
             var downloadHandlerText = "{'analytics':{'enabled':true},'connect':{'limit_user_tracking':false,'player_opted_out':false,'enabled':true},'performance':{'enabled':true},'settings':{'testInt':232},'bool':true,'settingsMetadata':{'assignmentId':'3049bfea-05fa-4ddf-acc6-ce43c888fe92','environmentId':'83fff3e2-a945-4601-9ccc-5e9d16d12ea8'}}";
-            ConfigManager.requestStatus = ConfigRequestStatus.Success;
-            ConfigManager.appConfig.origin = origin;
+            RemoteConfigService.Instance.requestStatus = ConfigRequestStatus.Success;
+            RemoteConfigService.Instance.appConfig.origin = origin;
             #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
-                ConfigManager.SaveCache(origin, responseHeaders, downloadHandlerText);
+                RemoteConfigService.Instance.SaveCache(origin, responseHeaders, downloadHandlerText);
             #endif
             testFinished = true;
         }

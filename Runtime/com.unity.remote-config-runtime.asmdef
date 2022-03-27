@@ -1,5 +1,5 @@
 {
-    "name": "Unity.RemoteConfig",
+    "name": "Unity.Services.RemoteConfig",
     "references": [
         "Unity.Services.Core.Internal"
     ],

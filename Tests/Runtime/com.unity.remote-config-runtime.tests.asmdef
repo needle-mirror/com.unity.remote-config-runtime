@@ -1,7 +1,7 @@
-{
-    "name": "Unity.RemoteConfig.Tests",
+﻿{
+    "name": "Unity.Services.RemoteConfig.Tests",
     "references": [
-        "Unity.RemoteConfig",
+        "Unity.Services.RemoteConfig",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

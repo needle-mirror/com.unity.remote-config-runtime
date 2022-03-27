@@ -1,11 +1,11 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Unity.Services.Authentication.Internal;
 using Unity.Services.Core.Configuration.Internal;
 using Unity.Services.Core.Device.Internal;
 using Unity.Services.Core.Internal;
 using UnityEngine;
 
-namespace Unity.RemoteConfig
+namespace Unity.Services.RemoteConfig
 {
     /// <summary>
     /// This is the package initializer.
@@ -54,23 +54,8 @@ namespace Unity.RemoteConfig
             CoreConfig.Itoken = Itoken;
             CoreConfig.IplayerId = IplayerId;
 
-            ApplyCoreConfig();
-
             // Do any other initialization needed.
             await Task.Yield();
-        }
-
-        void ApplyCoreConfig()
-        {
-            if (!string.IsNullOrEmpty(CoreConfig.installationId))
-            {
-                ConfigManager.SetUserID(CoreConfig.installationId);
-                ConfigManager.SetAnalyticsUserID(CoreConfig.analyticsUserId);
-            }
-            if (!string.IsNullOrEmpty(CoreConfig.analyticsUserId))
-            {
-                ConfigManager.SetAnalyticsUserID(CoreConfig.analyticsUserId);
-            }
         }
 
     }

@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Unity.RemoteConfig.Tests
+namespace Unity.Services.RemoteConfig.Tests
 {
-    internal class FetchConfigs_QueueImmediately_MonobehaviorTest : MonoBehaviour, IMonoBehaviourTest, IRCTest
+    internal class FetchConfigs_QueueImmediately_MonobehaviorTest : MonoBehaviour, IMonoBehaviourTest, IRCSTest
     {
         private bool testFinished = false;
         public bool IsTestFinished
@@ -23,13 +23,13 @@ namespace Unity.RemoteConfig.Tests
 
         void FetchConfigs()
         {
-            ConfigManager.FetchConfigs<
-                ConfigManagerTestUtils.UserAttributes,
-                ConfigManagerTestUtils.AppAttributes,
-                ConfigManagerTestUtils.FilterAttributes>
-                (new ConfigManagerTestUtils.UserAttributes(),
-                new ConfigManagerTestUtils.AppAttributes(),
-                new ConfigManagerTestUtils.FilterAttributes());
+            RemoteConfigService.Instance.FetchConfigs<
+                RemoteConfigServiceTestUtils.UserAttributes,
+                RemoteConfigServiceTestUtils.AppAttributes,
+                RemoteConfigServiceTestUtils.FilterAttributes>
+                (new RemoteConfigServiceTestUtils.UserAttributes(),
+                new RemoteConfigServiceTestUtils.AppAttributes(),
+                new RemoteConfigServiceTestUtils.FilterAttributes());
             testFinished = true;
         }
     }

@@ -9,9 +9,9 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-[assembly: InternalsVisibleTo("Unity.RemoteConfig.Tests")]
+[assembly: InternalsVisibleTo("Unity.Services.RemoteConfig.Tests")]
 
-namespace Unity.RemoteConfig
+namespace Unity.Services.RemoteConfig
 {
     public class ConfigManagerImpl
     {
@@ -72,7 +72,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.0.0-pre.27";
+        internal const string pluginVersion = "3.0.0-pre.28";
 
         internal const string remoteConfigUrl = "https://config.unity3d.com/settings";
 

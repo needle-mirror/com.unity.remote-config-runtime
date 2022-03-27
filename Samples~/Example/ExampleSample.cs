@@ -6,7 +6,7 @@
 // -----------------------------------------------------------------------------
 
 using System.Threading.Tasks;
-using Unity.RemoteConfig;
+using Unity.Services.RemoteConfig;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using UnityEngine;
@@ -45,28 +45,28 @@ public class ExampleSample : MonoBehaviour
             await InitializeRemoteConfigAsync();
         }
 
-        ConfigManager.FetchCompleted += ConfigManager_FetchCompleted;
-        ConfigManager.FetchConfigs(new userAttributes(), new appAttributes());
+        RemoteConfigService.Instance.FetchCompleted += ApplyRemoteSettings;
+        RemoteConfigService.Instance.FetchConfigs(new userAttributes(), new appAttributes());
 
         // -- Example on how to fetch configuration settings using filter attributes:
         // var fAttributes = new filterAttributes();
         // fAttributes.key = new string[] { "sword","cannon" };
-        // ConfigManager.FetchConfigs(new userAttributes(), new appAttributes(), fAttributes);
+        // RemoteConfigService.Instance.FetchConfigs(new userAttributes(), new appAttributes(), fAttributes);
 
         // -- Example on how to fetch configuration settings if you have dedicated configType:
         // var configType = "specialConfigType";
-        // ConfigManager.FetchConfigs(configType, new userAttributes(), new appAttributes());
+        // RemoteConfigService.Instance.FetchConfigs(configType, new userAttributes(), new appAttributes());
         // -- Configuration can be fetched with both configType and fAttributes passed
-        // ConfigManager.FetchConfigs(configType, new userAttributes(), new appAttributes(), fAttributes);
+        // RemoteConfigService.Instance.FetchConfigs(configType, new userAttributes(), new appAttributes(), fAttributes);
 
         // -- All examples from above will also work asynchronously, returning Task<RuntimeConfig>
-        // await ConfigManager.FetchConfigsAsync(new userAttributes(), new appAttributes());
-        // await ConfigManager.FetchConfigsAsync(new userAttributes(), new appAttributes(), fAttributes);
-        // await ConfigManager.FetchConfigsAsync(configType, new userAttributes(), new appAttributes());
-        // await ConfigManager.FetchConfigsAsync(configType, new userAttributes(), new appAttributes(), fAttributes);
+        // await RemoteConfigService.Instance.FetchConfigsAsync(new userAttributes(), new appAttributes());
+        // await RemoteConfigService.Instance.FetchConfigsAsync(new userAttributes(), new appAttributes(), fAttributes);
+        // await RemoteConfigService.Instance.FetchConfigsAsync(configType, new userAttributes(), new appAttributes());
+        // await RemoteConfigService.Instance.FetchConfigsAsync(configType, new userAttributes(), new appAttributes(), fAttributes);
     }
 
-    void ConfigManager_FetchCompleted(ConfigResponse configResponse)
+    void ApplyRemoteSettings(ConfigResponse configResponse)
     {
 
         switch (configResponse.requestOrigin)
@@ -79,7 +79,7 @@ public class ExampleSample : MonoBehaviour
                 break;
             case ConfigOrigin.Remote:
                 Debug.Log("Remote Values changed");
-                Debug.Log("ConfigManager.appConfig fetched: " + ConfigManager.appConfig.config.ToString());
+                Debug.Log("RemoteConfigService.Instance.appConfig fetched: " + RemoteConfigService.Instance.appConfig.config.ToString());
                 break;
         }
 
