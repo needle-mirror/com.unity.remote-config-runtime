@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [3.0.0-pre.29] - 2022-04-08
+
+- Updated `com.unity.services.core` dependency from `1.2.0` to `1.3.1`
+- Updated `com.unity.nuget.newtonsoft-json` dependency from `3.0.1` to `3.0.2`
+
 ## [3.0.0-pre.28] - 2022-03-27
 
 - Added `RemoteConfigService.Instance` as an access pattern instead of static class `ConfigManager`
