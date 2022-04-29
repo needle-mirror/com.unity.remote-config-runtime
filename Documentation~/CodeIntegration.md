@@ -1,5 +1,5 @@
 # Code integration
-The `RemoteConfig` API is included in the `Unity.Service` namespace, which you must include in your game script. For more information on its classes and methods, see the [Remote Config Scripting API](../api/index.html) and the [Remote Config Runtime Scripting API](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.0/api/index.html) documentation.
+The `RemoteConfig` API is included in the `Unity.Services` namespace, which you must include in your game script. For more information on its classes and methods, see the [Remote Config Scripting API](../api/index.html) and the [Remote Config Runtime Scripting API](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.0/api/index.html) documentation.
 
 ## Initialization
 The Remote Config package depends on Unity's authentication and core services.
@@ -30,14 +30,14 @@ async Task InitializeRemoteConfigAsync()
 ```
 
 ## Implementing custom attributes
-To provide custom attributes for [Campaigns conditions](CampaignsAndSettings.md#condition), implement the following `struct` variables in your game script:
+To provide custom attributes for [Game Overrides conditions](GameOverridesAndSettings.md#condition), implement the following `struct` variables in your game script:
 
 * Use the `Delivery` structure to provide a custom player ID attribute by using the `SetCustomUserID` method if your application uses its own tracking method. Remote Config will auto-generate an ID if no developer-defined attribute is available.
 * Use the `userAttributes` structure to provide custom **user**-category attributes.
 * Use the `appAttributes` structure to provide custom **app**-category attributes.
 * Use the `filterAttributes` structure to provide custom **filter**-category attributes in order to reduce the payload.
 
-**Note**: Custom attributes are entirely optional. You can implement Unity Remote Config without these structs and use the predefined Unity attributes for Campaigns conditions. For more information on attribute categories, see documentation on [conditions](CampaignsAndSettings.md#condition).
+**Note**: Custom attributes are entirely optional. You can implement Unity Remote Config without these structs and use the predefined Unity attributes for Game Overrides conditions. For more information on attribute categories, see documentation on [conditions](GameOverridesAndSettings.md#condition).
 
 Start by creating a framework for your script that implements your custom attributes and blocks out your functions:
 
@@ -221,14 +221,23 @@ case ConfigOrigin.Remote:
     JsonUtility.FromJsonOverwrite(jsonCubeString, CubeInfo);
 ```
 
-### Custom ID verification
-To check that you implemented a request with `customUserId` correctly, you can use a utility such as [Charles proxy](https://support.unity3d.com/hc/en-us/articles/115002917683-Using-Charles-Proxy-with-Unity) to check the contents of the actual network request messages. Using Charles, you can check your implementation of a Remote Config request with custom user IDs by following these steps:
-
-1. In the Editor, open the **Remote Config** window (**Window** > **Remote Config**).
-2. Open the Charles proxy and clear all events. You can also add "unity" in the filter field.<br><br>![Opening Charles proxy to verify custom IDs.](images/CharlesProxy.png)
-3. In the Unity Editor, click the **Play** button, then look in Charles for the POST request to `config.uca.cloud.unity3d.com/` . Your custom user ID should be in the request as a value inside the `"msg"` key for `"type": "analytics.delivery.v1"`.<br><br>![Observing the Charles response for your custom ID.](images/CharlesPostRequest.png)
-
-After the test, close Charles so it won’t interfere with other web requests.
-
 ### Security
 The web service from which Unity downloads Remote Config data is read-only, but not secure. This means third parties could view your Remote Config data. Do not store sensitive or secret information in your configuration settings. Similarly, the saved settings file could be read and modified by end-users (although Remote Config would overwrite any modifications the next time a session starts with an available Internet connection).
+
+### Platform Support
+Current version of Remote Config Runtime is tested successfully for following platforms: 
+
+Desktop:
+- Windows (PC)
+- Mac
+- Linux Standalone
+ 
+Mobile:
+- iOS
+- Android
+ 
+Consoles:
+- PS5
+- PS4
+- Xbox One
+- Nintendo Switch

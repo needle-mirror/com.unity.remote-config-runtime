@@ -59,7 +59,7 @@ To use Remote Config, you will need to include the following references:
 
 Prior to using Remote Config, you will then need to:
 * Initialize Unity Services
-  * `UnityServices.Initialize()`
+  * `UnityServices.InitializeAsync()`
 * Authenticate with Unity Authentication
   * `AuthenticationService.Instance.SignInAnonymously()` for anonymous authentication
   * `AuthenticationService.Instance.SignInWithAppleAsync()` for apple authentication

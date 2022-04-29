@@ -1,6 +1,6 @@
 # Environments
 
-Unity Remote Config Runtime uses environments to group Rules and Settings, and deliver specific environments to the client (Unity Runtime Instance) based on the `environmentId`. If no `environmentId` is provided in the request the default environment, which is the environment named `production` is returned to that instance.
+Unity Remote Config Runtime uses environments to group Game Overrides and Settings, and deliver specific environments to the client (Unity Runtime Instance) based on the `environmentId`. If no `environmentId` is provided in the request - the default environment, which is the environment named `production` is returned to that instance.
 
 Use the [Web Dashboard](http://dashboard.unity3d.com/remote-config) to manage your Remote Config Runtime environments. Upon initialization in a new project, only the default environment is available.
 
@@ -9,7 +9,7 @@ Use the [Web Dashboard](http://dashboard.unity3d.com/remote-config) to manage yo
 - A project can have a maximum of 10 environments
 - Environment names must be unique
 - The `development` environment name is reserved, and cannot be created by users for users of `Remote Config SDK Version` <= `@1.1.x`
-- The `production` environment name is reserved, and it is the default environment. If an EnvironmentID is NOT specified in the request the environment `production` will be served.
+- The `production` environment name is reserved, and it is the default environment. If an environmentID is NOT specified in the request the environment `production` will be served.
 
 ## Working with environments
 The [Web Dashboard](http://dashboard.unity3d.com/remote-config) lets you create, edit, and delete environments. This functionality is also available in the [REST APIs](RESTAPI.md).
