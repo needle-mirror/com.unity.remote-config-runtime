@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [3.1.0] - 2022-05-26
+
+- Updated `com.unity.services.core` dependency from `1.3.2` to `1.4.0`
+- Added 2.x namespace and corresponding API's for backward compatibility with 2.x implementation
+- Promote Candidate Experimental package to Verified Production
+
 ## [3.0.0] - 2022-04-29
 
 - Updated `com.unity.services.core` dependency from `1.3.1` to `1.3.2`

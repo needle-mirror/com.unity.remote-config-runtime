@@ -1,17 +1,19 @@
 using System;
 using System.Text;
 using UnityEngine;
+#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE && !UNITY_WII
+  using UnityEngine.Analytics;
+#endif
 using UnityEngine.Networking;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("Unity.Services.RemoteConfig.Tests")]
 
-namespace Unity.Services.RemoteConfig
+namespace Unity.RemoteConfig
 {
     public class ConfigManagerImpl
     {
@@ -35,7 +37,6 @@ namespace Unity.Services.RemoteConfig
         /// <returns>
         /// A class representing a single runtime settings configuration.
         /// </returns>
-
         private RuntimeConfig _appConfig;
         public RuntimeConfig appConfig
         {
@@ -72,12 +73,8 @@ namespace Unity.Services.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.1.0";
-
+        internal const string pluginVersion = "2.1.3-exp.4";
         internal const string remoteConfigUrl = "https://config.unity3d.com/settings";
-
-        internal const string authInitError = "Auth Service not initialized.\nRequest might result in empty or incomplete response\nPlease refer to https://docs.unity3d.com/Packages/com.unity.remote-config@3.0/manual/CodeIntegration.html";
-        internal const string coreInitError = "Core Service not initialized.\nRequest might result in empty or incomplete response\nPlease refer to https://docs.unity3d.com/Packages/com.unity.remote-config@3.0/manual/CodeIntegration.html";
 
         /// <summary>
         /// This event fires when the configuration manager successfully fetches settings from the service.
@@ -101,12 +98,14 @@ namespace Unity.Services.RemoteConfig
 
             _remoteConfigRequest = new RemoteConfigRequest
             {
-                projectId = Application.cloudProjectId ?? "",
-                userId = "",
+                projectId = Application.cloudProjectId,
+                #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE && !UNITY_WII
+                    userId = AnalyticsSessionInfo.userId,
+                #else
+                    userId = Guid.NewGuid().ToString(),
+                #endif
                 isDebugBuild = Debug.isDebugBuild,
                 configType = "",
-                playerId = "",
-                analyticsUserId = "",
                 configAssignmentHash = null,
                 packageVersion = pluginVersion + "+RCR",
                 originService = originService,
@@ -125,8 +124,7 @@ namespace Unity.Services.RemoteConfig
             }
 
             _unityAttributes = new UnityAttributes();
-            
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE && !UNITY_WII
                 FetchCompleted += SaveCache;
                 LoadFromCache();
             #endif
@@ -186,6 +184,15 @@ namespace Unity.Services.RemoteConfig
         }
 
         /// <summary>
+        /// Sets userId identifier in the Remote Config request payload.
+        /// </summary>
+        /// <param name="userID">User identifier.</param>
+        public void SetUserID(string userID)
+        {
+            _remoteConfigRequest.userId = userID;
+        }
+
+        /// <summary>
         /// Sets player Identity Token.
         /// </summary>
         /// <param name="identityToken">Player Identity identifier.</param>
@@ -195,143 +202,12 @@ namespace Unity.Services.RemoteConfig
         }
 
         /// <summary>
-        /// Sets userId to InstallationID identifier coming from core services.
-        /// </summary>
-        /// <param name="iid">Installation unique identifier.</param>
-        public void SetUserID(string iid)
-        {
-            _remoteConfigRequest.userId = iid;
-        }
-
-        /// <summary>
-        /// Sets playerId identifier coming from auth services.
-        /// </summary>
-        /// <param name="playerID">Player Id unique identifier.</param>
-        public void SetPlayerID(string playerID)
-        {
-            _remoteConfigRequest.playerId = playerID;
-        }
-
-        /// <summary>
-        /// Sets analyticsUserId identifier coming from core services.
-        /// </summary>
-        /// <param name="analyticsUserID">analyticsUserId unique identifier.</param>
-        public void SetAnalyticsUserID(string analyticsUserID)
-        {
-            _remoteConfigRequest.analyticsUserId = analyticsUserID;
-        }
-
-        /// <summary>
         /// Sets configAssignmentHash identifier.
         /// </summary>
         /// <param name="configAssignmentHashID">configAssignmentHash unique identifier.</param>
         public void SetConfigAssignmentHash(string configAssignmentHashID)
         {
             _remoteConfigRequest.configAssignmentHash = configAssignmentHashID;
-        }
-
-        /// <summary>
-        /// Fetches an app configuration settings from the remote server passing a configType.
-        /// </summary>
-        /// <param name="configType">A string containing configType. If none apply, use null.</param>
-        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use null.</param>
-        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use null.</param>
-        /// <param name="filterAttributes">A struct containing filter attributes. If none apply, use an empty struct.</param>
-        public async Task<RuntimeConfig> FetchConfigsAsync(string configType, object userAttributes, object appAttributes, object filterAttributes)
-        {
-            if (string.IsNullOrEmpty(configType))
-            {
-                configType = "settings";
-            }
-
-            appConfig = GetConfig(configType);
-            appConfig.RequestStatus = ConfigRequestStatus.Pending;
-            var jsonText = PreparePayloadWithConfigType(configType, userAttributes, appAttributes, filterAttributes);
-
-            var request = new UnityWebRequest
-            {
-                method = UnityWebRequest.kHttpVerbPOST,
-                timeout = 10,
-                url = remoteConfigUrl
-            };
-
-            request.SetRequestHeader("Content-Type", "application/json");
-            request.SetRequestHeader("Authorization", "Bearer " + _playerIdentityToken);
-            request.SetRequestHeader("unity-installation-id", _remoteConfigRequest.userId);
-            request.SetRequestHeader("unity-player-id", _remoteConfigRequest.playerId);
-
-            if (string.IsNullOrEmpty(_remoteConfigRequest.userId))
-            {
-                Debug.LogWarning(coreInitError);
-            }
-            if (string.IsNullOrEmpty(_remoteConfigRequest.playerId))
-            {
-                Debug.LogWarning(authInitError);
-            }
-
-            foreach (var headerProvider in requestHeaderProviders)
-            {
-                var header = headerProvider.Invoke();
-                request.SetRequestHeader(header.key, header.value);
-            }
-
-            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonText));
-            request.downloadHandler = new DownloadHandlerBuffer();
-
-            var requestOp = request.SendWebRequest();
-            while (!requestOp.isDone)
-            {
-                await Task.Delay(1);
-            }
-
-            ConfigResponse configResponse;
-            if (requestOp.webRequest.isHttpError || requestOp.webRequest.isNetworkError)
-            {
-                var configTypeHasKeys = configs[configType].GetKeys().Length > 0;
-                var origin = File.Exists(Path.Combine(Application.persistentDataPath, cacheFile)) && configTypeHasKeys ? ConfigOrigin.Cached : ConfigOrigin.Default;
-                configResponse = ParseResponse(origin, null, null);
-            }
-            else
-            {
-                configResponse = ParseResponse(ConfigOrigin.Remote, request.GetResponseHeaders(), request.downloadHandler.text);
-            }
-            requestOp.webRequest.Dispose();
-
-            appConfig.HandleConfigResponse(configResponse);
-            FetchCompleted?.Invoke(configResponse);
-            return appConfig;
-        }
-
-        /// <summary>
-        /// Fetches an app configuration settings from the remote server passing a configType.
-        /// </summary>
-        /// <param name="configType">A string containing configType. If none apply, use null.</param>
-        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use null.</param>
-        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use null.</param>
-        public async Task<RuntimeConfig> FetchConfigsAsync(string configType, object userAttributes, object appAttributes)
-        {
-            return await FetchConfigsAsync(configType, userAttributes, appAttributes, null);
-        }
-
-        /// <summary>
-        /// Fetches an app configuration settings from the remote server passing filterAttributes.
-        /// </summary>
-        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use null.</param>
-        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use null.</param>
-        /// <param name="filterAttributes">A struct containing filter attributes. If none apply, use an empty struct.</param>
-        public async Task<RuntimeConfig> FetchConfigsAsync(object userAttributes, object appAttributes, object filterAttributes)
-        {
-            return await FetchConfigsAsync("settings", userAttributes, appAttributes, filterAttributes);
-        }
-
-        /// <summary>
-        /// Fetches an app configuration settings from the remote server.
-        /// </summary>
-        /// <param name="userAttributes">A struct containing custom user attributes. If none apply, use null.</param>
-        /// <param name="appAttributes">A struct containing custom app attributes. If none apply, use null.</param>
-        public async Task<RuntimeConfig> FetchConfigsAsync(object userAttributes, object appAttributes)
-        {
-            return await FetchConfigsAsync("settings", userAttributes, appAttributes, null);
         }
 
         /// <summary>
@@ -495,26 +371,12 @@ namespace Unity.Services.RemoteConfig
         internal void DoRequest(string configType, string jsonText)
         {
             var request = new RCUnityWebRequest();
-            request.unityWebRequest = new UnityWebRequest
-            {
-                method = UnityWebRequest.kHttpVerbPOST,
-                timeout = 10,
-                url = remoteConfigUrl
-            };
-
+            request.unityWebRequest = new UnityWebRequest();
+            request.method = UnityWebRequest.kHttpVerbPOST;
             request.SetRequestHeader("Content-Type", "application/json");
+            request.timeout = 10;
+            request.url = remoteConfigUrl;
             request.SetRequestHeader("Authorization", "Bearer " + _playerIdentityToken);
-            request.SetRequestHeader("unity-installation-id", _remoteConfigRequest.userId);
-            request.SetRequestHeader("unity-player-id", _remoteConfigRequest.playerId);
-
-            if (string.IsNullOrEmpty(_remoteConfigRequest.userId))
-            {
-                Debug.LogWarning(coreInitError);
-            }
-            if (string.IsNullOrEmpty(_remoteConfigRequest.playerId))
-            {
-                Debug.LogWarning(authInitError);
-            }
 
             foreach(var headerProvider in requestHeaderProviders)
             {
@@ -690,12 +552,12 @@ namespace Unity.Services.RemoteConfig
     [Serializable]
     internal struct RemoteConfigRequest
     {
+#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE
         public string projectId;
         public string userId;
+#endif
         public bool isDebugBuild;
         public string configType;
-        public string playerId;
-        public string analyticsUserId;
         public string configAssignmentHash;
         public string[] key;
         public string[] type;
