@@ -73,7 +73,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "2.1.3-exp.4";
+        internal const string pluginVersion = "2.1.3-exp.5";
         internal const string remoteConfigUrl = "https://config.unity3d.com/settings";
 
         /// <summary>
@@ -552,10 +552,8 @@ namespace Unity.RemoteConfig
     [Serializable]
     internal struct RemoteConfigRequest
     {
-#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE
         public string projectId;
         public string userId;
-#endif
         public bool isDebugBuild;
         public string configType;
         public string configAssignmentHash;

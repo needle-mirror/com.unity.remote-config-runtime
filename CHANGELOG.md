@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [2.1.3-exp.5] - 2022-06-06
+
+- Allowing projectId and userId params to be in the payload for consoles
+- Upgraded Newtonsoft version from 3.0.1 to 3.0.2
+
 ## [2.1.3-exp.4] - 2022-03-17
 
 - Fixed bug for origin value if there is no internet
