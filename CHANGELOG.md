@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [2.1.3-exp.6] - 2022-06-09
+
+- Whitelisting platforms for getting userId from Analytics package within 2.x namespace
+
 ## [2.1.3-exp.5] - 2022-06-06
 
 - Allowing projectId and userId params to be in the payload for consoles
