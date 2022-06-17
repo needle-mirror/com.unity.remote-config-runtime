@@ -213,7 +213,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -228,7 +228,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -244,7 +244,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -260,7 +260,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -276,7 +276,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -296,7 +296,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -312,7 +312,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -332,7 +332,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -350,7 +350,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -366,7 +366,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -384,7 +384,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -399,7 +399,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -415,7 +415,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -431,7 +431,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -447,7 +447,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -463,7 +463,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -479,7 +479,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -495,7 +495,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -511,7 +511,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -527,7 +527,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -543,7 +543,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -559,7 +559,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -575,7 +575,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));
@@ -591,7 +591,7 @@ namespace Unity.Services.RemoteConfig.Tests
             monoTest.component.StartTest();
             yield return monoTest;
 
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 var fileName = Path.Combine(Application.persistentDataPath, ConfigManagerImpl.DefaultCacheFile);
                 while(!File.Exists(fileName)) yield return null;
                 Assert.That(File.Exists(fileName));

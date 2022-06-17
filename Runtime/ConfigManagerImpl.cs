@@ -72,7 +72,7 @@ namespace Unity.Services.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.1.0";
+        internal const string pluginVersion = "3.1.3";
 
         internal const string remoteConfigUrl = "https://config.unity3d.com/settings";
 
@@ -126,7 +126,7 @@ namespace Unity.Services.RemoteConfig
 
             _unityAttributes = new UnityAttributes();
             
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 FetchCompleted += SaveCache;
                 LoadFromCache();
             #endif
@@ -775,7 +775,7 @@ namespace Unity.Services.RemoteConfig
         string device = jc.GetStatic<string>("DEVICE");
         return string.Format("{0}/{1}/{2}", manufacturer, model, device);
 #else
-            return SystemInfo.deviceModel;
+        return SystemInfo.deviceModel;
 #endif
         }
 

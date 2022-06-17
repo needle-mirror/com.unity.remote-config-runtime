@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using UnityEngine;
-#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE && !UNITY_WII
+#if ENABLE_CLOUD_SERVICES_ANALYTICS
   using UnityEngine.Analytics;
 #endif
 using UnityEngine.Networking;
@@ -73,7 +73,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "2.1.3-exp.4";
+        internal const string pluginVersion = "2.1.3-exp.7";
         internal const string remoteConfigUrl = "https://config.unity3d.com/settings";
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace Unity.RemoteConfig
             _remoteConfigRequest = new RemoteConfigRequest
             {
                 projectId = Application.cloudProjectId,
-                #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE && !UNITY_WII
+                #if ENABLE_CLOUD_SERVICES_ANALYTICS
                     userId = AnalyticsSessionInfo.userId,
                 #else
                     userId = Guid.NewGuid().ToString(),
@@ -124,7 +124,7 @@ namespace Unity.RemoteConfig
             }
 
             _unityAttributes = new UnityAttributes();
-            #if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE && !UNITY_WII
+            #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
                 FetchCompleted += SaveCache;
                 LoadFromCache();
             #endif
@@ -552,10 +552,8 @@ namespace Unity.RemoteConfig
     [Serializable]
     internal struct RemoteConfigRequest
     {
-#if !UNITY_SWITCH && !UNITY_PS4 && !UNITY_PS5 && !UNITY_XBOXONE
         public string projectId;
         public string userId;
-#endif
         public bool isDebugBuild;
         public string configType;
         public string configAssignmentHash;
@@ -637,7 +635,7 @@ namespace Unity.RemoteConfig
         string device = jc.GetStatic<string>("DEVICE");
         return string.Format("{0}/{1}/{2}", manufacturer, model, device);
 #else
-            return SystemInfo.deviceModel;
+        return SystemInfo.deviceModel;
 #endif
         }
 

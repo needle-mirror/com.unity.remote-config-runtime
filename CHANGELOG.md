@@ -5,6 +5,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [3.1.3] - 2022-06-17
+
+- using ENABLE_CLOUD_SERVICES_ANALYTICS flag for platforms using Analytics within 2.x namespace
+
+## [3.1.2] - 2022-06-09
+
+- Whitelisting platforms for getting userId from Analytics package within 2.x namespace
+
+## [3.1.1] - 2022-06-08
+
+- Allowing projectId and userId params to be in the payload for consoles
+
 ## [3.1.0] - 2022-05-26
 
 - Updated `com.unity.services.core` dependency from `1.3.2` to `1.4.0`
