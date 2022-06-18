@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using UnityEngine;
-#if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
+#if ENABLE_CLOUD_SERVICES_ANALYTICS
   using UnityEngine.Analytics;
 #endif
 using UnityEngine.Networking;
@@ -73,7 +73,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "2.1.3-exp.6";
+        internal const string pluginVersion = "2.1.3-exp.7";
         internal const string remoteConfigUrl = "https://config.unity3d.com/settings";
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace Unity.RemoteConfig
             _remoteConfigRequest = new RemoteConfigRequest
             {
                 projectId = Application.cloudProjectId,
-                #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
+                #if ENABLE_CLOUD_SERVICES_ANALYTICS
                     userId = AnalyticsSessionInfo.userId,
                 #else
                     userId = Guid.NewGuid().ToString(),
