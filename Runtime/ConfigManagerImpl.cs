@@ -73,7 +73,7 @@ namespace Unity.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "2.1.3-exp.7";
+        internal const string pluginVersion = "2.1.3-exp.8";
         internal const string remoteConfigUrl = "https://config.unity3d.com/settings";
 
         /// <summary>

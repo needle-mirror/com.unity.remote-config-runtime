@@ -2,6 +2,7 @@
     * [Upgrade Guide](upgrade-guide)
 * [Configuring your Project](ConfiguringYourProject)
 * [Environments](Environments)
+* [Game Overrides and Settings](GameOverridesAndSettings)
 * [Code integration](CodeIntegration)
 * [REST API](RESTAPI)
 * [Web Dashboard](WebDashboard)
