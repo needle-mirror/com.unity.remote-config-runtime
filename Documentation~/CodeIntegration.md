@@ -53,7 +53,7 @@ public class RemoteConfigExample : MonoBehaviour {
     }
 
     // Create a function to set your variables to their keyed values:
-    void ApplyRemoteSettings (ConfigResponse configResponse) {
+    void ApplyRemoteConfig (ConfigResponse configResponse) {
         // You will implement this in the final step.
     }
 }
@@ -62,55 +62,67 @@ public class RemoteConfigExample : MonoBehaviour {
 ## Fetching and applying settings at runtime
 Next, implement your Remote Config support functions, and call them at runtime to retrieve key-value pairs from the service then map them to the appropriate variables.
 
-The Remote Config service returns a [`ConfigManager`](../api/Unity.RemoteConfig.ConfigManager.html) object to fetch and apply your configuration settings at runtime. In this example, you’ll use it to fetch the key-value pairs from the remote service, and invoke your `ApplyRemoteSettings` function when the retrieval succeeds. `ApplyRemoteSettings` takes a [`ConfigResponse`](../api/Unity.RemoteConfig.ConfigResponse.html) struct, which represents the response to a fetch request, and uses the [`ConfigManager.appConfig`](../api/Unity.RemoteConfig.ConfigManager.appConfig.html) method to apply settings.
+The Remote Config service returns a [`ConfigManager`](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@2.1/api/Unity.RemoteConfig.ConfigManager.html) object to fetch and apply your configuration settings at runtime. In this example, you’ll use it to fetch the key-value pairs from the remote service, and invoke your `ApplyRemoteConfig` function when the retrieval succeeds. `ApplyRemoteConfig` takes a [`ConfigResponse`](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@2.1/api/Unity.RemoteConfig.ConfigResponse.html) struct, which represents the response to a fetch request, and uses the [`ConfigManager.appConfig`](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@2.1/api/Unity.RemoteConfig.ConfigManager.html#Unity_RemoteConfig_ConfigManager_appConfig) method to apply settings.
 
 ```c#
     // Retrieve and apply the current key-value pairs from the service on Awake:
     void Awake () {
         // Add a listener to apply settings when successfully retrieved:
-        ConfigManager.FetchCompleted += ApplyRemoteSettings;
+        ConfigManager.FetchCompleted += ApplyRemoteConfig;
 
-        // Set the user’s unique ID:
-        ConfigManager.SetCustomUserID("some-user-id");
+        // you can set the user’s unique ID:
+        // ConfigManager.SetCustomUserID("some-user-id");
 
-        // Set the environment ID:
-        ConfigManager.SetEnvironmentID("an-env-id");
+        // you can set the user’s environment ID:
+        // ConfigManager.SetEnvironmentID("an-env-id");
 
         // Fetch configuration settings from the remote service:
-        ConfigManager.FetchConfigs<userAttributes, appAttributes>(new userAttributes(), new appAttributes());
+        ConfigManager.FetchConfigs(new userAttributes(), new appAttributes());
 
         // Example on how to fetch configuration settings using filter attributes:
-        var fAttributes = new filterAttributes();
-        fAttributes.key = new string[] { "sword","cannon" };
-        ConfigManager.FetchConfigs(new userAttributes(), new appAttributes(), fAttributes);
+        // var fAttributes = new filterAttributes();
+        // fAttributes.key = new string[] { "sword","cannon" };
+        // ConfigManager.FetchConfigs(new userAttributes(), new appAttributes(), fAttributes);
 
         // Example on how to fetch configuration settings if you have dedicated configType:
-        var configType = "specialConfigType";
+        // var configType = "specialConfigType";
         // Fetch configs of that configType
-        ConfigManager.FetchConfigs(configType, new userAttributes(), new appAttributes());
+        // ConfigManager.FetchConfigs(configType, new userAttributes(), new appAttributes());
         // Configuration can be fetched with both configType and fAttributes passed
-        ConfigManager.FetchConfigs(configType, new userAttributes(), new appAttributes(), fAttributes);
+        // ConfigManager.FetchConfigs(configType, new userAttributes(), new appAttributes(), fAttributes);
 
     }
 
-    void ApplyRemoteSettings (ConfigResponse configResponse) {
+    void ApplyRemoteConfig (ConfigResponse configResponse) {
         // Conditionally update settings, depending on the response's origin:
         switch (configResponse.requestOrigin) {
             case ConfigOrigin.Default:
-                Debug.Log ("No settings loaded this session; using default values.");
+                Debug.Log ("No settings loaded this session and no local cache file exists; using default values.");
                 break;
             case ConfigOrigin.Cached:
                 Debug.Log ("No settings loaded this session; using cached values from a previous session.");
                 break;
             case ConfigOrigin.Remote:
                 Debug.Log ("New settings loaded this session; update values accordingly.");
-                enemyVolume = ConfigManager.appConfig.GetInt ("enemyVolume");
-                enemyHealth = ConfigManager.appConfig.GetInt ("enemyHealth");
-                enemyDamage = ConfigManager.appConfig.GetFloat ("enemyDamage");
-                assignmentId = ConfigManager.appConfig.assignmentId;
                 break;
         }
+
+        enemyVolume = ConfigManager.appConfig.GetInt ("enemyVolume");
+        enemyHealth = ConfigManager.appConfig.GetInt ("enemyHealth");
+        enemyDamage = ConfigManager.appConfig.GetFloat ("enemyDamage");
+        assignmentId = ConfigManager.appConfig.assignmentId;
+
+        // These calls could also be used with the 2nd optional arg to provide a default value, e.g:
+        // enemyVolume = ConfigManager.appConfig.GetInt("enemyVolume", 100);
     }
+```
+
+## Accessing configs with particular config types
+
+All settings for corresponding config types will be correctly stored in the cache, and they could be accessed by passing the config type, such as:
+```c#
+ConfigManager.GetConfig("settings");
+ConfigManager.GetConfig("specialConfigType");
 ```
 
 ## Metadata Parameters

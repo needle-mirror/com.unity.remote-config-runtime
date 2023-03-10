@@ -13,6 +13,7 @@ public class ExampleSample : MonoBehaviour
 
     public struct userAttributes {}
     public struct appAttributes {}
+    public int enemyVolume;
 
     void Start()
     {
@@ -26,16 +27,21 @@ public class ExampleSample : MonoBehaviour
         switch (configResponse.requestOrigin)
         {
             case ConfigOrigin.Default:
-                Debug.Log("Default values will be returned");
+                Debug.Log("No settings loaded this session and no local cache file exists; using default values.");
                 break;
             case ConfigOrigin.Cached:
-                Debug.Log("Cached values loaded");
+                Debug.Log("No settings loaded this session; using cached values from a previous session.");
                 break;
             case ConfigOrigin.Remote:
-                Debug.Log("Remote Values changed");
+                Debug.Log("New settings loaded this session; update values accordingly.");
                 Debug.Log("ConfigManager.appConfig fetched: " + ConfigManager.appConfig.config.ToString());
                 break;
         }
+
+        enemyVolume = ConfigManager.appConfig.GetInt("enemyVolume");
+
+        // These calls could also be used with the 2nd optional arg to provide a default value, e.g:
+        // enemyVolume = ConfigManager.appConfig.GetInt("enemyVolume", 100);
 
     }
 

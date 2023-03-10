@@ -1,7 +1,7 @@
 {
   "name": "com.unity.remote-config-runtime",
   "displayName": "Remote Config Runtime",
-  "version": "2.1.3-exp.9",
+  "version": "2.1.3-exp.10",
   "unity": "2018.4",
   "_upm": {
     "gameService": {
@@ -9,7 +9,8 @@
       "projectDashboardUrl": "https://dashboard.unity3d.com/organizations/{0}/projects/{1}/remote-config/",
       "projectDashboardUrlType": "OrganizationKeyAndProjectGuid",
       "useCasesUrl": "https://docs.unity3d.com/Packages/com.unity.remote-config@2.1/manual/index.html"
-    }
+    },
+    "changelog": "- Updated implementation docs and ExampleSample.cs"
   },
   "description": "Remote Config is a cloud service that lets you tune and customize your app over the air without requiring an update to your game.  You can use rules to enable or disable features, change the difficulty of your game or run special events to target specific audiences.  Rules control when updates are applied and to whom, while Unity manages delivery of your game content with minimal performance impact. \n\nRemote Config can be configured via the editor or through our public API’s.  Functionality includes:\n   - Release new features without deploying code:\n   - Feature flagging\n   - Staged Rollouts\n   - Kill switch functionality\n   - Start & End Date\n   - Enable & disable rules\n   - Personalized real-time segmentation with custom attributes\n   - Custom conditions for applying setting variants\n   - Device, user, game and other arbitrary attributes supporting\n   - Tracing ID for decorating analytics events",
   "dependencies": {
@@ -51,12 +52,13 @@
     "deploy"
   ],
   "upmCi": {
-    "footprint": "29fb7da2f63408410faeb21e2e6dd82d453d6bf8"
+    "footprint": "82a4fe962631997ebefe04c21d2e86fef0bf7526"
   },
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@2.1/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.remote-config-runtime.git",
     "type": "git",
-    "revision": "7715d8f5b5a34bd41dce5a8178c436625447dd50"
+    "revision": "3254c213e950031e0bb1401e92d3d1922c001d01"
   },
   "samples": [
     {
