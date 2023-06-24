@@ -3,6 +3,7 @@
     "references": [
         "Unity.Services.Core.Internal"
     ],
+    "rootNamespace": "Unity.Services.RemoteConfig",
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

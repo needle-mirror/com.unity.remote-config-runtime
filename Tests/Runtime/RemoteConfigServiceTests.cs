@@ -21,7 +21,7 @@ namespace Unity.Services.RemoteConfig.Tests
         private string _previousProjectId;
         private string _previousProjectName;
         private string _previousVersion;
-        
+
         private void FixYamatoProjectSettings()
         {
             // Cloud Project ID needs to be linked or the SDK will fail to start.
@@ -31,7 +31,7 @@ namespace Unity.Services.RemoteConfig.Tests
             _cloudProjectIdProperty = _projectSettingsObject.FindProperty("cloudProjectId");
             _cloudProjectNameProperty = _projectSettingsObject.FindProperty("projectName");
             _versionProperty = _projectSettingsObject.FindProperty("bundleVersion"); // NOTE: this is Project Settings -> Player -> Version
-            
+
             _previousProjectId = _cloudProjectIdProperty.stringValue;
             _previousProjectName = _cloudProjectNameProperty.stringValue;
             _previousVersion = _versionProperty.stringValue;
@@ -40,12 +40,12 @@ namespace Unity.Services.RemoteConfig.Tests
             _versionProperty.stringValue = "1.3.3.7";
             _projectSettingsObject.ApplyModifiedProperties();
         }
-        
+
         [UnitySetUp]
         public IEnumerator Setup()
         {
             FixYamatoProjectSettings();
-            
+
             // var init = UnityServices.InitializeAsync();
             // while (!init.IsCompleted)
             // {
@@ -75,7 +75,7 @@ namespace Unity.Services.RemoteConfig.Tests
 
             yield return null;
         }
-        
+
         [UnityTest]
         public IEnumerator SetCustomUserID_SetsCustomUserID()
         {
@@ -199,11 +199,11 @@ namespace Unity.Services.RemoteConfig.Tests
             managerImpl.LoadFromCache();
             Assert.AreEqual(12, RemoteConfigService.Instance.appConfig.GetInt("someInt"));
             Assert.That(RemoteConfigService.Instance.GetConfig("economy").GetString("item") == "sword");
-            Assert.That(RemoteConfigService.Instance.GetConfig("economy").assignmentId == JObject.Parse(RemoteConfigServiceTestUtils.jsonPayloadEconomyConfig)["metadata"]["assignmentId"].ToString()); 
+            Assert.That(RemoteConfigService.Instance.GetConfig("economy").assignmentId == JObject.Parse(RemoteConfigServiceTestUtils.jsonPayloadEconomyConfig)["metadata"]["assignmentId"].ToString());
         }
     }
 #endif
-    
+
     internal class RuntimeRemoteConfigServiceTests
     {
         [UnityTest]
@@ -338,7 +338,7 @@ namespace Unity.Services.RemoteConfig.Tests
                 Assert.That(File.Exists(fileName));
             #endif
 
-            // at this point we have multiple configs in cache, but we are still able to get "bool" 
+            // at this point we have multiple configs in cache, but we are still able to get "bool"
             // from "settings" configType, eventhough we loaded "someOtherConfig" configType
             Assert.AreEqual(true, RemoteConfigService.Instance.appConfig.GetBool("bool"));
         }
@@ -455,7 +455,7 @@ namespace Unity.Services.RemoteConfig.Tests
 
             Assert.AreEqual("{\"a\":2.0,\"b\":4,\"c\":\"someString\"}", RemoteConfigService.Instance.appConfig.GetString("stringFormattedAsJson"));
         }
-        
+
         [UnityTest]
         public IEnumerator GetString_ReturnsRightValueWhenBadResponse()
         {
@@ -659,7 +659,7 @@ namespace Unity.Services.RemoteConfig.Tests
                 }
             }";
 
-        public static string jsonPayloadEconomyConfig = 
+        public static string jsonPayloadEconomyConfig =
             @"{
                 ""configs"": {
                     ""economy"": {
@@ -674,20 +674,8 @@ namespace Unity.Services.RemoteConfig.Tests
 
         public static void SetProjectIdOnRequestPayload()
         {
-            //Assembly assem = typeof(RemoteConfigService).Assembly;
-            //RemoteConfigService rs = (RemoteConfigService) assem.CreateInstance("Unity.Services.RemoteConfig");
-
-            //RemoteConfigService rsInst = new RemoteConfigService();
-            
-            FieldInfo configmanagerImplInfo = typeof(RemoteConfigService).GetField("_configManagerImpl", BindingFlags.Instance | BindingFlags.NonPublic);
-            var configmanagerImpl = configmanagerImplInfo.GetValue(RemoteConfigService.Instance);
-
-            FieldInfo rcRequestFieldInfo = typeof(ConfigManagerImpl).GetField("_remoteConfigRequest", BindingFlags.Instance | BindingFlags.NonPublic);
-            var common = rcRequestFieldInfo.GetValue(configmanagerImpl);
-
-            FieldInfo projectIdFieldInfo = common.GetType().GetField("projectId");
-            projectIdFieldInfo.SetValue(common, "de2c88ca-80fc-448f-bfa9-ab598bf7a9e4");
-            rcRequestFieldInfo.SetValue(configmanagerImpl, common);
+            const string projectId = "de2c88ca-80fc-448f-bfa9-ab598bf7a9e4";
+            RemoteConfigService.Instance.ConfigManagerImpl._remoteConfigRequest.projectId = projectId;
         }
 
         public static void FieldInvestigation(Type t)

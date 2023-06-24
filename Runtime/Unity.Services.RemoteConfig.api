@@ -1,0 +1,363 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace Unity.RemoteConfig
+{
+    [System.Obsolete(@"The Remote Config implementation you are using is now deprecated as of version 3.x. It will continue to function, but in order to use the newly supported implementation, please refer to the following docs (https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.0/manual/CodeIntegration.html) or ExampleSample.cs", false)] public static class ConfigManager
+    {
+        public static event System.Action<Unity.RemoteConfig.ConfigResponse> FetchCompleted;
+        public static Unity.RemoteConfig.RuntimeConfig appConfig { get; set; }
+        public static Unity.RemoteConfig.ConfigRequestStatus requestStatus { get; set; }
+        public static void FetchConfigs<T, T2>(T userAttributes, T2 appAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new();
+        public static void FetchConfigs<T, T2>(string configType, T userAttributes, T2 appAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new();
+        public static void FetchConfigs<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new() where T3 : System.ValueType, new();
+        public static void FetchConfigs<T, T2, T3>(string configType, T userAttributes, T2 appAttributes, T3 filterAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new() where T3 : System.ValueType, new();
+        public static Unity.RemoteConfig.RuntimeConfig GetConfig(string configType);
+        public static void SetConfigAssignmentHash(string configAssignmentHashID);
+        public static void SetCustomUserID(string customUserID);
+        public static void SetEnvironmentID(string environmentID);
+        public static void SetPlayerIdentityToken(string playerIdentityToken);
+        public static void SetUserID(string userID);
+    }
+
+    public class ConfigManagerImpl
+    {
+        public Unity.RemoteConfig.RuntimeConfig appConfig { get; }
+        public ConfigManagerImpl(string originService, string attributionMetadataStr = , string cacheFileRC = RemoteConfigCache.json) {}
+        public void FetchConfigs(object userAttributes, object appAttributes);
+        public void FetchConfigs<T, T2>(T userAttributes, T2 appAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new();
+        public void FetchConfigs(object userAttributes, object appAttributes, object filterAttributes);
+        public void FetchConfigs(string configType, object userAttributes, object appAttributes);
+        public void FetchConfigs<T, T2>(string configType, T userAttributes, T2 appAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new();
+        public void FetchConfigs<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new() where T3 : System.ValueType, new();
+        public void FetchConfigs(string configType, object userAttributes, object appAttributes, object filterAttributes);
+        public void FetchConfigs<T, T2, T3>(string configType, T userAttributes, T2 appAttributes, T3 filterAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new() where T3 : System.ValueType, new();
+        public Unity.RemoteConfig.RuntimeConfig GetConfig(string configType);
+        public void LoadFromCache();
+        public void SaveCache(Unity.RemoteConfig.ConfigResponse response);
+        public void SetConfigAssignmentHash(string configAssignmentHashID);
+        public void SetCustomUserID(string customUserID);
+        public void SetEnvironmentID(string environmentID);
+        public void SetPlayerIdentityToken(string identityToken);
+        public void SetUserID(string userID);
+    }
+
+    public enum ConfigOrigin
+    {
+        public const Unity.RemoteConfig.ConfigOrigin Cached = 1;
+        public const Unity.RemoteConfig.ConfigOrigin Default = 0;
+        public const Unity.RemoteConfig.ConfigOrigin Remote = 2;
+        public int value__;
+    }
+
+    public enum ConfigRequestStatus
+    {
+        public const Unity.RemoteConfig.ConfigRequestStatus Failed = 1;
+        public const Unity.RemoteConfig.ConfigRequestStatus None = 0;
+        public const Unity.RemoteConfig.ConfigRequestStatus Pending = 3;
+        public const Unity.RemoteConfig.ConfigRequestStatus Success = 2;
+        public int value__;
+    }
+
+    public struct ConfigResponse
+    {
+        public Newtonsoft.Json.Linq.JObject body;
+        public System.Collections.Generic.Dictionary<string, string> headers;
+        public Unity.RemoteConfig.ConfigOrigin requestOrigin;
+        public Unity.RemoteConfig.ConfigRequestStatus status;
+    }
+
+    public interface IRCUnityWebRequest
+    {
+        public abstract UnityEngine.Networking.CertificateHandler certificateHandler { get; set; }
+        public abstract bool chunkedTransfer { get; set; }
+        public abstract bool disposeCertificateHandlerOnDispose { get; set; }
+        public abstract bool disposeDownloadHandlerOnDispose { get; set; }
+        public abstract bool disposeUploadHandlerOnDispose { get; set; }
+        public abstract System.UInt64 downloadedBytes { get; }
+        public abstract UnityEngine.Networking.DownloadHandler downloadHandler { get; set; }
+        public abstract float downloadProgress { get; }
+        public abstract string error { get; }
+        public abstract bool isDone { get; }
+        public abstract bool isHttpError { get; }
+        public abstract bool isModifiable { get; }
+        public abstract bool isNetworkError { get; }
+        public abstract string method { get; set; }
+        public abstract int redirectLimit { get; set; }
+        public abstract long responseCode { get; }
+        public abstract int timeout { get; set; }
+        public abstract UnityEngine.Networking.UnityWebRequest unityWebRequest { get; set; }
+        public abstract System.UInt64 uploadedBytes { get; }
+        public abstract UnityEngine.Networking.UploadHandler uploadHandler { get; set; }
+        public abstract float uploadProgress { get; }
+        public abstract System.Uri uri { get; set; }
+        public abstract string url { get; set; }
+        public abstract bool useHttpContinue { get; set; }
+        public abstract void Abort();
+        public abstract void Dispose();
+        public abstract string GetRequestHeader(string name);
+        public abstract string GetResponseHeader(string name);
+        public abstract System.Collections.Generic.Dictionary<string, string> GetResponseHeaders();
+        public abstract UnityEngine.Networking.UnityWebRequestAsyncOperation SendWebRequest();
+        public abstract void SetRequestHeader(string name, string value);
+    }
+
+    public class RCUnityWebRequest : Unity.RemoteConfig.IRCUnityWebRequest
+    {
+        public virtual UnityEngine.Networking.CertificateHandler certificateHandler { get; set; }
+        public virtual bool chunkedTransfer { get; set; }
+        public virtual bool disposeCertificateHandlerOnDispose { get; set; }
+        public virtual bool disposeDownloadHandlerOnDispose { get; set; }
+        public virtual bool disposeUploadHandlerOnDispose { get; set; }
+        public virtual System.UInt64 downloadedBytes { get; }
+        public virtual UnityEngine.Networking.DownloadHandler downloadHandler { get; set; }
+        public virtual float downloadProgress { get; }
+        public virtual string error { get; }
+        public virtual bool isDone { get; }
+        public virtual bool isHttpError { get; }
+        public virtual bool isModifiable { get; }
+        public virtual bool isNetworkError { get; }
+        public virtual string method { get; set; }
+        public virtual int redirectLimit { get; set; }
+        public virtual long responseCode { get; }
+        public virtual int timeout { get; set; }
+        public virtual UnityEngine.Networking.UnityWebRequest unityWebRequest { get; set; }
+        public virtual System.UInt64 uploadedBytes { get; }
+        public virtual UnityEngine.Networking.UploadHandler uploadHandler { get; set; }
+        public virtual float uploadProgress { get; }
+        public virtual System.Uri uri { get; set; }
+        public virtual string url { get; set; }
+        public virtual bool useHttpContinue { get; set; }
+        public RCUnityWebRequest() {}
+        public virtual void Abort();
+        public virtual void Dispose();
+        public virtual string GetRequestHeader(string name);
+        public virtual string GetResponseHeader(string name);
+        public virtual System.Collections.Generic.Dictionary<string, string> GetResponseHeaders();
+        public virtual UnityEngine.Networking.UnityWebRequestAsyncOperation SendWebRequest();
+        public virtual void SetRequestHeader(string name, string value);
+    }
+
+    public class RuntimeConfig
+    {
+        public string configType;
+        public event System.Action<Unity.RemoteConfig.ConfigResponse> FetchCompleted;
+        public string assignmentId { get; set; }
+        public Newtonsoft.Json.Linq.JObject config { get; }
+        public string configAssignmentHash { get; set; }
+        public string environmentId { get; set; }
+        public Unity.RemoteConfig.ConfigOrigin origin { get; }
+        public bool GetBool(string key, bool defaultValue = False);
+        public float GetFloat(string key, float defaultValue = 0);
+        public int GetInt(string key, int defaultValue = 0);
+        public string GetJson(string key, string defaultValue = {});
+        public string[] GetKeys();
+        public long GetLong(string key, long defaultValue = 0);
+        public string GetString(string key, string defaultValue = );
+        public bool HasKey(string key);
+    }
+}
+
+namespace Unity.Services.RemoteConfig
+{
+    [System.Obsolete(@"All methods from ConfigManager have been moved to RemoteConfigService type. Please access them through RemoteConfigService.Instance instead of ConfigManager", false)] public static class ConfigManager
+    {
+        public static event System.Action<Unity.Services.RemoteConfig.ConfigResponse> FetchCompleted;
+        public static Unity.Services.RemoteConfig.RuntimeConfig appConfig { get; set; }
+        public static Unity.Services.RemoteConfig.ConfigRequestStatus requestStatus { get; set; }
+        public static void FetchConfigs<T, T2>(T userAttributes, T2 appAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new();
+        public static void FetchConfigs<T, T2>(string configType, T userAttributes, T2 appAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new();
+        public static void FetchConfigs<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new() where T3 : System.ValueType, new();
+        public static void FetchConfigs<T, T2, T3>(string configType, T userAttributes, T2 appAttributes, T3 filterAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new() where T3 : System.ValueType, new();
+        public static System.Threading.Tasks.Task<Unity.Services.RemoteConfig.RuntimeConfig> FetchConfigsAsync<T, T2>(T userAttributes, T2 appAttributes);
+        public static System.Threading.Tasks.Task<Unity.Services.RemoteConfig.RuntimeConfig> FetchConfigsAsync<T, T2>(string configType, T userAttributes, T2 appAttributes);
+        public static System.Threading.Tasks.Task<Unity.Services.RemoteConfig.RuntimeConfig> FetchConfigsAsync<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes);
+        public static System.Threading.Tasks.Task<Unity.Services.RemoteConfig.RuntimeConfig> FetchConfigsAsync<T, T2, T3>(string configType, T userAttributes, T2 appAttributes, T3 filterAttributes);
+        public static Unity.Services.RemoteConfig.RuntimeConfig GetConfig(string configType);
+        public static void SetAnalyticsUserID(string analyticsUserID);
+        public static void SetConfigAssignmentHash(string configAssignmentHashID);
+        public static void SetCustomUserID(string customUserID);
+        public static void SetEnvironmentID(string environmentID);
+        public static void SetPlayerID(string playerID);
+        public static void SetPlayerIdentityToken(string playerIdentityToken);
+        public static void SetUserID(string iid);
+    }
+
+    public class ConfigManagerImpl
+    {
+        public Unity.Services.RemoteConfig.RuntimeConfig appConfig { get; }
+        public ConfigManagerImpl(string originService, string attributionMetadataStr = , string cacheFileRC = RemoteConfigCache.json) {}
+        public void FetchConfigs(object userAttributes, object appAttributes);
+        public void FetchConfigs<T, T2>(T userAttributes, T2 appAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new();
+        public void FetchConfigs(object userAttributes, object appAttributes, object filterAttributes);
+        public void FetchConfigs(string configType, object userAttributes, object appAttributes);
+        public void FetchConfigs<T, T2>(string configType, T userAttributes, T2 appAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new();
+        public void FetchConfigs<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new() where T3 : System.ValueType, new();
+        public void FetchConfigs(string configType, object userAttributes, object appAttributes, object filterAttributes);
+        public void FetchConfigs<T, T2, T3>(string configType, T userAttributes, T2 appAttributes, T3 filterAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new() where T3 : System.ValueType, new();
+        [System.Diagnostics.DebuggerStepThrough] [System.Runtime.CompilerServices.AsyncStateMachine(typeof(Unity.Services.RemoteConfig.ConfigManagerImpl.<FetchConfigsAsync>d__34))] public System.Threading.Tasks.Task<Unity.Services.RemoteConfig.RuntimeConfig> FetchConfigsAsync(object userAttributes, object appAttributes);
+        [System.Diagnostics.DebuggerStepThrough] [System.Runtime.CompilerServices.AsyncStateMachine(typeof(Unity.Services.RemoteConfig.ConfigManagerImpl.<FetchConfigsAsync>d__33))] public System.Threading.Tasks.Task<Unity.Services.RemoteConfig.RuntimeConfig> FetchConfigsAsync(object userAttributes, object appAttributes, object filterAttributes);
+        [System.Diagnostics.DebuggerStepThrough] [System.Runtime.CompilerServices.AsyncStateMachine(typeof(Unity.Services.RemoteConfig.ConfigManagerImpl.<FetchConfigsAsync>d__32))] public System.Threading.Tasks.Task<Unity.Services.RemoteConfig.RuntimeConfig> FetchConfigsAsync(string configType, object userAttributes, object appAttributes);
+        [System.Diagnostics.DebuggerStepThrough] [System.Runtime.CompilerServices.AsyncStateMachine(typeof(Unity.Services.RemoteConfig.ConfigManagerImpl.<FetchConfigsAsync>d__31))] public System.Threading.Tasks.Task<Unity.Services.RemoteConfig.RuntimeConfig> FetchConfigsAsync(string configType, object userAttributes, object appAttributes, object filterAttributes);
+        public Unity.Services.RemoteConfig.RuntimeConfig GetConfig(string configType);
+        public void LoadFromCache();
+        public void SaveCache(Unity.Services.RemoteConfig.ConfigResponse response);
+        public void SetAnalyticsUserID(string analyticsUserID);
+        public void SetConfigAssignmentHash(string configAssignmentHashID);
+        public void SetCustomUserID(string customUserID);
+        public void SetEnvironmentID(string environmentID);
+        public void SetPlayerID(string playerID);
+        public void SetPlayerIdentityToken(string identityToken);
+        public void SetUserID(string iid);
+    }
+
+    public enum ConfigOrigin
+    {
+        public const Unity.Services.RemoteConfig.ConfigOrigin Cached = 1;
+        public const Unity.Services.RemoteConfig.ConfigOrigin Default = 0;
+        public const Unity.Services.RemoteConfig.ConfigOrigin Remote = 2;
+        public int value__;
+    }
+
+    public enum ConfigRequestStatus
+    {
+        public const Unity.Services.RemoteConfig.ConfigRequestStatus Failed = 1;
+        public const Unity.Services.RemoteConfig.ConfigRequestStatus None = 0;
+        public const Unity.Services.RemoteConfig.ConfigRequestStatus Pending = 3;
+        public const Unity.Services.RemoteConfig.ConfigRequestStatus Success = 2;
+        public int value__;
+    }
+
+    public struct ConfigResponse
+    {
+        public Newtonsoft.Json.Linq.JObject body;
+        public System.Collections.Generic.Dictionary<string, string> headers;
+        public Unity.Services.RemoteConfig.ConfigOrigin requestOrigin;
+        public Unity.Services.RemoteConfig.ConfigRequestStatus status;
+    }
+
+    public static class CoreConfig
+    {
+        public static string analyticsUserId;
+        public static string installationId;
+        public static Unity.Services.Authentication.Internal.IPlayerId IplayerId;
+        public static Unity.Services.Authentication.Internal.IAccessToken Itoken;
+    }
+
+    public interface IRCUnityWebRequest
+    {
+        public abstract UnityEngine.Networking.CertificateHandler certificateHandler { get; set; }
+        public abstract bool disposeCertificateHandlerOnDispose { get; set; }
+        public abstract bool disposeDownloadHandlerOnDispose { get; set; }
+        public abstract bool disposeUploadHandlerOnDispose { get; set; }
+        public abstract System.UInt64 downloadedBytes { get; }
+        public abstract UnityEngine.Networking.DownloadHandler downloadHandler { get; set; }
+        public abstract float downloadProgress { get; }
+        public abstract string error { get; }
+        public abstract bool isDone { get; }
+        public abstract bool isHttpError { get; }
+        public abstract bool isModifiable { get; }
+        public abstract bool isNetworkError { get; }
+        public abstract string method { get; set; }
+        public abstract int redirectLimit { get; set; }
+        public abstract long responseCode { get; }
+        public abstract int timeout { get; set; }
+        public abstract UnityEngine.Networking.UnityWebRequest unityWebRequest { get; set; }
+        public abstract System.UInt64 uploadedBytes { get; }
+        public abstract UnityEngine.Networking.UploadHandler uploadHandler { get; set; }
+        public abstract float uploadProgress { get; }
+        public abstract System.Uri uri { get; set; }
+        public abstract string url { get; set; }
+        public abstract bool useHttpContinue { get; set; }
+        public abstract void Abort();
+        public abstract void Dispose();
+        public abstract string GetRequestHeader(string name);
+        public abstract string GetResponseHeader(string name);
+        public abstract System.Collections.Generic.Dictionary<string, string> GetResponseHeaders();
+        public abstract UnityEngine.Networking.UnityWebRequestAsyncOperation SendWebRequest();
+        public abstract void SetRequestHeader(string name, string value);
+    }
+
+    public class RCUnityWebRequest : Unity.Services.RemoteConfig.IRCUnityWebRequest
+    {
+        public virtual UnityEngine.Networking.CertificateHandler certificateHandler { get; set; }
+        public virtual bool disposeCertificateHandlerOnDispose { get; set; }
+        public virtual bool disposeDownloadHandlerOnDispose { get; set; }
+        public virtual bool disposeUploadHandlerOnDispose { get; set; }
+        public virtual System.UInt64 downloadedBytes { get; }
+        public virtual UnityEngine.Networking.DownloadHandler downloadHandler { get; set; }
+        public virtual float downloadProgress { get; }
+        public virtual string error { get; }
+        public virtual bool isDone { get; }
+        public virtual bool isHttpError { get; }
+        public virtual bool isModifiable { get; }
+        public virtual bool isNetworkError { get; }
+        public virtual string method { get; set; }
+        public virtual int redirectLimit { get; set; }
+        public virtual long responseCode { get; }
+        public virtual int timeout { get; set; }
+        public virtual UnityEngine.Networking.UnityWebRequest unityWebRequest { get; set; }
+        public virtual System.UInt64 uploadedBytes { get; }
+        public virtual UnityEngine.Networking.UploadHandler uploadHandler { get; set; }
+        public virtual float uploadProgress { get; }
+        public virtual System.Uri uri { get; set; }
+        public virtual string url { get; set; }
+        public virtual bool useHttpContinue { get; set; }
+        public RCUnityWebRequest() {}
+        public virtual void Abort();
+        public virtual void Dispose();
+        public virtual string GetRequestHeader(string name);
+        public virtual string GetResponseHeader(string name);
+        public virtual System.Collections.Generic.Dictionary<string, string> GetResponseHeaders();
+        public virtual UnityEngine.Networking.UnityWebRequestAsyncOperation SendWebRequest();
+        public virtual void SetRequestHeader(string name, string value);
+    }
+
+    public sealed class RemoteConfigService
+    {
+        public event System.Action<Unity.Services.RemoteConfig.ConfigResponse> FetchCompleted;
+        public Unity.Services.RemoteConfig.RuntimeConfig appConfig { get; set; }
+        public static Unity.Services.RemoteConfig.RemoteConfigService Instance { get; }
+        public Unity.Services.RemoteConfig.ConfigRequestStatus requestStatus { get; set; }
+        public void FetchConfigs<T, T2>(T userAttributes, T2 appAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new();
+        public void FetchConfigs<T, T2>(string configType, T userAttributes, T2 appAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new();
+        public void FetchConfigs<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new() where T3 : System.ValueType, new();
+        public void FetchConfigs<T, T2, T3>(string configType, T userAttributes, T2 appAttributes, T3 filterAttributes) where T : System.ValueType, new() where T2 : System.ValueType, new() where T3 : System.ValueType, new();
+        public System.Threading.Tasks.Task<Unity.Services.RemoteConfig.RuntimeConfig> FetchConfigsAsync<T, T2>(T userAttributes, T2 appAttributes);
+        public System.Threading.Tasks.Task<Unity.Services.RemoteConfig.RuntimeConfig> FetchConfigsAsync<T, T2>(string configType, T userAttributes, T2 appAttributes);
+        public System.Threading.Tasks.Task<Unity.Services.RemoteConfig.RuntimeConfig> FetchConfigsAsync<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes);
+        public System.Threading.Tasks.Task<Unity.Services.RemoteConfig.RuntimeConfig> FetchConfigsAsync<T, T2, T3>(string configType, T userAttributes, T2 appAttributes, T3 filterAttributes);
+        public Unity.Services.RemoteConfig.RuntimeConfig GetConfig(string configType);
+        public void SetAnalyticsUserID(string analyticsUserID);
+        public void SetConfigAssignmentHash(string configAssignmentHashID);
+        public void SetCustomUserID(string customUserID);
+        public void SetEnvironmentID(string environmentID);
+        public void SetPlayerID(string playerID);
+        public void SetPlayerIdentityToken(string playerIdentityToken);
+        public void SetUserID(string iid);
+    }
+
+    public class RuntimeConfig
+    {
+        public string configType;
+        public event System.Action<Unity.Services.RemoteConfig.ConfigResponse> FetchCompleted;
+        public string assignmentId { get; set; }
+        public Newtonsoft.Json.Linq.JObject config { get; }
+        public string configAssignmentHash { get; set; }
+        public string environmentId { get; set; }
+        public Unity.Services.RemoteConfig.ConfigOrigin origin { get; }
+        public bool GetBool(string key, bool defaultValue = False);
+        public float GetFloat(string key, float defaultValue = 0);
+        public int GetInt(string key, int defaultValue = 0);
+        public string GetJson(string key, string defaultValue = {});
+        public string[] GetKeys();
+        public long GetLong(string key, long defaultValue = 0);
+        public string GetString(string key, string defaultValue = );
+        public bool HasKey(string key);
+    }
+
+    public static class Utilities
+    {
+        public static bool CheckForInternetConnection();
+    }
+}

@@ -4,6 +4,32 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.0.1] - 2023-06-24
+
+- Dropped support for Unity 2020.3, minimum supported is 2021.3 now
+
+## [4.0.0] - 2023-06-14
+
+- Removed 2.x namespace and corresponding API's for backward compatibility with 2.x implementation
+- Removed static ConfigManager class
+- Updated SDK documentation regarding caching and unity attributes
+- Updated `com.unity.services.core` dependency from `1.5.2` to `1.8.1`
+- Promote Candidate Experimental package to Verified Production
+- Dropped support for Unity 2019, minimum supported is 2020.3 now
+- Updated delivery endpoint from `https://config.unity3d.com/settings` to `https://config.services.api.unity.com/settings`
+- Added fix for inadvertently persisted auth token
+
+## [3.2.0-pre.1] - 2022-10-19
+
+- Renamed CorePackageInitializer to RemoteConfigInitializer
+- Initialize method is now synchronous
+- Removed await Task.Delay(1); from FetchConfigsAsync method
+- Refactored WebRequest in order to adhere to WebGL implementation
+- Added documentation for caching mechanism, updated restApi links
+- ExampleSample made visible in package manager
+- Updated `com.unity.services.core` dependency from `1.4.3` to `1.5.2`
+- <IProjectConfiguration> component replaced with <IExternalUserId> component within initialization, changing the way RCR accesses analyticsUserId
+- environmentId extracted from component instead of the accessToken
 
 ## [3.1.3] - 2022-06-17
 

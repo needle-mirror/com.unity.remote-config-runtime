@@ -18,16 +18,19 @@ public class ExampleSample : MonoBehaviour
     public struct userAttributes {}
     public struct appAttributes {}
 
+    // Declare any Settings variables you’ll want to configure remotely:
+    public int enemyVolume;
+
     async Task InitializeRemoteConfigAsync()
     {
             // initialize handlers for unity game services
             await UnityServices.InitializeAsync();
 
-            // options can be passed in the initializer, e.g if you want to set analytics-user-id use two lines from below:
-            // var options = new InitializationOptions().SetOption("com.unity.services.core.analytics-user-id", "my-user-id-123");
+            // options can be passed in the initializer, e.g if you want to set AnalyticsUserId or an EnvironmentName use the lines from below:
+            // var options = new InitializationOptions()
+            // .SetEnvironmentName("testing")
+            // .SetAnalyticsUserId("test-user-id-12345");
             // await UnityServices.InitializeAsync(options);
-            // for all valid settings and options, check
-            // https://pages.prd.mz.internal.unity3d.com/mz-developer-handbook/docs/sdk/operatesolutionsdk/settings-and-options-for-services
 
             // remote config requires authentication for managing environment information
             if (!AuthenticationService.Instance.IsSignedIn)
@@ -45,8 +48,8 @@ public class ExampleSample : MonoBehaviour
             await InitializeRemoteConfigAsync();
         }
 
-        RemoteConfigService.Instance.FetchCompleted += ApplyRemoteSettings;
-        RemoteConfigService.Instance.FetchConfigs(new userAttributes(), new appAttributes());
+        RemoteConfigService.Instance.FetchCompleted += ApplyRemoteConfig;
+        await RemoteConfigService.Instance.FetchConfigsAsync(new userAttributes(), new appAttributes());
 
         // -- Example on how to fetch configuration settings using filter attributes:
         // var fAttributes = new filterAttributes();
@@ -66,22 +69,27 @@ public class ExampleSample : MonoBehaviour
         // await RemoteConfigService.Instance.FetchConfigsAsync(configType, new userAttributes(), new appAttributes(), fAttributes);
     }
 
-    void ApplyRemoteSettings(ConfigResponse configResponse)
+    void ApplyRemoteConfig(ConfigResponse configResponse)
     {
 
         switch (configResponse.requestOrigin)
         {
             case ConfigOrigin.Default:
-                Debug.Log("Default values will be returned");
+                Debug.Log("No settings loaded this session and no local cache file exists; using default values.");
                 break;
             case ConfigOrigin.Cached:
-                Debug.Log("Cached values loaded");
+                Debug.Log("No settings loaded this session; using cached values from a previous session.");
                 break;
             case ConfigOrigin.Remote:
-                Debug.Log("Remote Values changed");
+                Debug.Log("New settings loaded this session; update values accordingly.");
                 Debug.Log("RemoteConfigService.Instance.appConfig fetched: " + RemoteConfigService.Instance.appConfig.config.ToString());
                 break;
         }
+
+        enemyVolume = RemoteConfigService.Instance.appConfig.GetInt("enemyVolume");
+
+        // These calls could also be used with the 2nd optional arg to provide a default value, e.g:
+        // enemyVolume = RemoteConfigService.Instance.appConfig.GetInt("enemyVolume", 100);
 
     }
 

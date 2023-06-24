@@ -1,19 +1,32 @@
 {
   "name": "com.unity.remote-config-runtime",
   "displayName": "Remote Config Runtime",
-  "version": "3.1.3",
-  "unity": "2019.4",
+  "version": "4.0.1",
+  "unity": "2021.3",
   "_upm": {
-    "changelog": "- using ENABLE_CLOUD_SERVICES_ANALYTICS flag for platforms using Analytics within 2.x namespace"
+    "gameService": {
+      "genericDashboardUrl": "https://dashboard.unity3d.com/remote-config",
+      "projectDashboardUrl": "https://dashboard.unity3d.com/organizations/{0}/projects/{1}/settings/general",
+      "projectDashboardUrlType": "OrganizationKeyAndProjectGuid",
+      "useCasesUrl": "https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.2/manual/index.html"
+    },
+    "changelog": "- Dropped support for Unity 2020.3, minimum supported is 2021.3 now"
   },
   "description": "Remote Config is a cloud service that lets you tune and customize your app over the air without requiring an update to your game.  This package is intended to be inherited as a dependency, and should not be directly installed, by end users. Unity Developers that want to implement Unity Remote Config in their game/application, should use the Remote Config Package `com.unity.remote-config` rather than this package directly.",
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "3.0.2",
     "com.unity.modules.unitywebrequest": "1.0.0",
     "com.unity.modules.unityanalytics": "1.0.0",
-    "com.unity.services.core": "1.4.0",
-    "com.unity.services.authentication": "2.0.0"
+    "com.unity.services.core": "1.8.1",
+    "com.unity.services.authentication": "2.2.0"
   },
+  "samples": [
+    {
+      "displayName": "ExampleSample",
+      "description": "Contains basic implementation sample for remote config runtime",
+      "path": "Samples~/Example"
+    }
+  ],
   "keywords": [
     "remote",
     "config",
@@ -48,18 +61,12 @@
     "deploy"
   ],
   "upmCi": {
-    "footprint": "0ecaebb60d2b2dfcca8f1e27a2a12c3fd747c71a"
+    "footprint": "818adb59b1986ad9f48de2cb3002089152d3156a"
   },
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@4.0/manual/index.html",
   "repository": {
-    "url": "https://github.cds.internal.unity3d.com/unity/com.unity.remote-config-runtime.git",
+    "url": "https://github.cds.internal.unity3d.com/unity/operate-services-sdk.git",
     "type": "git",
-    "revision": "91b2d12b27935e9c9b1a488069ac9dc6945b8bfc"
-  },
-  "samples": [
-    {
-      "displayName": "Example Sample",
-      "description": "This sample example C# file can be used to quickly utilise usage of Remote Config APIs. For more comprehensive code integration, visit https://docs.unity3d.com/Packages/com.unity.remote-config@latest",
-      "path": "Samples~/Example"
-    }
-  ]
+    "revision": "ec5d70692c285d10b3cd798493012eb29560e113"
+  }
 }

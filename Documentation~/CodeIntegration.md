@@ -1,33 +1,5 @@
 # Code integration
-The `RemoteConfig` API is included in the `Unity.Services` namespace, which you must include in your game script. For more information on its classes and methods, see the [Remote Config Scripting API](../api/index.html) and the [Remote Config Runtime Scripting API](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.0/api/index.html) documentation.
-
-## Initialization
-The Remote Config package depends on Unity's authentication and core services.
-These dependencies require a small amount of user code for proper configuration.
-
-```c#
-using Unity.Services.Authentication;
-using Unity.Services.Core;
-using System.Threading.Tasks;
-
-async Task InitializeRemoteConfigAsync()
-{
-        // initialize handlers for unity game services
-        await UnityServices.InitializeAsync();
-
-        // options can be passed in the initializer, e.g if you want to set analytics-user-id or an environment-name use the lines from below:
-        // var options = new InitializationOptions()
-        //   .SetOption("com.unity.services.core.analytics-user-id", "my-user-id-1234")
-        //   .SetOption("com.unity.services.core.environment-name", "production");
-        // await UnityServices.InitializeAsync(options);
-
-        // remote config requires authentication for managing environment information
-        if (!AuthenticationService.Instance.IsSignedIn)
-        {
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
-        }
-}
-```
+The `RemoteConfig` API is included in the `Unity.Services` namespace, which you must include in your game script. For more information on its classes and methods, see the [Remote Config Scripting API](../api/index.html) and the [Remote Config Runtime Scripting API](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.1/api/index.html) documentation.
 
 ## Implementing custom attributes
 To provide custom attributes for [Game Overrides conditions](GameOverridesAndSettings.md#condition), implement the following `struct` variables in your game script:
@@ -44,6 +16,9 @@ Start by creating a framework for your script that implements your custom attrib
 ```c#
 using UnityEngine;
 using Unity.Services.RemoteConfig;
+using Unity.Services.Authentication;
+using Unity.Services.Core;
+using System.Threading.Tasks;
 
 public class RemoteConfigExample : MonoBehaviour {
 
@@ -72,16 +47,35 @@ public class RemoteConfigExample : MonoBehaviour {
     // Declare any Settings variables you’ll want to configure remotely:
     public int enemyVolume;
     public float enemyHealth;
-    public float enemyDamage;    
+    public float enemyDamage;
 
-    // RemoteConfigService.Instance.FetchConfigs() must be called with the attributes structs (empty or with custom attributes) to initiate the WebRequest.
 
-    async void Awake () {
+    // The Remote Config package depends on Unity's authentication and core services.
+    // These dependencies require a small amount of user code for proper configuration.
+    async Task InitializeRemoteConfigAsync()
+    {
+            // initialize handlers for unity game services
+            await UnityServices.InitializeAsync();
+
+            // options can be passed in the initializer, e.g if you want to set AnalyticsUserId or an EnvironmentName use the lines from below:
+            // var options = new InitializationOptions()
+            // .SetEnvironmentName("testing")
+            // .SetAnalyticsUserId("test-user-id-12345");
+            // await UnityServices.InitializeAsync(options);
+
+            // remote config requires authentication for managing environment information
+            if (!AuthenticationService.Instance.IsSignedIn)
+            {
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            }
+    }
+
+    async Task Awake () {
         // In this example, you will fetch configuration settings on Awake.
     }
 
     // Create a function to set your variables to their keyed values:
-    void ApplyRemoteSettings (ConfigResponse configResponse) {
+    void ApplyRemoteConfig (ConfigResponse configResponse) {
         // You will implement this in the final step.
     }
 }
@@ -90,7 +84,7 @@ public class RemoteConfigExample : MonoBehaviour {
 ## Fetching and applying settings at runtime
 Next, implement your Remote Config support functions and call them at runtime to retrieve key-value pairs from the service then map them to the appropriate variables.
 
-The Remote Config service returns a [`RemoteConfigService.Instance`](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.0/api/Unity.Service.RemoteConfig.RemoteConfigService.html) object to handle fetching and applying your configuration settings at runtime. In this example, you’ll use it to fetch the key-value pairs from the remote service, and invoke your `ApplyRemoteSettings` function on retrieval. `ApplyRemoteSettings` takes a [`ConfigResponse`](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.0/api/Unity.Service.RemoteConfig.ConfigResponse.html) struct, which represents the response to a fetch request, and uses the [`RemoteConfigService.Instance.appConfig`](../api/Unity.Service.RemoteConfig.RemoteConfigService.appConfig.html) method to apply settings.
+The Remote Config service returns a [`RemoteConfigService.Instance`](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.1/api/Unity.Service.RemoteConfig.RemoteConfigService.html) object to handle fetching and applying your configuration settings at runtime. In this example, you’ll use it to fetch the key-value pairs from the remote service, and invoke your `ApplyRemoteConfig` function on retrieval. `ApplyRemoteConfig` takes a [`ConfigResponse`](https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.1/api/Unity.Service.RemoteConfig.ConfigResponse.html) struct, which represents the response to a fetch request, and uses the [`RemoteConfigService.Instance.appConfig`](../api/Unity.Service.RemoteConfig.RemoteConfigService.appConfig.html) method to apply settings.
 
 ```c#
     // Retrieve and apply the current key-value pairs from the service on Awake:
@@ -104,55 +98,67 @@ The Remote Config service returns a [`RemoteConfigService.Instance`](https://doc
         }
 
         // Add a listener to apply settings when successfully retrieved:
-        RemoteConfigService.Instance.FetchCompleted += ApplyRemoteSettings;
+        RemoteConfigService.Instance.FetchCompleted += ApplyRemoteConfig;
 
-        // Set the user’s unique ID:
-        RemoteConfigService.Instance.SetCustomUserID("some-user-id");
+        // you can set the user’s unique ID:
+        // RemoteConfigService.Instance.SetCustomUserID("some-user-id");
 
-        // Set the environment ID:
-        RemoteConfigService.Instance.SetEnvironmentID("an-env-id");
+        // you can set the environment ID:
+        // RemoteConfigService.Instance.SetEnvironmentID("an-env-id");
 
-        // Fetch configuration settings from the remote service:
-        RemoteConfigService.Instance.FetchConfigs<userAttributes, appAttributes>(new userAttributes(), new appAttributes());
+        // Fetch configuration settings from the remote service, they must be called with the attributes structs (empty or with custom attributes) to initiate the WebRequest.
+        await RemoteConfigService.Instance.FetchConfigsAsync(new userAttributes(), new appAttributes());
 
         // Example on how to fetch configuration settings using filter attributes:
-        var fAttributes = new filterAttributes();
-        fAttributes.key = new string[] { "sword","cannon" };
-        RemoteConfigService.Instance.FetchConfigs(new userAttributes(), new appAttributes(), fAttributes);
+        // var fAttributes = new filterAttributes();
+        // fAttributes.key = new string[] { "sword","cannon" };
+        // RemoteConfigService.Instance.FetchConfigs(new userAttributes(), new appAttributes(), fAttributes);
 
         // Example on how to fetch configuration settings if you have dedicated configType:
-        var configType = "specialConfigType";
+        // var configType = "specialConfigType";
         // Fetch configs of that configType
-        RemoteConfigService.Instance.FetchConfigs(configType, new userAttributes(), new appAttributes());
+        // RemoteConfigService.Instance.FetchConfigs(configType, new userAttributes(), new appAttributes());
         // Configuration can be fetched with both configType and fAttributes passed
-        RemoteConfigService.Instance.FetchConfigs(configType, new userAttributes(), new appAttributes(), fAttributes);
+        // RemoteConfigService.Instance.FetchConfigs(configType, new userAttributes(), new appAttributes(), fAttributes);
 
         // All examples from above will also work asynchronously, returning Task<RuntimeConfig>
-        await RemoteConfigService.Instance.FetchConfigsAsync(new userAttributes(), new appAttributes());
-        await RemoteConfigService.Instance.FetchConfigsAsync(new userAttributes(), new appAttributes(), fAttributes);
-        await RemoteConfigService.Instance.FetchConfigsAsync(configType, new userAttributes(), new appAttributes());
-        await RemoteConfigService.Instance.FetchConfigsAsync(configType, new userAttributes(), new appAttributes(), fAttributes);
+        // await RemoteConfigService.Instance.FetchConfigsAsync(new userAttributes(), new appAttributes());
+        // await RemoteConfigService.Instance.FetchConfigsAsync(new userAttributes(), new appAttributes(), fAttributes);
+        // await RemoteConfigService.Instance.FetchConfigsAsync(configType, new userAttributes(), new appAttributes());
+        // await RemoteConfigService.Instance.FetchConfigsAsync(configType, new userAttributes(), new appAttributes(), fAttributes);
 
     }
 
-    void ApplyRemoteSettings (ConfigResponse configResponse) {
+    void ApplyRemoteConfig (ConfigResponse configResponse) {
         // Conditionally update settings, depending on the response's origin:
         switch (configResponse.requestOrigin) {
             case ConfigOrigin.Default:
-                Debug.Log ("No settings loaded this session; using default values.");
+                Debug.Log ("No settings loaded this session and no local cache file exists; using default values.");
                 break;
             case ConfigOrigin.Cached:
                 Debug.Log ("No settings loaded this session; using cached values from a previous session.");
                 break;
             case ConfigOrigin.Remote:
                 Debug.Log ("New settings loaded this session; update values accordingly.");
-                enemyVolume = RemoteConfigService.Instance.appConfig.GetInt ("enemyVolume");
-                enemyHealth = RemoteConfigService.Instance.appConfig.GetInt ("enemyHealth");
-                enemyDamage = RemoteConfigService.Instance.appConfig.GetFloat ("enemyDamage");
-                assignmentId = RemoteConfigService.Instance.appConfig.assignmentId;
                 break;
         }
+
+        enemyVolume = RemoteConfigService.Instance.appConfig.GetInt("enemyVolume");
+        enemyHealth = RemoteConfigService.Instance.appConfig.GetInt("enemyHealth");
+        enemyDamage = RemoteConfigService.Instance.appConfig.GetFloat("enemyDamage");
+        assignmentId = RemoteConfigService.Instance.appConfig.assignmentId;
+
+        // These calls could also be used with the 2nd optional arg to provide a default value, e.g:
+        // enemyVolume = RemoteConfigService.Instance.appConfig.GetInt("enemyVolume", 100);
     }
+```
+
+## Accessing configs with particular config types
+
+All settings for corresponding config types will be correctly stored in the cache, and they could be accessed by passing the config type, such as:
+```c#
+RemoteConfigService.Instance.GetConfig("settings");
+RemoteConfigService.Instance.GetConfig("specialConfigType");
 ```
 
 ## Metadata Parameters

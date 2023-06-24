@@ -8,6 +8,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Unity.Services.RemoteConfig.WebRequest;
 
 [assembly: InternalsVisibleTo("Unity.Services.RemoteConfig.Tests")]
 
@@ -63,7 +64,7 @@ namespace Unity.Services.RemoteConfig
         /// </summary>
         string _playerIdentityToken;
 
-        RemoteConfigRequest _remoteConfigRequest;
+        internal RemoteConfigRequest _remoteConfigRequest;
         UnityAttributes _unityAttributes;
 
         internal List<Func<RequestHeaderTuple>> requestHeaderProviders = new List<Func<RequestHeaderTuple>>();
@@ -72,9 +73,9 @@ namespace Unity.Services.RemoteConfig
         internal string cacheFile;
         internal string originService;
         internal string attributionMetadataStr;
-        internal const string pluginVersion = "3.1.3";
+        internal const string pluginVersion = "4.0.1";
 
-        internal const string remoteConfigUrl = "https://config.unity3d.com/settings";
+        internal const string remoteConfigUrl = "https://config.services.api.unity.com/settings";
 
         internal const string authInitError = "Auth Service not initialized.\nRequest might result in empty or incomplete response\nPlease refer to https://docs.unity3d.com/Packages/com.unity.remote-config@3.0/manual/CodeIntegration.html";
         internal const string coreInitError = "Core Service not initialized.\nRequest might result in empty or incomplete response\nPlease refer to https://docs.unity3d.com/Packages/com.unity.remote-config@3.0/manual/CodeIntegration.html";
@@ -125,27 +126,28 @@ namespace Unity.Services.RemoteConfig
             }
 
             _unityAttributes = new UnityAttributes();
-            
+
             #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL
-                FetchCompleted += SaveCache;
-                LoadFromCache();
+            FetchCompleted += SaveCache;
+            LoadFromCache();
             #endif
         }
 
         internal ConfigResponse ParseResponse(ConfigOrigin origin, Dictionary<string, string> headers, string body)
         {
-            var configResponse = new ConfigResponse {
+            var configResponse = new ConfigResponse
+            {
                 requestOrigin = origin,
                 headers = headers
             };
-            if(body == null || headers == null)
+            if (body == null || headers == null)
             {
                 configResponse.status = ConfigRequestStatus.Failed;
                 return configResponse;
             }
             foreach (var validationFunc in rawResponseValidators)
             {
-                if(validationFunc(headers, body) == false)
+                if (validationFunc(headers, body) == false)
                 {
                     configResponse.status = ConfigRequestStatus.Failed;
                     return configResponse;
@@ -248,54 +250,56 @@ namespace Unity.Services.RemoteConfig
             appConfig.RequestStatus = ConfigRequestStatus.Pending;
             var jsonText = PreparePayloadWithConfigType(configType, userAttributes, appAttributes, filterAttributes);
 
-            var request = new UnityWebRequest
-            {
-                method = UnityWebRequest.kHttpVerbPOST,
-                timeout = 10,
-                url = remoteConfigUrl
-            };
-
-            request.SetRequestHeader("Content-Type", "application/json");
-            request.SetRequestHeader("Authorization", "Bearer " + _playerIdentityToken);
-            request.SetRequestHeader("unity-installation-id", _remoteConfigRequest.userId);
-            request.SetRequestHeader("unity-player-id", _remoteConfigRequest.playerId);
-
-            if (string.IsNullOrEmpty(_remoteConfigRequest.userId))
-            {
-                Debug.LogWarning(coreInitError);
-            }
-            if (string.IsNullOrEmpty(_remoteConfigRequest.playerId))
-            {
-                Debug.LogWarning(authInitError);
-            }
-
-            foreach (var headerProvider in requestHeaderProviders)
-            {
-                var header = headerProvider.Invoke();
-                request.SetRequestHeader(header.key, header.value);
-            }
-
-            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonText));
-            request.downloadHandler = new DownloadHandlerBuffer();
-
-            var requestOp = request.SendWebRequest();
-            while (!requestOp.isDone)
-            {
-                await Task.Delay(1);
-            }
-
             ConfigResponse configResponse;
-            if (requestOp.webRequest.isHttpError || requestOp.webRequest.isNetworkError)
+
+            using (var request = new UnityWebRequest
+                   {
+                       method = UnityWebRequest.kHttpVerbPOST,
+                       timeout = 10,
+                       url = remoteConfigUrl
+                   })
             {
-                var configTypeHasKeys = configs[configType].GetKeys().Length > 0;
-                var origin = File.Exists(Path.Combine(Application.persistentDataPath, cacheFile)) && configTypeHasKeys ? ConfigOrigin.Cached : ConfigOrigin.Default;
-                configResponse = ParseResponse(origin, null, null);
+                request.SetRequestHeader("Content-Type", "application/json");
+                request.SetRequestHeader("Authorization", "Bearer " + _playerIdentityToken);
+                request.SetRequestHeader("unity-installation-id", _remoteConfigRequest.userId);
+                request.SetRequestHeader("unity-player-id", _remoteConfigRequest.playerId);
+
+                if (string.IsNullOrEmpty(_remoteConfigRequest.userId))
+                {
+                    Debug.LogWarning(coreInitError);
+                }
+
+                if (string.IsNullOrEmpty(_remoteConfigRequest.playerId))
+                {
+                    Debug.LogWarning(authInitError);
+                }
+
+                foreach (var headerProvider in requestHeaderProviders)
+                {
+                    var header = headerProvider.Invoke();
+                    request.SetRequestHeader(header.key, header.value);
+                }
+
+                request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonText));
+                request.downloadHandler = new DownloadHandlerBuffer();
+
+                var response = await request.SendWebRequest();
+
+                if (response.IsHttpError || response.IsNetworkError)
+                {
+                    var configTypeHasKeys = configs[configType].GetKeys().Length > 0;
+                    var origin =
+                        File.Exists(Path.Combine(Application.persistentDataPath, cacheFile)) && configTypeHasKeys
+                        ? ConfigOrigin.Cached
+                        : ConfigOrigin.Default;
+                    configResponse = ParseResponse(origin, null, null);
+                }
+                else
+                {
+                    configResponse = ParseResponse(ConfigOrigin.Remote, request.GetResponseHeaders(),
+                        request.downloadHandler.text);
+                }
             }
-            else
-            {
-                configResponse = ParseResponse(ConfigOrigin.Remote, request.GetResponseHeaders(), request.downloadHandler.text);
-            }
-            requestOp.webRequest.Dispose();
 
             appConfig.HandleConfigResponse(configResponse);
             FetchCompleted?.Invoke(configResponse);
@@ -357,7 +361,7 @@ namespace Unity.Services.RemoteConfig
         /// <typeparam name="T3">The type of the <c>filterAttributes</c> struct.</typeparam>
         public void FetchConfigs<T, T2, T3>(T userAttributes, T2 appAttributes, T3 filterAttributes) where T : struct where T2 : struct where T3 : struct
         {
-            PostConfigWithConfigType("settings",userAttributes, appAttributes, filterAttributes);
+            PostConfigWithConfigType("settings", userAttributes, appAttributes, filterAttributes);
         }
 
         /// <summary>
@@ -516,7 +520,7 @@ namespace Unity.Services.RemoteConfig
                 Debug.LogWarning(authInitError);
             }
 
-            foreach(var headerProvider in requestHeaderProviders)
+            foreach (var headerProvider in requestHeaderProviders)
             {
                 var header = headerProvider.Invoke();
                 request.SetRequestHeader(header.key, header.value);
@@ -555,7 +559,7 @@ namespace Unity.Services.RemoteConfig
         /// <param name="response">the ConfigResponse resulting from the FetchConfigs call</param>
         public void SaveCache(ConfigResponse response)
         {
-            if(response.requestOrigin == ConfigOrigin.Remote)
+            if (response.requestOrigin == ConfigOrigin.Remote)
             {
                 var responsesToCache = new Dictionary<string, ConfigResponse>();
                 foreach (var configType in configs.Keys)
@@ -570,7 +574,7 @@ namespace Unity.Services.RemoteConfig
                         writer.Write(JsonConvert.SerializeObject(responsesToCache));
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Debug.LogError(e);
                 }
@@ -768,14 +772,14 @@ namespace Unity.Services.RemoteConfig
         string GetDeviceModel()
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        // Get manufacturer, model, and device
-        AndroidJavaClass jc = new AndroidJavaClass("android.os.Build");
-        string manufacturer = jc.GetStatic<string>("MANUFACTURER");
-        string model = jc.GetStatic<string>("MODEL");
-        string device = jc.GetStatic<string>("DEVICE");
-        return string.Format("{0}/{1}/{2}", manufacturer, model, device);
+            // Get manufacturer, model, and device
+            AndroidJavaClass jc = new AndroidJavaClass("android.os.Build");
+            string manufacturer = jc.GetStatic<string>("MANUFACTURER");
+            string model = jc.GetStatic<string>("MODEL");
+            string device = jc.GetStatic<string>("DEVICE");
+            return string.Format("{0}/{1}/{2}", manufacturer, model, device);
 #else
-        return SystemInfo.deviceModel;
+            return SystemInfo.deviceModel;
 #endif
         }
 

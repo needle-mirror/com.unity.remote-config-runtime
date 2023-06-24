@@ -47,14 +47,15 @@ namespace Unity.Services.RemoteConfig
         {
             get
             {
-                if (_configManagerImpl == null)
-                {
-                    _configManagerImpl = new ConfigManagerImpl("remote-config");
-                }
+
+                _configManagerImpl ??= new ConfigManagerImpl("remote-config");
 
                 if (CoreConfig.Itoken != null)
                 {
                     var token = CoreConfig.Itoken.AccessToken;
+                    // allowing to set player identity token in RC request even if null, as it should not be persisted
+                    _configManagerImpl.SetPlayerIdentityToken(token);
+
                     if (_autoLoadEnvironment && !string.IsNullOrEmpty(token) && _lastToken != token)
                     {
                         var payload = token.Split('.')[1];
@@ -65,7 +66,7 @@ namespace Unity.Services.RemoteConfig
                         _configManagerImpl.SetEnvironmentID(envId);
                         _autoLoadEnvironment = true;
                         _lastToken = token;
-                        _configManagerImpl.SetPlayerIdentityToken(_lastToken);
+
                     }
                 }
 
