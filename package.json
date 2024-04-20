@@ -1,7 +1,7 @@
 {
   "name": "com.unity.remote-config-runtime",
   "displayName": "Remote Config Runtime",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "unity": "2021.3",
   "_upm": {
     "gameService": {
@@ -10,15 +10,15 @@
       "projectDashboardUrlType": "OrganizationKeyAndProjectGuid",
       "useCasesUrl": "https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@3.2/manual/index.html"
     },
-    "changelog": "- Dropped support for Unity 2020.3, minimum supported is 2021.3 now"
+    "changelog": "- Added apple privacy manifest\n- Updated `com.unity.services.authentication` dependency from `2.2.0` to `2.7.4`\n- Updated `com.unity.services.core` dependency from `1.8.1` to `1.12.5`"
   },
   "description": "Remote Config is a cloud service that lets you tune and customize your app over the air without requiring an update to your game.  This package is intended to be inherited as a dependency, and should not be directly installed, by end users. Unity Developers that want to implement Unity Remote Config in their game/application, should use the Remote Config Package `com.unity.remote-config` rather than this package directly.",
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "3.0.2",
     "com.unity.modules.unitywebrequest": "1.0.0",
     "com.unity.modules.unityanalytics": "1.0.0",
-    "com.unity.services.core": "1.8.1",
-    "com.unity.services.authentication": "2.2.0"
+    "com.unity.services.core": "1.12.5",
+    "com.unity.services.authentication": "2.7.4"
   },
   "samples": [
     {
@@ -61,12 +61,12 @@
     "deploy"
   ],
   "upmCi": {
-    "footprint": "818adb59b1986ad9f48de2cb3002089152d3156a"
+    "footprint": "62fe8cd7cecae3ab9703be088bdea7034182a4b4"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.remote-config-runtime@4.0/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/operate-services-sdk.git",
     "type": "git",
-    "revision": "ec5d70692c285d10b3cd798493012eb29560e113"
+    "revision": "22dae21c71f6de318c2d3b449fc2a71829db6388"
   }
 }

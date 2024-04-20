@@ -4,6 +4,12 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.0.2] - 2024-04-20
+
+- Added apple privacy manifest
+- Updated `com.unity.services.authentication` dependency from `2.2.0` to `2.7.4`
+- Updated `com.unity.services.core` dependency from `1.8.1` to `1.12.5`
+
 ## [4.0.1] - 2023-06-24
 
 - Dropped support for Unity 2020.3, minimum supported is 2021.3 now

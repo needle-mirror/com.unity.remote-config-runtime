@@ -41,12 +41,8 @@ public class ExampleSample : MonoBehaviour
 
     async Task Start()
     {
-        // initialize Unity's authentication and core services, however check for internet connection
-        // in order to fail gracefully without throwing exception if connection does not exist
-        if (Utilities.CheckForInternetConnection())
-        {
-            await InitializeRemoteConfigAsync();
-        }
+        // initialize Unity's authentication and core services
+        await InitializeRemoteConfigAsync();
 
         RemoteConfigService.Instance.FetchCompleted += ApplyRemoteConfig;
         await RemoteConfigService.Instance.FetchConfigsAsync(new userAttributes(), new appAttributes());
